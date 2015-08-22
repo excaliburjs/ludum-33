@@ -34,6 +34,16 @@ game.on('update', function () {
 
 game.start(loader).then(() => {
    
+   // defend intro
+   var defendIntro = new ex.Actor(game.width/2, game.height/2, 998, 412);
+   defendIntro.addDrawing(Resources.TextureTextDefend);
+   defendIntro.opacity = 0;   
+   defendIntro.previousOpacity = 0;
+   game.add(defendIntro);
+   // fade don't work
+   defendIntro.delay(1000).callMethod(() => defendIntro.opacity = 1).delay(2000).callMethod(() => defendIntro.kill());  
+   defendIntro.setZIndex(999);
+   
    // magic here bro
    var map = new ex.Actor(0, 0, game.width, game.height);
    map.addDrawing(Resources.TextureMap);
