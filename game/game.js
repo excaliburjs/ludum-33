@@ -100,6 +100,9 @@ var Map = (function (_super) {
         var curr = _.sum(this._treasures, function (x) { return x.getAmount(); });
         var prog = (curr / total);
         this._treasureProgress.setWidth(Math.floor(prog * Config.TreasureProgressSize));
+        if (curr <= 0) {
+            this._gameOver();
+        }
         var focus = game.currentScene.camera.getFocus().toVector();
         var position = new ex.Vector(this._player.x, this._player.y);
         var stretch = position.minus(focus).scale(Config.CameraElasticity);
@@ -112,6 +115,10 @@ var Map = (function (_super) {
     Map.prototype.addTreasure = function (t) {
         this._treasures.push(t);
         this.add(t);
+    };
+    Map.prototype._gameOver = function () {
+        //TODO
+        console.log('game over');
     };
     Map.CellSize = 24;
     return Map;

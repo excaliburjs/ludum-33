@@ -83,6 +83,9 @@ class Map extends ex.Scene {
       var curr = _.sum(this._treasures, (x) => x.getAmount());
       var prog = (curr / total);
       this._treasureProgress.setWidth(Math.floor(prog * Config.TreasureProgressSize));
+      if (curr <=0) {
+         this._gameOver();
+      }
             
       var focus = game.currentScene.camera.getFocus().toVector();
       var position = new ex.Vector(this._player.x, this._player.y);
@@ -97,5 +100,10 @@ class Map extends ex.Scene {
    private addTreasure(t: Treasure) {
       this._treasures.push(t);
       this.add(t);
-   }   
+   }
+   
+   private _gameOver() {
+      //TODO
+      console.log('game over');
+   }
 }
