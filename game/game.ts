@@ -1,12 +1,20 @@
 /// <reference path="../Excalibur/dist/Excalibur.d.ts" />
+/// <reference path="../lodash.d.ts" />
+/// <reference path="resources.ts" />
 
 var game = new ex.Engine({
    canvasElementId: "game",
    width: 800,
    height: 600
 });
+var loader = new ex.Loader();
 
-game.start().then(() => {
+// load up all resources in dictionary
+_.forIn(Resources, (resource) => {
+   loader.addResource(resource);
+});
+
+game.start(loader).then(() => {
    
    // magic here
    
