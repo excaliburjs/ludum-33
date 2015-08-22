@@ -84,9 +84,13 @@ class Hero extends ex.Actor {
       this.onSearching();
    }
    
-   public update(engine: ex.Engine, delta: number){
+   public update(engine: ex.Engine, delta: number) {
       super.update(engine, delta);
       this.setZIndex(this.y);
+   }
+
+   public getLootAmount(): number {
+      return this._treasure;
    }
    
    public getLines() {
