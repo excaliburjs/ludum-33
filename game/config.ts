@@ -1,6 +1,7 @@
 
 
 var Config = {
+   MonsterHealth: 30,
    MonsterWidth: 48,
    MonsterHeight: 48,
    MonsterSpeed: 200,
@@ -21,6 +22,8 @@ var Config = {
    HeroSpeed: 100,
    // Hero with loot speed (in px/s)
    HeroFleeingSpeed: 80,
+   // The cooldown amount for a hero's attack
+   HeroAttackCooldown: 50,
    
    // Amount of gold heroes can carry
    TreasureStealAmount: 1,   

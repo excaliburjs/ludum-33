@@ -2,6 +2,8 @@
 /// <reference path="config.ts" />
 
 class Monster extends ex.Actor {
+   public health: number = Config.MonsterHealth;
+   
    private _mouseX: number;
    private _mouseY: number;
    

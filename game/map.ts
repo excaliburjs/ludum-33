@@ -3,7 +3,7 @@ class Map extends ex.Scene {
    
    private _treasures: Treasure[];
    private _map: ex.Actor; // todo TileMap
-   private _player: Monster;
+   public _player: Monster;
    private _treasureProgress: ex.UIActor;
    private _lootProgress: ex.UIActor;
    

@@ -38,6 +38,7 @@ class Hero extends ex.Actor {
    
    private _treasure: number = 0;
    private _fsm: TypeState.FiniteStateMachine<HeroStates>;
+   private _attackCooldown: number = Config.HeroAttackCooldown;
 
    constructor(x: number, y: number) {
       super(x, y, 24, 24);
@@ -65,28 +66,35 @@ class Hero extends ex.Actor {
       
       this.collisionType = ex.CollisionType.Active;
       
-      this.on('update', (e?: ex.UpdateEvent) => {
-         if (this.Health <= 0) {
-            map.getTreasures()[0].return(this._treasure);
-            HeroSpawner.despawn(this);
-         }
-      });
-      
       this.on('collision', (e?: ex.CollisionEvent) => {
          if (e.other instanceof Treasure) {
             if ((<Hero>e.actor)._treasure === 0) {
                (<Hero>e.actor)._treasure = (<Treasure>e.other).steal();
                (<Hero>e.actor)._fsm.go(HeroStates.Looting);
             }
+         } else if (e.other instanceof Monster) {
+            if (this._attackCooldown == 0) {
+               var monster = <Monster>e.other;
+               monster.health--;
+               this._attackCooldown = Config.HeroAttackCooldown;
+            }
          }
       });
      
-      this.onSearching();
+      // this.onSearching();
+      this.onAttacking();
    }
    
    public update(engine: ex.Engine, delta: number) {
       super.update(engine, delta);
+      
+      if (this.Health <= 0) {
+            map.getTreasures()[0].return(this._treasure);
+            HeroSpawner.despawn(this);
+      }
+      
       this.setZIndex(this.y);
+      this._attackCooldown = Math.max(this._attackCooldown - delta, 0);
    }
 
    public getLootAmount(): number {
@@ -150,8 +158,8 @@ class Hero extends ex.Actor {
       // stop any actions
       this.clearActions();
       
-      // attack monster
-      
+      // TODO attack monster
+      this.meet(map._player);
    }
    
    private onExit() {     
