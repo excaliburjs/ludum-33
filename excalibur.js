@@ -6628,6 +6628,9 @@ var ex;
             for (var i = 0; i < this.traits.length; i++) {
                 this.traits[i].update(this, engine, delta);
             }
+            for (var i = 0; i < this.children.length; i++) {
+                this.children[i].update(engine, delta);
+            }
             eventDispatcher.publish(ex.EventType[5 /* Update */], new ex.UpdateEvent(delta));
         };
         /**
