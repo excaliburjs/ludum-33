@@ -11,6 +11,8 @@ var Config = {
     HeroSpawnInterval: 10000,
     // Max heroes to spawn at once
     HeroSpawnPoolMax: 5,
+    // How much health a hero has
+    HeroHealth: 3,
     // Hero speed (in px/s)
     HeroSpeed: 100,
     // Hero with loot speed (in px/s)
@@ -153,6 +155,7 @@ var Monster = (function (_super) {
         this._mouseX = 0;
         this._mouseY = 0;
         this._rays = new Array();
+        this._attackable = new Array();
     }
     Monster.prototype.onInitialize = function (engine) {
         var _this = this;
@@ -171,16 +174,22 @@ var Monster = (function (_super) {
         sprite.scale.setTo(3, 3);
         this.addDrawing(sprite);
         var yValues = new Array(-0.62, -0.25, 0, 0.25, 0.62);
-        for (var i = 0; i < yValues.length; i++) {
-            var rayVector = new ex.Vector(1, yValues[i]);
-            var rayPoint = new ex.Point(this.x, this.y);
+        _.forIn(yValues, function (yValue) {
+            var rayVector = new ex.Vector(1, yValue);
+            var rayPoint = new ex.Point(_this.x, _this.y);
             var ray = new ex.Ray(rayPoint, rayVector);
             that._rays.push(ray);
-        }
+        });
+        // attack
+        engine.input.pointers.primary.on("down", function (evt) {
+            that._attack();
+        });
     };
     Monster.prototype.update = function (engine, delta) {
         var _this = this;
         _super.prototype.update.call(this, engine, delta);
+        this._attackable.length = 0;
+        this._detectAttackable();
         // clear move
         this.dx = 0;
         this.dy = 0;
@@ -203,16 +212,40 @@ var Monster = (function (_super) {
         }
         var prevRotation = this.rotation;
         this.rotation = new ex.Vector(this._mouseX - this.x, this._mouseY - this.y).toAngle();
-        //updating attack rays
+        // updating attack rays
         _.forIn(this._rays, function (ray) {
             ray.pos = new ex.Point(_this.x, _this.y);
             var rotationAmt = _this.rotation - prevRotation;
             ray.dir = ray.dir.rotate(rotationAmt, new ex.Point(0, 0));
         });
     };
+    Monster.prototype._detectAttackable = function () {
+        var _this = this;
+        _.forIn(HeroSpawner.getHeroes(), function (hero) {
+            if (_this._isHeroAttackable(hero)) {
+                _this._attackable.push(hero);
+            }
+        });
+    };
+    Monster.prototype._isHeroAttackable = function (hero) {
+        var heroLines = hero.getLines();
+        for (var i = 0; i < this._rays.length; i++) {
+            for (var j = 0; j < heroLines.length; j++) {
+                var distanceToIntersect = this._rays[i].intersect(heroLines[j]);
+                if ((distanceToIntersect > 0) && (distanceToIntersect <= Config.MonsterAttackRange)) {
+                    return true;
+                }
+            }
+        }
+    };
+    Monster.prototype._attack = function () {
+        _.forIn(this._attackable, function (hero) {
+            hero.Health--;
+        });
+    };
     Monster.prototype.debugDraw = function (ctx) {
         _super.prototype.debugDraw.call(this, ctx);
-        //Debugging draw for LOS rays on the enemy
+        // Debugging draw for attack rays
         _.forIn(this._rays, function (ray) {
             ctx.beginPath();
             ctx.moveTo(ray.pos.x, ray.pos.y);
@@ -249,16 +282,27 @@ var HeroSpawner = (function () {
         for (var i = 0; i < Math.min(Config.HeroSpawnPoolMax, HeroSpawner._spawned); i++) {
             var spawnPoints = map.getSpawnPoints();
             var spawnPoint = Util.pickRandom(spawnPoints);
-            game.add(new Hero(spawnPoint.x, spawnPoint.y));
+            var hero = new Hero(spawnPoint.x, spawnPoint.y);
+            game.add(hero);
+            this._heroes.push(hero);
         }
     };
+    HeroSpawner.getHeroes = function () {
+        return this._heroes;
+    };
+    HeroSpawner.despawn = function (h) {
+        h.kill();
+        _.remove(this._heroes, h);
+    };
     HeroSpawner._spawned = 0;
+    HeroSpawner._heroes = [];
     return HeroSpawner;
 })();
 var Hero = (function (_super) {
     __extends(Hero, _super);
     function Hero(x, y) {
         _super.call(this, x, y, 24, 24);
+        this.Health = Config.HeroHealth;
         this._treasure = 0;
         this._fsm = new TypeState.FiniteStateMachine(HeroStates.Searching);
         // declare valid state transitions
@@ -269,6 +313,7 @@ var Hero = (function (_super) {
         this._fsm.on(HeroStates.Fleeing, this.onFleeing.bind(this));
     }
     Hero.prototype.onInitialize = function (engine) {
+        var _this = this;
         this.setZIndex(1);
         var spriteSheet = new ex.SpriteSheet(Resources.TextureHero, 3, 1, 28, 28);
         var idleAnim = spriteSheet.getAnimationForAll(engine, 300);
@@ -276,6 +321,11 @@ var Hero = (function (_super) {
         idleAnim.scale.setTo(2, 2);
         this.addDrawing("idle", idleAnim);
         this.collisionType = ex.CollisionType.Active;
+        this.on('update', function (e) {
+            if (_this.Health <= 0) {
+                HeroSpawner.despawn(_this);
+            }
+        });
         this.on('collision', function (e) {
             if (e.other instanceof Treasure) {
                 if (e.actor._treasure === 0) {
@@ -285,6 +335,26 @@ var Hero = (function (_super) {
             }
         });
         this.onSearching();
+    };
+    Hero.prototype.getLines = function () {
+        var lines = new Array();
+        var beginPoint1 = new ex.Point(this.x, this.y);
+        var endPoint1 = new ex.Point(this.x + this.getWidth(), this.y);
+        var newLine1 = new ex.Line(beginPoint1, endPoint1);
+        // beginPoint2 is endPoint1
+        var endPoint2 = new ex.Point(endPoint1.x, endPoint1.y + this.getHeight());
+        var newLine2 = new ex.Line(endPoint1, endPoint2);
+        // beginPoint3 is endPoint2
+        var endPoint3 = new ex.Point(this.x, this.y + this.getHeight());
+        var newLine3 = new ex.Line(endPoint2, endPoint3);
+        // beginPoint4 is endPoint3
+        // endPoint4 is beginPoint1
+        var newLine4 = new ex.Line(endPoint3, beginPoint1);
+        lines.push(newLine1);
+        lines.push(newLine2);
+        lines.push(newLine3);
+        lines.push(newLine4);
+        return lines;
     };
     Hero.prototype.onSearching = function (from) {
         // find treasures
@@ -313,7 +383,7 @@ var Hero = (function (_super) {
     };
     Hero.prototype.onExit = function () {
         // play negative sound or something
-        this.kill();
+        HeroSpawner.despawn(this);
     };
     return Hero;
 })(ex.Actor);
@@ -363,7 +433,7 @@ game.start(loader).then(function () {
     game.add("map", map);
     game.goToScene("map");
     // set zoom
-    game.currentScene.camera.zoom(1.7);
+    game.currentScene.camera.zoom(1.5);
     // defend intro
     var defendIntro = new ex.UIActor(game.width / 2, game.height / 2, 858, 105);
     defendIntro.anchor.setTo(0.5, 0.5);

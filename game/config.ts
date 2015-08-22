@@ -9,12 +9,14 @@ var Config = {
    CameraElasticity: .01,
 	CameraFriction: .21,
 	CameraShake: 7,
-	CameraShakeDuration: 800,
+	CameraShakeDuration: 800,      
    
    // Spawn interval
    HeroSpawnInterval: 10000, // in ms   
    // Max heroes to spawn at once
    HeroSpawnPoolMax: 5,
+   // How much health a hero has
+   HeroHealth: 3,  
    // Hero speed (in px/s)
    HeroSpeed: 100,
    // Hero with loot speed (in px/s)

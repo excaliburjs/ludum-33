@@ -30,7 +30,7 @@ game.start(loader).then(() => {
    game.goToScene("map");
    
    // set zoom
-   game.currentScene.camera.zoom(1.7);
+   game.currentScene.camera.zoom(1.5);
    
    // defend intro
    var defendIntro = new ex.UIActor(game.width/2, game.height/2, 858, 105);
@@ -41,8 +41,8 @@ game.start(loader).then(() => {
    defendIntro.previousOpacity = 0;
    game.add(defendIntro);
    // fade don't work
-   defendIntro.delay(1000).callMethod(() => defendIntro.opacity = 1).delay(2000).callMethod(() => defendIntro.kill());        
-
+   defendIntro.delay(1000).callMethod(() => defendIntro.opacity = 1).delay(2000).callMethod(() => defendIntro.kill());
+      
    var heroTimer = new ex.Timer(() => HeroSpawner.spawnHero(), Config.HeroSpawnInterval, true);
    game.add(heroTimer);
    
