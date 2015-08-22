@@ -27,7 +27,7 @@ game.start(loader).then(() => {
    
    var treasure = new Treasure(game.width - 50, game.height - 50, 50, 50, ex.Color.Yellow);
    game.add(treasure);
-   treasure.setZIndex(-1);
+   hero.setZIndex(1);
    
    hero.moveTo(treasure.x, treasure.y, 100);
    
