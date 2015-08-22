@@ -71,6 +71,16 @@ var Hero = (function (_super) {
         _super.call(this, x, y, width, height, color);
         this.addDrawing(Resources.TextureHero);
     }
+    Hero.prototype.onInitialize = function (engine) {
+        var _this = this;
+        this.collisionType = ex.CollisionType.Active;
+        this.on('collision', function (e) {
+            if (e.other instanceof Treasure) {
+                _this._treasure = e.other;
+                e.other.scene.remove(e.other);
+            }
+        });
+    };
     return Hero;
 })(ex.Actor);
 var Treasure = (function (_super) {
@@ -79,6 +89,9 @@ var Treasure = (function (_super) {
         _super.call(this, x, y, width, height, color);
         this.addDrawing(Resources.TextureTreasure);
     }
+    Treasure.prototype.onInitialize = function (engine) {
+        this.collisionType = ex.CollisionType.Passive;
+    };
     return Treasure;
 })(ex.Actor);
 /// <reference path="config.ts" />
@@ -133,8 +146,8 @@ game.start(loader).then(function () {
     game.add(monster);
     var hero = new Hero(50, 50, 50, 50, ex.Color.Red);
     game.add(hero);
+    hero.setZIndex(1);
     var treasure = new Treasure(game.width - 50, game.height - 50, 50, 50, ex.Color.Yellow);
     game.add(treasure);
-    hero.setZIndex(1);
     hero.moveTo(treasure.x, treasure.y, 100);
 });
