@@ -2,6 +2,7 @@ var Config = {
     MonsterWidth: 48,
     MonsterHeight: 48,
     MonsterSpeed: 300,
+    MonsterAttackRange: 50,
     CameraElasticity: .01,
     CameraFriction: .21,
     CameraShake: 7,
@@ -75,6 +76,7 @@ var Monster = (function (_super) {
         this.color = ex.Color.Red;
         this._mouseX = 0;
         this._mouseY = 0;
+        this._rays = new Array();
     }
     Monster.prototype.onInitialize = function (engine) {
         var _this = this;
@@ -89,6 +91,16 @@ var Monster = (function (_super) {
         idleAnim.loop = true;
         idleAnim.scale.setTo(2, 2);
         this.addDrawing("idle", idleAnim);
+        var sprite = Resources.TextureMonster.asSprite().clone();
+        sprite.scale.setTo(3, 3);
+        this.addDrawing(sprite);
+        var yValues = new Array(-0.62, -0.25, 0, 0.25, 0.62);
+        for (var i = 0; i < yValues.length; i++) {
+            var rayVector = new ex.Vector(1, yValues[i]);
+            var rayPoint = new ex.Point(this.x, this.y);
+            var ray = new ex.Ray(rayPoint, rayVector);
+            that._rays.push(ray);
+        }
     };
     Monster.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
@@ -112,7 +124,27 @@ var Monster = (function (_super) {
             engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right)) {
             this.dx = Config.MonsterSpeed;
         }
+        var prevRotation = this.rotation;
         this.rotation = new ex.Vector(this._mouseX - this.x, this._mouseY - this.y).toAngle();
+        //updating attack rays
+        for (var i = 0; i < this._rays.length; i++) {
+            this._rays[i].pos = new ex.Point(this.x, this.y);
+            var rotationAmt = this.rotation - prevRotation;
+            this._rays[i].dir = this._rays[i].dir.rotate(rotationAmt, new ex.Point(0, 0));
+        }
+    };
+    Monster.prototype.debugDraw = function (ctx) {
+        _super.prototype.debugDraw.call(this, ctx);
+        //Debugging draw for LOS rays on the enemy
+        for (var i = 0; i < this._rays.length; i++) {
+            ctx.beginPath();
+            ctx.moveTo(this._rays[i].pos.x, this._rays[i].pos.y);
+            var end = this._rays[i].getPoint(Config.MonsterAttackRange);
+            ctx.lineTo(end.x, end.y);
+            ctx.strokeStyle = ex.Color.Chartreuse.toString();
+            ctx.stroke();
+            ctx.closePath();
+        }
     };
     return Monster;
 })(ex.Actor);
