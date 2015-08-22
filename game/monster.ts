@@ -35,21 +35,27 @@ class Monster extends ex.Actor {
       this.dy = 0;
       
       // WASD
-      if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.W)) {
+      if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.W) || 
+         engine.input.keyboard.isKeyPressed(ex.Input.Keys.Up)) {
          this.dy = -Config.MonsterSpeed;
       }
       
-      if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.S)) {
+      if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.S) ||
+         engine.input.keyboard.isKeyPressed(ex.Input.Keys.Down)) {
          this.dy = Config.MonsterSpeed;
       }
       
-      if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.A)) {
+      if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.A) ||
+         engine.input.keyboard.isKeyPressed(ex.Input.Keys.Left)) {
          this.dx = -Config.MonsterSpeed;
       }
       
-      if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.D)) {
+      if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.D) ||
+         engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right)) {
          this.dx = Config.MonsterSpeed;
       }
+      
+      
       this.rotation = new ex.Vector(this._mouseX - this.x, this._mouseY - this.y).toAngle();
    }
 }
