@@ -67,6 +67,7 @@ class Hero extends ex.Actor {
       
       this.on('update', (e?: ex.UpdateEvent) => {
          if (this.Health <= 0) {
+            map.getTreasures()[0].return(this._treasure);
             HeroSpawner.despawn(this);
          }
       });

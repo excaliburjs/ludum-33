@@ -3,8 +3,8 @@ var Config = {
     MonsterHeight: 48,
     MonsterSpeed: 300,
     MonsterAttackRange: 80,
-    CameraElasticity: 0.01,
-    CameraFriction: 0.21,
+    CameraElasticity: 0.05,
+    CameraFriction: 0.5,
     CameraShake: 0,
     CameraShakeDuration: 0,
     // Spawn interval
@@ -343,6 +343,7 @@ var Hero = (function (_super) {
         this.collisionType = ex.CollisionType.Active;
         this.on('update', function (e) {
             if (_this.Health <= 0) {
+                map.getTreasures()[0].return(_this._treasure);
                 HeroSpawner.despawn(_this);
             }
         });
@@ -418,16 +419,16 @@ var Treasure = (function (_super) {
         var treasure = Resources.TextureTreasure.asSprite().clone();
         this.addDrawing(treasure);
         this.collisionType = ex.CollisionType.Passive;
-        this._label = new ex.Label(this._hoard.toString(), 0, 24, "Arial 14px");
-        this.addChild(this._label);
     };
     Treasure.prototype.getAmount = function () {
         return this._hoard;
     };
     Treasure.prototype.steal = function () {
         this._hoard -= Config.TreasureStealAmount;
-        this._label.text = this._hoard.toString();
         return Config.TreasureStealAmount;
+    };
+    Treasure.prototype.return = function (amount) {
+        this._hoard += amount;
     };
     return Treasure;
 })(ex.Actor);
@@ -442,7 +443,7 @@ var Treasure = (function (_super) {
 var game = new ex.Engine({
     canvasElementId: "game",
     width: 960,
-    height: 600
+    height: 640
 });
 game.setAntialiasing(false);
 var loader = new ex.Loader();
