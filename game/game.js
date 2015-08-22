@@ -115,13 +115,15 @@ game.on('update', function () {
 game.currentScene.camera.zoom(2);
 game.start(loader).then(function () {
     // defend intro
-    var defendIntro = new ex.Actor(game.width / 2, game.height / 2, 998, 412);
+    var defendIntro = new ex.UIActor(game.width / 2, game.height / 2, 858, 105);
+    defendIntro.anchor.setTo(0.5, 0.5);
+    // defendIntro.scale.setTo(0.6, 0.6); doesn't work
     defendIntro.addDrawing(Resources.TextureTextDefend);
     defendIntro.opacity = 0;
     defendIntro.previousOpacity = 0;
     game.add(defendIntro);
+    // fade don't work
     defendIntro.delay(1000).callMethod(function () { return defendIntro.opacity = 1; }).delay(2000).callMethod(function () { return defendIntro.kill(); });
-    defendIntro.setZIndex(999);
     // magic here bro
     var map = new ex.Actor(0, 0, game.width, game.height);
     map.addDrawing(Resources.TextureMap);
