@@ -1,0 +1,5 @@
+[submodule "Excalibur"]
+	path = Excalibur
+	url = https://github.com/excaliburjs/Excalibur
+	branch = ludum-dare-33
+   ignore = dirty
