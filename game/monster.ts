@@ -11,13 +11,14 @@ class Monster extends ex.Actor {
    private _attackable: Hero[]; // heroes that can be attacked during current update loop
    
    constructor(x, y){
-      super(x, y, Config.MonsterWidth * 3, Config.MonsterHeight * 3);
+      super(x, y, Config.MonsterWidth, Config.MonsterHeight);
       this.color = ex.Color.Red;
       this._mouseX = 0;
       this._mouseY = 0;
       this._rays = new Array<ex.Ray>();
       this._attackable = new Array<Hero>();
       this.anchor = new ex.Point(0.35, 0.35);
+      this.collisionType = ex.CollisionType.Active;
    }
    
    onInitialize(engine: ex.Engine): void {
@@ -29,7 +30,7 @@ class Monster extends ex.Actor {
          this._mouseY = ev.y;
          
       });
-      var spriteSheet = new ex.SpriteSheet(Resources.TextureMonster, 6, 1, 72, 72);
+      var spriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 6, 1, 72, 72);
       
       var attackDownAnim = spriteSheet.getAnimationBetween(engine, 3, 6, 100);
       attackDownAnim.scale.setTo(2, 2);
@@ -39,12 +40,13 @@ class Monster extends ex.Actor {
       var idleAnim = spriteSheet.getAnimationBetween(engine, 0, 2, 500);
       idleAnim.loop = true;
       idleAnim.scale.setTo(2, 2);
-      this.addDrawing("idle", idleAnim);
-      this.setDrawing("idle");
+      this.addDrawing("idleDown", idleAnim);
       
-      var sprite = Resources.TextureMonster.asSprite().clone();
-      sprite.scale.setTo(3, 3);
-      this.addDrawing(sprite);
+      
+      var sprite = Resources.TextureMonsterRight.asSprite().clone();
+      sprite.scale.setTo(2, 2);
+      this.addDrawing("idleRight", sprite);
+      this.setDrawing("idleRight");
       
       var yValues = new Array<number>(-0.62, -0.25, 0, 0.25, 0.62);
       _.forIn(yValues, (yValue) => {
