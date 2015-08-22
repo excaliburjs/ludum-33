@@ -34,8 +34,9 @@ class HeroSpawner {
 }
 
 class Hero extends ex.Actor {
-   public static Speed: number = 100;
-   public static FleeingSpeed: number = 60;
+   public static Speed: number = Config.HeroSpeed;
+   public static FleeingSpeed: number = Config.HeroFleeingSpeed;
+   public Health: number = Config.HeroHealth;
    
    private _treasure: number = 0;
    private _fsm: TypeState.FiniteStateMachine<HeroStates>;

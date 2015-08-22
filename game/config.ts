@@ -11,6 +11,11 @@ var Config = {
 	CameraShake: 7,
 	CameraShakeDuration: 800,
    
+   HeroHealth: 3,
+   HeroSpeed: 100,
+   HeroFleeingSpeed: 60,
+   
+   
    // Spawn interval
    HeroSpawnInterval: 10000, // in ms
    

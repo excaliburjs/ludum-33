@@ -42,6 +42,11 @@ class Monster extends ex.Actor {
          var ray = new ex.Ray(rayPoint, rayVector);
          that._rays.push(ray);
       });
+      
+      // attack
+      engine.input.pointers.primary.on("down", function (evt) {
+         that._attack();
+      });
    }
    
    public update(engine: ex.Engine, delta: number): void {
@@ -97,7 +102,8 @@ class Monster extends ex.Actor {
       var heroLines = hero.getLines();
       for (var i = 0; i < this._rays.length; i++) {
          for (var j = 0; j < heroLines.length; j++) {
-            if (this._rays[i].intersect(heroLines[j]) > 0) {
+            var distanceToIntersect = this._rays[i].intersect(heroLines[j]);
+            if ((distanceToIntersect > 0) && (distanceToIntersect <= Config.MonsterAttackRange)) {
                return true;
             }
          }
@@ -105,7 +111,10 @@ class Monster extends ex.Actor {
    }
    
    private _attack() {
-      
+      _.forIn(this._attackable, (hero: Hero) => {
+         // hero.Health--;
+         HeroSpawner.despawn(hero);
+      });
    }
   
    public debugDraw(ctx: CanvasRenderingContext2D): void {
