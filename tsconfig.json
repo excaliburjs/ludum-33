@@ -1,0 +1,23 @@
+{
+   "version": "1.5.3",
+   
+   "compilerOptions": {
+      "target": "ES5",
+      "declaration": false,
+      "noImplicitAny": false,
+      "removeComments": false,
+      "noLib": false,
+      "out": "game/game.js"
+   },
+   
+   "filesGlob": [
+      "./**/*.ts",
+      "!./node_modules/**/*.ts"
+   ],
+   
+   "files": [
+      "game/game.ts",
+      "Excalibur/dist/Excalibur.d.ts",
+      "lodash.d.ts"
+   ]
+}
