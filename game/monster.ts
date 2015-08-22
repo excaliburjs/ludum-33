@@ -112,8 +112,7 @@ class Monster extends ex.Actor {
    
    private _attack() {
       _.forIn(this._attackable, (hero: Hero) => {
-         // hero.Health--;
-         HeroSpawner.despawn(hero);
+         hero.Health--;
       });
    }
   

@@ -61,6 +61,12 @@ class Hero extends ex.Actor {
       
       this.collisionType = ex.CollisionType.Active;
       
+      this.on('update', (e?: ex.UpdateEvent) => {
+         if (this.Health <= 0) {
+            HeroSpawner.despawn(this);
+         }
+      });
+      
       this.on('collision', (e?: ex.CollisionEvent) => {
          if (e.other instanceof Treasure) {
             if ((<Hero>e.actor)._treasure === 0) {
