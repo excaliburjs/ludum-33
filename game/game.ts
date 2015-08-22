@@ -1,3 +1,5 @@
+/// <reference path="config.ts" />
+/// <reference path="monster.ts" />
 /// <reference path="resources.ts" />
 
 var game = new ex.Engine({
