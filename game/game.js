@@ -65,17 +65,15 @@ var Hero = (function (_super) {
     __extends(Hero, _super);
     function Hero(x, y, width, height, color) {
         _super.call(this, x, y, width, height, color);
-        // this.addDrawing(Resources.TextureHero);
-    }
-    Hero.prototype.onInitialize = function () {
         this.addDrawing(Resources.TextureHero);
-    };
+    }
     return Hero;
 })(ex.Actor);
 var Treasure = (function (_super) {
     __extends(Treasure, _super);
     function Treasure(x, y, width, height, color) {
         _super.call(this, x, y, width, height, color);
+        this.addDrawing(Resources.TextureTreasure);
     }
     return Treasure;
 })(ex.Actor);
@@ -121,6 +119,6 @@ game.start(loader).then(function () {
     game.add(hero);
     var treasure = new Treasure(game.width - 50, game.height - 50, 50, 50, ex.Color.Yellow);
     game.add(treasure);
-    treasure.setZIndex(-1);
+    hero.setZIndex(1);
     hero.moveTo(treasure.x, treasure.y, 100);
 });
