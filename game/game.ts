@@ -1,4 +1,6 @@
 /// <reference path="resources.ts" />
+/// <reference path="hero.ts" />
+/// <reference path="treasure.ts" />
 
 var game = new ex.Engine({
    canvasElementId: "game",
@@ -18,6 +20,15 @@ game.start(loader).then(() => {
    var map = new ex.Actor(0, 0, game.width, game.height);
    map.addDrawing(Resources.TextureMap);
    map.anchor.setTo(0, 0);
-   
    game.add(map);
+
+   var hero = new Hero(50, 50, 50, 50, ex.Color.Red);
+   game.add(hero);
+   
+   var treasure = new Treasure(game.width - 50, game.height - 50, 50, 50, ex.Color.Yellow);
+   game.add(treasure);
+   treasure.setZIndex(-1);
+   
+   hero.moveTo(treasure.x, treasure.y, 100);
+   
 });
