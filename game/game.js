@@ -20,6 +20,8 @@ var Config = {
     HeroFleeingSpeed: 80,
     // The cooldown amount for a hero's attack
     HeroAttackCooldown: 2000,
+    // The maximum distance a hero will aggro to the monster
+    HeroAggroDistance: 100,
     // Amount of gold heroes can carry
     TreasureStealAmount: 1,
     // Amount of gold in each treasure stash
@@ -255,6 +257,9 @@ var Monster = (function (_super) {
     Monster.prototype.update = function (engine, delta) {
         var _this = this;
         _super.prototype.update.call(this, engine, delta);
+        if (this.health <= 0) {
+            map._gameOver();
+        }
         this._attackable.length = 0;
         this._detectAttackable();
         // clear move
@@ -380,10 +385,12 @@ var Hero = (function (_super) {
         this._fsm = new TypeState.FiniteStateMachine(HeroStates.Searching);
         // declare valid state transitions
         this._fsm.from(HeroStates.Searching).to(HeroStates.Attacking, HeroStates.Looting);
+        this._fsm.from(HeroStates.Attacking).to(HeroStates.Searching);
         this._fsm.from(HeroStates.Looting).to(HeroStates.Fleeing);
         this._fsm.on(HeroStates.Searching, this.onSearching.bind(this));
         this._fsm.on(HeroStates.Looting, this.onLooting.bind(this));
         this._fsm.on(HeroStates.Fleeing, this.onFleeing.bind(this));
+        this._fsm.on(HeroStates.Attacking, this.onAttacking.bind(this));
     }
     Hero.prototype.onInitialize = function (engine) {
         var _this = this;
@@ -409,8 +416,7 @@ var Hero = (function (_super) {
                 }
             }
         });
-        // this.onSearching();
-        this.onAttacking();
+        this.onSearching();
     };
     Hero.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
@@ -420,6 +426,16 @@ var Hero = (function (_super) {
         }
         this.setZIndex(this.y);
         this._attackCooldown = Math.max(this._attackCooldown - delta, 0);
+        var heroVector = new ex.Vector(this.x, this.y);
+        var monsterVector = new ex.Vector(map._player.x, map._player.y);
+        switch (this._fsm.currentState) {
+            case HeroStates.Searching:
+                if (heroVector.distance(monsterVector) < Config.HeroAggroDistance) {
+                    this._fsm.go(HeroStates.Attacking);
+                    console.log('switching to attack');
+                }
+                break;
+        }
     };
     Hero.prototype.getLootAmount = function () {
         return this._treasure;

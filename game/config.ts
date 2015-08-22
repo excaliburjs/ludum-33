@@ -24,6 +24,8 @@ var Config = {
    HeroFleeingSpeed: 80,
    // The cooldown amount for a hero's attack
    HeroAttackCooldown: 2000,
+   // The maximum distance a hero will aggro to the monster
+   HeroAggroDistance: 100,
    
    // Amount of gold heroes can carry
    TreasureStealAmount: 1,   

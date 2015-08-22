@@ -47,11 +47,13 @@ class Hero extends ex.Actor {
       
       // declare valid state transitions
       this._fsm.from(HeroStates.Searching).to(HeroStates.Attacking, HeroStates.Looting);
+      this._fsm.from(HeroStates.Attacking).to(HeroStates.Searching);
       this._fsm.from(HeroStates.Looting).to(HeroStates.Fleeing);
       
       this._fsm.on(HeroStates.Searching, this.onSearching.bind(this)); 
       this._fsm.on(HeroStates.Looting, this.onLooting.bind(this));     
       this._fsm.on(HeroStates.Fleeing, this.onFleeing.bind(this));
+      this._fsm.on(HeroStates.Attacking, this.onAttacking.bind(this));
    }
    
    onInitialize(engine: ex.Engine) {
@@ -80,9 +82,9 @@ class Hero extends ex.Actor {
             }
          }
       });
-     //TODO
-      // this.onSearching();
-      this.onAttacking();
+
+      this.onSearching();
+
    }
    
    public update(engine: ex.Engine, delta: number) {
@@ -92,9 +94,25 @@ class Hero extends ex.Actor {
             map.getTreasures()[0].return(this._treasure);
             HeroSpawner.despawn(this);
       }
-      
       this.setZIndex(this.y);
       this._attackCooldown = Math.max(this._attackCooldown - delta, 0);
+      
+      var heroVector = new ex.Vector(this.x, this.y);
+      var monsterVector = new ex.Vector(map._player.x, map._player.y);
+      
+      switch (this._fsm.currentState) {
+         case HeroStates.Searching:
+         if (heroVector.distance(monsterVector) < Config.HeroAggroDistance) {
+            this._fsm.go(HeroStates.Attacking);
+            console.log('switching to attack');
+         }
+         break;
+         // case HeroStates.Attacking:
+         // if (heroVector.distance(monsterVector) > Config.HeroAggroDistance)
+         //    this._fsm.go(HeroStates.Searching);
+         //    console.log('stopping attack');
+         // break;
+      }
    }
 
    public getLootAmount(): number {
