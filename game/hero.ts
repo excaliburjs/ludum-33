@@ -22,10 +22,7 @@ class HeroSpawner {
    
 }
 
-class Hero extends ex.Actor {
-   public static Speed: number = 100;
-   public static FleeingSpeed: number = 60;
-   
+class Hero extends ex.Actor {      
    private _treasure: number = 0;
    private _fsm: TypeState.FiniteStateMachine<HeroStates>;
 
@@ -75,7 +72,7 @@ class Hero extends ex.Actor {
       var loot =  Util.pickRandom(treasures);
       
       // move to it
-      this.moveTo(loot.x, loot.y, Hero.Speed);
+      this.moveTo(loot.x, loot.y, Config.HeroSpeed);
    }
    
    private onLooting(from?: HeroStates) {
@@ -84,10 +81,12 @@ class Hero extends ex.Actor {
    }
    
    private onFleeing(from?: HeroStates) {
-      // find nearest exit
-      var exit = map.getCellPos(19, 1);
       
-      this.moveTo(exit.x, exit.y, Hero.FleeingSpeed).callMethod(() => this.onExit());
+      // find an exit
+      var exits = map.getSpawnPoints();
+      var exit = Util.pickRandom(exits);
+      
+      this.moveTo(exit.x, exit.y, Config.HeroFleeingSpeed).callMethod(() => this.onExit());
    }
    
    private onAttacking(from?: HeroStates) {

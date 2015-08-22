@@ -11,8 +11,14 @@ var Config = {
     HeroSpawnInterval: 10000,
     // Max heroes to spawn at once
     HeroSpawnPoolMax: 5,
+    // Hero speed (in px/s)
+    HeroSpeed: 100,
+    // Hero with loot speed (in px/s)
+    HeroFleeingSpeed: 40,
+    // Amount of gold heroes can carry
     TreasureStealAmount: 100,
-    TreasureHoardSize: 1000
+    // Amount of gold in each treasure stash
+    TreasureHoardSize: 10000
 };
 var Util = (function () {
     function Util() {
@@ -32,19 +38,33 @@ var Map = (function (_super) {
     __extends(Map, _super);
     function Map(engine) {
         _super.call(this, engine);
+        this._cameraVel = new ex.Vector(0, 0);
         this._treasures = [];
     }
     Map.prototype.onInitialize = function () {
-        this._map = new ex.Actor(0, 0, 960, 480);
+        this._map = new ex.Actor(0, 0, 960, 960);
         this._map.anchor.setTo(0, 0);
         this._map.addDrawing(Resources.TextureMap);
         this.add(this._map);
         //
         // todo load from Tiled
-        //
-        // one treasure for now
-        var treasure = new Treasure(this._map.getWidth() - 50, this._map.getHeight() - 50, 50, 50, ex.Color.Yellow);
-        this.addTreasure(treasure);
+        //     
+        var treasures = [
+            this.getCellPos(19, 2),
+            this.getCellPos(20, 2),
+            this.getCellPos(19, 37),
+            this.getCellPos(20, 37)
+        ];
+        for (var i = 0; i < treasures.length; i++) {
+            var treasure = new Treasure(treasures[i].x, treasures[i].y);
+            this.addTreasure(treasure);
+        }
+        var playerSpawn = this.getCellPos(19, 19);
+        this._player = new Monster(playerSpawn.x, playerSpawn.y);
+        this.add(this._player);
+    };
+    Map.prototype.getPlayer = function () {
+        return this._player;
     };
     Map.prototype.getTreasures = function () {
         return this._treasures;
@@ -52,13 +72,23 @@ var Map = (function (_super) {
     Map.prototype.getSpawnPoints = function () {
         // todo get from tiled
         return [
-            this.getCellPos(1, 1),
-            this.getCellPos(39, 1),
-            this.getCellPos(2, 18)
+            this.getCellPos(0, 19),
+            this.getCellPos(39, 19)
         ];
     };
     Map.prototype.getCellPos = function (x, y) {
         return new ex.Point(Map.CellSize * x, Map.CellSize * y);
+    };
+    Map.prototype.update = function (engine, delta) {
+        _super.prototype.update.call(this, engine, delta);
+        var focus = game.currentScene.camera.getFocus().toVector();
+        var position = new ex.Vector(this._player.x, this._player.y);
+        var stretch = position.minus(focus).scale(Config.CameraElasticity);
+        this._cameraVel = this._cameraVel.plus(stretch);
+        var friction = this._cameraVel.scale(-1).scale(Config.CameraFriction);
+        this._cameraVel = this._cameraVel.plus(friction);
+        focus = focus.plus(this._cameraVel);
+        game.currentScene.camera.setFocus(focus.x, focus.y);
     };
     Map.prototype.addTreasure = function (t) {
         this._treasures.push(t);
@@ -262,7 +292,7 @@ var Hero = (function (_super) {
         // random treasure for now
         var loot = Util.pickRandom(treasures);
         // move to it
-        this.moveTo(loot.x, loot.y, Hero.Speed);
+        this.moveTo(loot.x, loot.y, Config.HeroSpeed);
     };
     Hero.prototype.onLooting = function (from) {
         var _this = this;
@@ -271,9 +301,10 @@ var Hero = (function (_super) {
     };
     Hero.prototype.onFleeing = function (from) {
         var _this = this;
-        // find nearest exit
-        var exit = map.getCellPos(19, 1);
-        this.moveTo(exit.x, exit.y, Hero.FleeingSpeed).callMethod(function () { return _this.onExit(); });
+        // find an exit
+        var exits = map.getSpawnPoints();
+        var exit = Util.pickRandom(exits);
+        this.moveTo(exit.x, exit.y, Config.HeroFleeingSpeed).callMethod(function () { return _this.onExit(); });
     };
     Hero.prototype.onAttacking = function (from) {
         // stop any actions
@@ -284,19 +315,17 @@ var Hero = (function (_super) {
         // play negative sound or something
         this.kill();
     };
-    Hero.Speed = 100;
-    Hero.FleeingSpeed = 60;
     return Hero;
 })(ex.Actor);
 var Treasure = (function (_super) {
     __extends(Treasure, _super);
-    function Treasure(x, y, width, height, color) {
-        _super.call(this, x, y, width, height, color);
+    function Treasure(x, y) {
+        _super.call(this, x, y, 24, 24);
         this._hoard = Config.TreasureHoardSize;
+        this.anchor.setTo(0, 0);
     }
     Treasure.prototype.onInitialize = function (engine) {
         var treasure = Resources.TextureTreasure.asSprite().clone();
-        treasure.scale.setTo(2, 2);
         this.addDrawing(treasure);
         this.collisionType = ex.CollisionType.Passive;
         this._label = new ex.Label(this._hoard.toString(), 0, 24, "Arial 14px");
@@ -328,28 +357,13 @@ var loader = new ex.Loader();
 _.forIn(Resources, function (resource) {
     loader.addResource(resource);
 });
-var monster = null;
-// mess with camera to lerp to the monster
-var cameraVel = new ex.Vector(0, 0);
-game.on('update', function () {
-    if (monster) {
-        var focus = game.currentScene.camera.getFocus().toVector();
-        var position = new ex.Vector(monster.x, monster.y);
-        var stretch = position.minus(focus).scale(Config.CameraElasticity);
-        cameraVel = cameraVel.plus(stretch);
-        var friction = cameraVel.scale(-1).scale(Config.CameraFriction);
-        cameraVel = cameraVel.plus(friction);
-        focus = focus.plus(cameraVel);
-        game.currentScene.camera.setFocus(focus.x, focus.y);
-    }
-});
 var map = new Map(game);
 game.start(loader).then(function () {
     // load map
     game.add("map", map);
     game.goToScene("map");
     // set zoom
-    game.currentScene.camera.zoom(2);
+    game.currentScene.camera.zoom(1.7);
     // defend intro
     var defendIntro = new ex.UIActor(game.width / 2, game.height / 2, 858, 105);
     defendIntro.anchor.setTo(0.5, 0.5);
@@ -360,8 +374,6 @@ game.start(loader).then(function () {
     game.add(defendIntro);
     // fade don't work
     defendIntro.delay(1000).callMethod(function () { return defendIntro.opacity = 1; }).delay(2000).callMethod(function () { return defendIntro.kill(); });
-    monster = new Monster(game.width / 2, game.height / 2);
-    game.add(monster);
     var heroTimer = new ex.Timer(function () { return HeroSpawner.spawnHero(); }, Config.HeroSpawnInterval, true);
     game.add(heroTimer);
     HeroSpawner.spawnHero();
