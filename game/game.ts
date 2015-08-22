@@ -16,8 +16,6 @@ _.forIn(Resources, (resource) => {
 
 game.start(loader).then(() => {
    
-   // magic here bro
-   
    var hero = new Hero(50, 50, 50, 50, ex.Color.Red);
    game.add(hero);
    
