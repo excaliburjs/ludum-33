@@ -9,13 +9,14 @@ class Monster extends ex.Actor {
    private _attackable: Hero[]; // heroes that can be attacked during current update loop
    
    constructor(x, y){
-      super(x, y, Config.MonsterWidth * 3, Config.MonsterHeight * 3);
+      super(x, y, Config.MonsterWidth, Config.MonsterHeight);
       this.color = ex.Color.Red;
       this._mouseX = 0;
       this._mouseY = 0;
       this._rays = new Array<ex.Ray>();
       this._attackable = new Array<Hero>();
       this.anchor = new ex.Point(0.35, 0.35);
+      this.collisionType = ex.CollisionType.Active;
    }
    
    onInitialize(engine: ex.Engine): void {
