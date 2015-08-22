@@ -25,7 +25,7 @@ class Monster extends ex.Actor {
       var spriteSheet = new ex.SpriteSheet(Resources.TextureMonster, 3, 1, 40, 36);
       var idleAnim = spriteSheet.getAnimationForAll(engine, 500);
       idleAnim.loop = true;
-      idleAnim.scale.setTo(2, 2);
+      idleAnim.scale.setTo(3, 3);
       this.addDrawing("idle", idleAnim);
    }
    

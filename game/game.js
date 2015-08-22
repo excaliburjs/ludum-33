@@ -34,7 +34,7 @@ var Monster = (function (_super) {
         var spriteSheet = new ex.SpriteSheet(Resources.TextureMonster, 3, 1, 40, 36);
         var idleAnim = spriteSheet.getAnimationForAll(engine, 500);
         idleAnim.loop = true;
-        idleAnim.scale.setTo(2, 2);
+        idleAnim.scale.setTo(3, 3);
         this.addDrawing("idle", idleAnim);
     };
     Monster.prototype.update = function (engine, delta) {
@@ -75,10 +75,14 @@ var Hero = (function (_super) {
     __extends(Hero, _super);
     function Hero(x, y, width, height, color) {
         _super.call(this, x, y, width, height, color);
-        this.addDrawing(Resources.TextureHero);
     }
     Hero.prototype.onInitialize = function (engine) {
         var _this = this;
+        var spriteSheet = new ex.SpriteSheet(Resources.TextureHero, 3, 1, 28, 28);
+        var idleAnim = spriteSheet.getAnimationForAll(engine, 300);
+        idleAnim.loop = true;
+        idleAnim.scale.setTo(2, 2);
+        this.addDrawing("idle", idleAnim);
         this.collisionType = ex.CollisionType.Active;
         this.on('collision', function (e) {
             if (e.other instanceof Treasure) {

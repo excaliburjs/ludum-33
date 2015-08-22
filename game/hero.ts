@@ -4,10 +4,19 @@ class Hero extends ex.Actor {
    
    constructor(x: number, y: number, width: number, height: number, color?: ex.Color) {
       super(x, y, width, height, color);
-      this.addDrawing(Resources.TextureHero);
+      
+      
+      
    }
    
    onInitialize(engine: ex.Engine) {
+      
+      var spriteSheet = new ex.SpriteSheet(Resources.TextureHero, 3, 1, 28, 28);
+      var idleAnim = spriteSheet.getAnimationForAll(engine, 300);
+      idleAnim.loop = true;
+      idleAnim.scale.setTo(2, 2);
+      
+      this.addDrawing("idle", idleAnim);
       
       this.collisionType = ex.CollisionType.Active;
       
