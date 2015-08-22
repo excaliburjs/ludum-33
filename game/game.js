@@ -3,8 +3,8 @@ var Config = {
     MonsterHeight: 48,
     MonsterSpeed: 300,
     MonsterAttackRange: 80,
-    CameraElasticity: 0.01,
-    CameraFriction: 0.21,
+    CameraElasticity: 0.05,
+    CameraFriction: 0.5,
     CameraShake: 0,
     CameraShakeDuration: 0,
     // Spawn interval
@@ -20,7 +20,9 @@ var Config = {
     // Amount of gold heroes can carry
     TreasureStealAmount: 100,
     // Amount of gold in each treasure stash
-    TreasureHoardSize: 10000
+    TreasureHoardSize: 10000,
+    // Treasure progress indicator width (in px)
+    TreasureProgressSize: 600
 };
 var Util = (function () {
     function Util() {
@@ -48,6 +50,16 @@ var Map = (function (_super) {
         this._map.anchor.setTo(0, 0);
         this._map.addDrawing(Resources.TextureMap);
         this.add(this._map);
+        // show GUI
+        var progressBack = new ex.UIActor(60, 23, Config.TreasureProgressSize + 4, 40);
+        progressBack.color = ex.Color.Black;
+        this.add(progressBack);
+        this._treasureProgress = new ex.UIActor(60, 27, Config.TreasureProgressSize, 32);
+        this._treasureProgress.color = ex.Color.fromHex("#eab600");
+        this.add(this._treasureProgress);
+        var treasureIndicator = new ex.UIActor(10, 10, 64, 64);
+        treasureIndicator.addDrawing(Resources.TextureTreasureIndicator);
+        this.add(treasureIndicator);
         //
         // todo load from Tiled
         //     
@@ -83,6 +95,11 @@ var Map = (function (_super) {
     };
     Map.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
+        // update treasure indicator
+        var total = this._treasures.length * Config.TreasureHoardSize;
+        var curr = _.sum(this._treasures, function (x) { return x.getAmount(); });
+        var prog = (curr / total);
+        this._treasureProgress.setWidth(Math.floor(prog * Config.TreasureProgressSize));
         var focus = game.currentScene.camera.getFocus().toVector();
         var position = new ex.Vector(this._player.x, this._player.y);
         var stretch = position.minus(focus).scale(Config.CameraElasticity);
@@ -273,6 +290,7 @@ var Resources = {
     TextureHero: new ex.Texture("images/hero.png"),
     TextureMonster: new ex.Texture("images/minotaurv2.png"),
     TextureTreasure: new ex.Texture("images/treasure.png"),
+    TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
     TextureMap: new ex.Texture("images/map.png"),
     TextureTextDefend: new ex.Texture("images/text-defend.png")
 };
@@ -333,6 +351,7 @@ var Hero = (function (_super) {
         this.collisionType = ex.CollisionType.Active;
         this.on('update', function (e) {
             if (_this.Health <= 0) {
+                map.getTreasures()[0].return(_this._treasure);
                 HeroSpawner.despawn(_this);
             }
         });
@@ -412,13 +431,16 @@ var Treasure = (function (_super) {
         var treasure = Resources.TextureTreasure.asSprite().clone();
         this.addDrawing(treasure);
         this.collisionType = ex.CollisionType.Passive;
-        this._label = new ex.Label(this._hoard.toString(), 0, 24, "Arial 14px");
-        this.addChild(this._label);
+    };
+    Treasure.prototype.getAmount = function () {
+        return this._hoard;
     };
     Treasure.prototype.steal = function () {
         this._hoard -= Config.TreasureStealAmount;
-        this._label.text = this._hoard.toString();
         return Config.TreasureStealAmount;
+    };
+    Treasure.prototype.return = function (amount) {
+        this._hoard += amount;
     };
     return Treasure;
 })(ex.Actor);
@@ -433,7 +455,7 @@ var Treasure = (function (_super) {
 var game = new ex.Engine({
     canvasElementId: "game",
     width: 960,
-    height: 480
+    height: 640
 });
 game.setAntialiasing(false);
 var loader = new ex.Loader();

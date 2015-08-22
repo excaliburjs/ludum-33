@@ -4,6 +4,7 @@ class Map extends ex.Scene {
    private _treasures: Treasure[];
    private _map: ex.Actor; // todo TileMap
    private _player: Monster;
+   private _treasureProgress: ex.UIActor;
    
    constructor(engine: ex.Engine) {
       super(engine);
@@ -16,6 +17,19 @@ class Map extends ex.Scene {
       this._map.anchor.setTo(0, 0);
       this._map.addDrawing(Resources.TextureMap);
       this.add(this._map);
+      
+      // show GUI
+      var progressBack = new ex.UIActor(60, 23, Config.TreasureProgressSize + 4, 40);
+      progressBack.color = ex.Color.Black;
+      this.add(progressBack);
+      
+      this._treasureProgress = new ex.UIActor(60, 27, Config.TreasureProgressSize, 32);
+      this._treasureProgress.color = ex.Color.fromHex("#eab600");
+      this.add(this._treasureProgress);
+      
+      var treasureIndicator = new ex.UIActor(10, 10, 64, 64);
+      treasureIndicator.addDrawing(Resources.TextureTreasureIndicator);
+      this.add(treasureIndicator);
       
       //
       // todo load from Tiled
@@ -63,6 +77,12 @@ class Map extends ex.Scene {
    
    public update(engine: ex.Engine, delta: number) {
       super.update(engine, delta);
+      
+      // update treasure indicator
+      var total = this._treasures.length * Config.TreasureHoardSize;
+      var curr = _.sum(this._treasures, (x) => x.getAmount());
+      var prog = (curr / total);
+      this._treasureProgress.setWidth(Math.floor(prog * Config.TreasureProgressSize));
             
       var focus = game.currentScene.camera.getFocus().toVector();
       var position = new ex.Vector(this._player.x, this._player.y);
