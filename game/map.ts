@@ -3,6 +3,7 @@ class Map extends ex.Scene {
    
    private _treasures: Treasure[];
    private _map: ex.Actor; // todo TileMap
+   private _player: Monster;
    
    constructor(engine: ex.Engine) {
       super(engine);
@@ -11,18 +12,34 @@ class Map extends ex.Scene {
    }
    
    public onInitialize() {
-      this._map = new ex.Actor(0, 0, 960, 480);
+      this._map = new ex.Actor(0, 0, 960, 960);
       this._map.anchor.setTo(0, 0);
       this._map.addDrawing(Resources.TextureMap);
       this.add(this._map);
       
       //
       // todo load from Tiled
-      //
+      //     
+      var treasures = [
+         this.getCellPos(19, 2),
+         this.getCellPos(20, 2),
+         this.getCellPos(19, 37),
+         this.getCellPos(20, 37)
+      ];
       
-      // one treasure for now
-      var treasure = new Treasure(this._map.getWidth() - 50, this._map.getHeight() - 50, 50, 50, ex.Color.Yellow);
-      this.addTreasure(treasure);
+      for (var i = 0; i < treasures.length; i++) {
+         var treasure = new Treasure(treasures[i].x, treasures[i].y);
+         this.addTreasure(treasure);
+      }
+      
+      var playerSpawn = this.getCellPos(19, 19);
+      this._player = new Monster(playerSpawn.x, playerSpawn.y);
+      
+      this.add(this._player);
+   }
+   
+   public getPlayer(): Monster {
+      return this._player;
    }
    
    public getTreasures(): Treasure[] {
@@ -33,14 +50,28 @@ class Map extends ex.Scene {
       // todo get from tiled
       
       return [
-         this.getCellPos(1, 1),
-         this.getCellPos(39, 1),
-         this.getCellPos(2, 18)
+         this.getCellPos(0, 19),
+         this.getCellPos(39, 19)
       ]
    }
    
    public getCellPos(x: number, y: number): ex.Point {
       return new ex.Point(Map.CellSize * x, Map.CellSize * y);
+   }
+   
+   private _cameraVel = new ex.Vector(0, 0);
+   
+   public update(engine: ex.Engine, delta: number) {
+      super.update(engine, delta);
+            
+      var focus = game.currentScene.camera.getFocus().toVector();
+      var position = new ex.Vector(this._player.x, this._player.y);
+      var stretch = position.minus(focus).scale(Config.CameraElasticity);
+      this._cameraVel = this._cameraVel.plus(stretch);
+      var friction = this._cameraVel.scale(-1).scale(Config.CameraFriction);
+      this._cameraVel = this._cameraVel.plus(friction);
+      focus = focus.plus(this._cameraVel);
+      game.currentScene.camera.setFocus(focus.x, focus.y);
    }
    
    private addTreasure(t: Treasure) {

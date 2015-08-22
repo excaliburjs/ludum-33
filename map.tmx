@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="40" height="20" tilewidth="24" tileheight="24" nextobjectid="1">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="40" height="40" tilewidth="24" tileheight="24" nextobjectid="1">
  <tileset firstgid="1" name="world" tilewidth="24" tileheight="24" tilecount="2296">
-  <image source="../../../Users/g521211/OneDrive/Art/oryx_16-bit_fantasy_1.1/oryx_16bit_fantasy_world.png" width="1366" height="1007"/>
+  <image source="../../../Users/g521211/OneDrive/Art/oryx_16-bit_fantasy_1.1/oryx_16bit_fantasy_world_trans.png" width="1366" height="1007"/>
  </tileset>
- <layer name="Ground" width="40" height="20">
+ <layer name="Ground" width="40" height="40">
   <data encoding="base64" compression="zlib">
-   eJztw0ENAAAMA6EzVv+25mIvSFg1VVXVhwc3p76h
+   eJzt2DEKgDAQRNFp9lixFE8lniileDxjG9K56oC/eJAqfLZatkgqPzB1vu4Z9Y3eLtznBwAA8Kaa9M8c0hL5TTWh8dr51ta2xf39r+/Jmt/e2o4H5gcAAAA/7vdJ7rueTvGCgpg=
   </data>
  </layer>
- <layer name="Walls" width="40" height="20">
+ <layer name="Decor" width="40" height="40">
   <data encoding="base64" compression="zlib">
-   eJztzqENAEAMw8DM1f1xZ3pa7oK+ZEuh0VWSWlovfs1dTR9LH0sfSx9LH0sfSx9LH+sX3+U9myUa3Q==
+   eJzt2E0KgCAQBWDbVVfs5xzZUTptuQjcOKSM9RrfB4IUDE9QUZ2zoe/S/46H3+46XqhVQspWYq+QsQbtcRO1Cnm9e/D9CDkbEclSZ7UvaWdao/50tZF7VpY56i/KtVuYf0T0HuS7cci2AefjfYPQhTU0gM+DP7wjouezIOd93JoTpLQNRA==
+  </data>
+ </layer>
+ <layer name="Walls" width="40" height="40">
+  <data encoding="base64" compression="zlib">
+   eJzt2DEOwDAIBEHe5f9L+VbkgjaFD+yNdSvRj+hgRMS4YKoj2yqN3ZFtinF3ZFtGtmVkW0a2ZWRbZp+WfVr2admnNW3PacRH00bfn33r2adln5Z9Wn/xEY3kG458A5N/COQfDPmHtWLbZVRs3cYKW5ex0nZyXpkuTTs=
   </data>
  </layer>
 </map>

@@ -2,14 +2,14 @@ class Treasure extends ex.Actor {
    private _hoard = Config.TreasureHoardSize;
    private _label: ex.Label;
    
-   constructor(x: number, y: number, width: number, height: number, color?: ex.Color) {
-      super(x, y, width, height, color);
+   constructor(x: number, y: number) {
+      super(x, y, 24, 24);
       
+      this.anchor.setTo(0, 0);
    }
    
    onInitialize(engine: ex.Engine) {
       var treasure = Resources.TextureTreasure.asSprite().clone();
-      treasure.scale.setTo(2, 2);
       this.addDrawing(treasure);
       
       this.collisionType = ex.CollisionType.Passive;
