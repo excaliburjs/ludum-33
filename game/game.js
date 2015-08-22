@@ -421,7 +421,7 @@ var Treasure = (function (_super) {
 var game = new ex.Engine({
     canvasElementId: "game",
     width: 960,
-    height: 480
+    height: 600
 });
 game.setAntialiasing(false);
 var loader = new ex.Loader();
