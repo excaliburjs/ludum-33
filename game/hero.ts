@@ -38,6 +38,7 @@ class Hero extends ex.Actor {
    
    private _treasure: number = 0;
    private _fsm: TypeState.FiniteStateMachine<HeroStates>;
+   private _attackCooldown: number = Config.HeroAttackCooldown;
 
    constructor(x: number, y: number) {
       super(x, y, 24, 24);
@@ -46,11 +47,13 @@ class Hero extends ex.Actor {
       
       // declare valid state transitions
       this._fsm.from(HeroStates.Searching).to(HeroStates.Attacking, HeroStates.Looting);
+      this._fsm.from(HeroStates.Attacking).to(HeroStates.Searching);
       this._fsm.from(HeroStates.Looting).to(HeroStates.Fleeing);
       
       this._fsm.on(HeroStates.Searching, this.onSearching.bind(this)); 
       this._fsm.on(HeroStates.Looting, this.onLooting.bind(this));     
       this._fsm.on(HeroStates.Fleeing, this.onFleeing.bind(this));
+      this._fsm.on(HeroStates.Attacking, this.onAttacking.bind(this));
    }
    
    onInitialize(engine: ex.Engine) {
@@ -63,14 +66,7 @@ class Hero extends ex.Actor {
       
       this.addDrawing("idle", idleAnim);
       
-      this.collisionType = ex.CollisionType.Active;
-      
-      this.on('update', (e?: ex.UpdateEvent) => {
-         if (this.Health <= 0) {
-            map.getTreasures()[0].return(this._treasure);
-            HeroSpawner.despawn(this);
-         }
-      });
+      this.collisionType = ex.CollisionType.Passive;
       
       this.on('collision', (e?: ex.CollisionEvent) => {
          if (e.other instanceof Treasure) {
@@ -78,15 +74,45 @@ class Hero extends ex.Actor {
                (<Hero>e.actor)._treasure = (<Treasure>e.other).steal();
                (<Hero>e.actor)._fsm.go(HeroStates.Looting);
             }
+         } else if (e.other instanceof Monster) {
+            if (this._attackCooldown == 0) {
+               var monster = <Monster>e.other;
+               monster.health--;
+               this._attackCooldown = Config.HeroAttackCooldown;
+            }
          }
       });
-     
+
       this.onSearching();
+
    }
    
    public update(engine: ex.Engine, delta: number) {
       super.update(engine, delta);
+      
+      if (this.Health <= 0) {
+            map.getTreasures()[0].return(this._treasure);
+            HeroSpawner.despawn(this);
+      }
       this.setZIndex(this.y);
+      this._attackCooldown = Math.max(this._attackCooldown - delta, 0);
+      
+      var heroVector = new ex.Vector(this.x, this.y);
+      var monsterVector = new ex.Vector(map._player.x, map._player.y);
+      
+      switch (this._fsm.currentState) {
+         case HeroStates.Searching:
+         if (heroVector.distance(monsterVector) < Config.HeroAggroDistance) {
+            this._fsm.go(HeroStates.Attacking);
+            // console.log('switching to attack');
+         }
+         break;
+         case HeroStates.Attacking:
+         if (heroVector.distance(monsterVector) > Config.HeroAggroDistance)
+            this._fsm.go(HeroStates.Searching);
+            // console.log('stopping attack');
+         break;
+      }
    }
 
    public getLootAmount(): number {
@@ -150,8 +176,8 @@ class Hero extends ex.Actor {
       // stop any actions
       this.clearActions();
       
-      // attack monster
-      
+      // TODO attack monster
+      this.meet(map._player, Config.HeroSpeed);
    }
    
    private onExit() {     
