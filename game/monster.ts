@@ -87,7 +87,7 @@ class Monster extends ex.Actor {
       for (var i = 0; i < this._rays.length; i++) {
          ctx.beginPath();
          ctx.moveTo(this._rays[i].pos.x, this._rays[i].pos.y);
-         var end = this._rays[i].getPoint(100);
+         var end = this._rays[i].getPoint(Config.MonsterAttackRange);
          ctx.lineTo(end.x, end.y);
          ctx.strokeStyle = ex.Color.Chartreuse.toString();
          ctx.stroke();

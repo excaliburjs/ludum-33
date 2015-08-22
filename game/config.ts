@@ -4,6 +4,7 @@ var Config = {
    MonsterWidth: 48,
    MonsterHeight: 48,
    MonsterSpeed: 300,
+   MonsterAttackRange: 50,
    
    CameraElasticity: .01,
 	CameraFriction: .21,
