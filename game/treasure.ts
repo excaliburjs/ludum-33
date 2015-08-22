@@ -17,6 +17,10 @@ class Treasure extends ex.Actor {
       this.addChild(this._label);
    }
    
+   public getAmount(): number {
+      return this._hoard;
+   }
+   
    public steal(): number {
       this._hoard -= Config.TreasureStealAmount;
       this._label.text = this._hoard.toString();

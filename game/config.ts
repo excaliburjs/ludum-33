@@ -25,5 +25,7 @@ var Config = {
    // Amount of gold heroes can carry
    TreasureStealAmount: 100,   
    // Amount of gold in each treasure stash
-   TreasureHoardSize: 10000
+   TreasureHoardSize: 10000,
+   // Treasure progress indicator width (in px)
+   TreasureProgressSize: 600
 }
