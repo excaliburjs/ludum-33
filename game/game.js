@@ -89,7 +89,7 @@ var Monster = (function (_super) {
         var spriteSheet = new ex.SpriteSheet(Resources.TextureMonster, 3, 1, 40, 36);
         var idleAnim = spriteSheet.getAnimationForAll(engine, 500);
         idleAnim.loop = true;
-        idleAnim.scale.setTo(3, 3);
+        idleAnim.scale.setTo(2, 2);
         this.addDrawing("idle", idleAnim);
         var sprite = Resources.TextureMonster.asSprite().clone();
         sprite.scale.setTo(3, 3);
@@ -302,7 +302,7 @@ game.start(loader).then(function () {
     game.add("map", map);
     game.goToScene("map");
     // set zoom
-    game.currentScene.camera.zoom(2);
+    game.currentScene.camera.zoom(1.2);
     // defend intro
     var defendIntro = new ex.UIActor(game.width / 2, game.height / 2, 858, 105);
     defendIntro.anchor.setTo(0.5, 0.5);

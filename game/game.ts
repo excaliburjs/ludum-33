@@ -45,7 +45,7 @@ game.start(loader).then(() => {
    game.goToScene("map");
    
    // set zoom
-   game.currentScene.camera.zoom(2);
+   game.currentScene.camera.zoom(1.2);
    
    // defend intro
    var defendIntro = new ex.UIActor(game.width/2, game.height/2, 858, 105);
