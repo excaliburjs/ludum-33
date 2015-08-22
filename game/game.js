@@ -52,11 +52,17 @@ var Map = (function (_super) {
         this.add(this._map);
         // show GUI
         var progressBack = new ex.UIActor(60, 23, Config.TreasureProgressSize + 4, 40);
+        progressBack.anchor.setTo(0, 0);
         progressBack.color = ex.Color.Black;
         this.add(progressBack);
         this._treasureProgress = new ex.UIActor(60, 27, Config.TreasureProgressSize, 32);
+        this._treasureProgress.anchor.setTo(0, 0);
         this._treasureProgress.color = ex.Color.fromHex("#eab600");
         this.add(this._treasureProgress);
+        this._lootProgress = new ex.UIActor(60, 27, 0, 32);
+        this._lootProgress.anchor.setTo(0, 0);
+        this._lootProgress.color = ex.Color.fromHex("#f25500");
+        this.add(this._lootProgress);
         var treasureIndicator = new ex.UIActor(10, 10, 64, 64);
         treasureIndicator.addDrawing(Resources.TextureTreasureIndicator);
         this.add(treasureIndicator);
@@ -97,9 +103,17 @@ var Map = (function (_super) {
         _super.prototype.update.call(this, engine, delta);
         // update treasure indicator
         var total = this._treasures.length * Config.TreasureHoardSize;
+        var looting = _.sum(HeroSpawner.getHeroes(), function (x) { return x.getLootAmount(); });
         var curr = _.sum(this._treasures, function (x) { return x.getAmount(); });
-        var prog = (curr / total);
-        this._treasureProgress.setWidth(Math.floor(prog * Config.TreasureProgressSize));
+        // % being looted right now
+        var lootProgress = looting / total;
+        // % level of hoard, if looting succeeds
+        var lossProgress = curr / total;
+        var progressWidth = Math.floor(lossProgress * Config.TreasureProgressSize);
+        var lootWidth = Math.floor(lootProgress * Config.TreasureProgressSize);
+        this._treasureProgress.setWidth(progressWidth);
+        this._lootProgress.x = this._treasureProgress.getRight();
+        this._lootProgress.setWidth(lootWidth);
         var focus = game.currentScene.camera.getFocus().toVector();
         var position = new ex.Vector(this._player.x, this._player.y);
         var stretch = position.minus(focus).scale(Config.CameraElasticity);
@@ -355,6 +369,9 @@ var Hero = (function (_super) {
             }
         });
         this.onSearching();
+    };
+    Hero.prototype.getLootAmount = function () {
+        return this._treasure;
     };
     Hero.prototype.getLines = function () {
         var lines = new Array();

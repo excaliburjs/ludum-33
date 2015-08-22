@@ -83,6 +83,10 @@ class Hero extends ex.Actor {
       this.onSearching();
    }
    
+   public getLootAmount(): number {
+      return this._treasure;
+   }
+   
    public getLines() {
       var lines = new Array<ex.Line>();
 
