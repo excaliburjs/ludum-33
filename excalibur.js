@@ -6652,7 +6652,7 @@ var ex;
                 var xDiff = 0;
                 var yDiff = 0;
                 if (this.centerDrawingX) {
-                    xDiff = (this.currentDrawing.width - this.getWidth()) / 2 - this.currentDrawing.width * this.currentDrawing.scale.x * this.currentDrawing.anchor.x;
+                    xDiff = (this.currentDrawing.width - this.getWidth()) / 2 - this.currentDrawing.width * this.currentDrawing.anchor.x;
                 }
                 if (this.centerDrawingY) {
                     yDiff = (this.currentDrawing.height - this.getHeight()) / 2 - this.currentDrawing.height * this.currentDrawing.anchor.y;
@@ -8467,6 +8467,11 @@ var ex;
             if (this.freezeFrame !== -1 && this.currentFrame >= this.sprites.length) {
                 currSprite = this.sprites[ex.Util.clamp(this.freezeFrame, 0, this.sprites.length - 1)];
                 currSprite.draw(ctx, x, y);
+            }
+            // add the calculated width
+            if (currSprite) {
+                this.width = currSprite.width;
+                this.height = currSprite.height;
             }
         };
         /**

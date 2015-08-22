@@ -31,9 +31,11 @@ var Monster = (function (_super) {
             _this._mouseX = ev.x;
             _this._mouseY = ev.y;
         });
-        var sprite = Resources.TextureMonster.asSprite().clone();
-        sprite.scale.setTo(3, 3);
-        this.addDrawing(sprite);
+        var spriteSheet = new ex.SpriteSheet(Resources.TextureMonster, 3, 1, 40, 36);
+        var idleAnim = spriteSheet.getAnimationForAll(engine, 500);
+        idleAnim.loop = true;
+        idleAnim.scale.setTo(2, 2);
+        this.addDrawing("idle", idleAnim);
     };
     Monster.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
@@ -64,7 +66,7 @@ var Monster = (function (_super) {
 var Resources = {
     // SomeSound: new ex.Sound('../sounds/foo.mp3')
     TextureHero: new ex.Texture("images/hero.png"),
-    TextureMonster: new ex.Texture("images/monster.png"),
+    TextureMonster: new ex.Texture("images/minotaur.png"),
     TextureTreasure: new ex.Texture("images/treasure.png"),
     TextureMap: new ex.Texture("images/map.png"),
     TextureTextDefend: new ex.Texture("images/text-defend.png")
