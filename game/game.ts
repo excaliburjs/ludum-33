@@ -60,10 +60,10 @@ game.start(loader).then(() => {
 
    var hero = new Hero(50, 50, 50, 50, ex.Color.Red);
    game.add(hero);
+   hero.setZIndex(1);
    
    var treasure = new Treasure(game.width - 50, game.height - 50, 50, 50, ex.Color.Yellow);
    game.add(treasure);
-   hero.setZIndex(1);
    
    hero.moveTo(treasure.x, treasure.y, 100);
    
