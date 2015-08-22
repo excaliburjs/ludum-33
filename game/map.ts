@@ -146,7 +146,7 @@ class Map extends ex.Scene {
       this.add(t);
    }   
    
-   private _gameOver() {
+   public _gameOver() {
       //TODO
       console.log('game over');
    }

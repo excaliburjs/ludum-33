@@ -23,7 +23,7 @@ var Config = {
    // Hero with loot speed (in px/s)
    HeroFleeingSpeed: 80,
    // The cooldown amount for a hero's attack
-   HeroAttackCooldown: 50,
+   HeroAttackCooldown: 2000,
    
    // Amount of gold heroes can carry
    TreasureStealAmount: 1,   

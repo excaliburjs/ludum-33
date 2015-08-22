@@ -64,7 +64,7 @@ class Hero extends ex.Actor {
       
       this.addDrawing("idle", idleAnim);
       
-      this.collisionType = ex.CollisionType.Active;
+      this.collisionType = ex.CollisionType.Passive;
       
       this.on('collision', (e?: ex.CollisionEvent) => {
          if (e.other instanceof Treasure) {
@@ -80,7 +80,7 @@ class Hero extends ex.Actor {
             }
          }
       });
-     
+     //TODO
       // this.onSearching();
       this.onAttacking();
    }
@@ -159,7 +159,7 @@ class Hero extends ex.Actor {
       this.clearActions();
       
       // TODO attack monster
-      this.meet(map._player);
+      this.follow(map._player, 5);
    }
    
    private onExit() {     

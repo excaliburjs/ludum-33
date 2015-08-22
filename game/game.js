@@ -19,7 +19,7 @@ var Config = {
     // Hero with loot speed (in px/s)
     HeroFleeingSpeed: 80,
     // The cooldown amount for a hero's attack
-    HeroAttackCooldown: 50,
+    HeroAttackCooldown: 2000,
     // Amount of gold heroes can carry
     TreasureStealAmount: 1,
     // Amount of gold in each treasure stash
@@ -208,12 +208,8 @@ var BloodEmitter = (function (_super) {
 var Monster = (function (_super) {
     __extends(Monster, _super);
     function Monster(x, y) {
-<<<<<<< HEAD
-        _super.call(this, x, y, Config.MonsterWidth * 3, Config.MonsterHeight * 3);
-        this.health = Config.MonsterHealth;
-=======
         _super.call(this, x, y, Config.MonsterWidth, Config.MonsterHeight);
->>>>>>> 71cc12ff5199f603e78a98d631bb7fbea27c7462
+        this.health = Config.MonsterHealth;
         this.color = ex.Color.Red;
         this._mouseX = 0;
         this._mouseY = 0;
@@ -397,7 +393,7 @@ var Hero = (function (_super) {
         idleAnim.loop = true;
         idleAnim.scale.setTo(2, 2);
         this.addDrawing("idle", idleAnim);
-        this.collisionType = ex.CollisionType.Active;
+        this.collisionType = ex.CollisionType.Passive;
         this.on('collision', function (e) {
             if (e.other instanceof Treasure) {
                 if (e.actor._treasure === 0) {
@@ -472,7 +468,7 @@ var Hero = (function (_super) {
         // stop any actions
         this.clearActions();
         // TODO attack monster
-        this.meet(map._player);
+        this.follow(map._player, 5);
     };
     Hero.prototype.onExit = function () {
         // play negative sound or something
