@@ -16,11 +16,11 @@ var Config = {
     // Hero speed (in px/s)
     HeroSpeed: 100,
     // Hero with loot speed (in px/s)
-    HeroFleeingSpeed: 40,
+    HeroFleeingSpeed: 80,
     // Amount of gold heroes can carry
-    TreasureStealAmount: 100,
+    TreasureStealAmount: 1,
     // Amount of gold in each treasure stash
-    TreasureHoardSize: 10000,
+    TreasureHoardSize: 5,
     // Treasure progress indicator width (in px)
     TreasureProgressSize: 600
 };
@@ -222,7 +222,7 @@ var Monster = (function (_super) {
             _this._mouseX = ev.x;
             _this._mouseY = ev.y;
         });
-        var spriteSheet = new ex.SpriteSheet(Resources.TextureMonster, 6, 1, 72, 72);
+        var spriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 6, 1, 72, 72);
         var attackDownAnim = spriteSheet.getAnimationBetween(engine, 3, 6, 100);
         attackDownAnim.scale.setTo(2, 2);
         attackDownAnim.loop = true;
@@ -230,11 +230,11 @@ var Monster = (function (_super) {
         var idleAnim = spriteSheet.getAnimationBetween(engine, 0, 2, 500);
         idleAnim.loop = true;
         idleAnim.scale.setTo(2, 2);
-        this.addDrawing("idle", idleAnim);
-        this.setDrawing("idle");
-        var sprite = Resources.TextureMonster.asSprite().clone();
-        sprite.scale.setTo(3, 3);
-        this.addDrawing(sprite);
+        this.addDrawing("idleDown", idleAnim);
+        var sprite = Resources.TextureMonsterRight.asSprite().clone();
+        sprite.scale.setTo(2, 2);
+        this.addDrawing("idleRight", sprite);
+        this.setDrawing("idleRight");
         var yValues = new Array(-0.62, -0.25, 0, 0.25, 0.62);
         _.forIn(yValues, function (yValue) {
             var rayVector = new ex.Vector(1, yValue);
@@ -327,7 +327,8 @@ var Monster = (function (_super) {
 var Resources = {
     // SomeSound: new ex.Sound('../sounds/foo.mp3')
     TextureHero: new ex.Texture("images/hero.png"),
-    TextureMonster: new ex.Texture("images/minotaurv2.png"),
+    TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
+    TextureMonsterRight: new ex.Texture("images/minotaurv2right.png"),
     TextureTreasure: new ex.Texture("images/treasure.png"),
     TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
     TextureMap: new ex.Texture("images/map.png"),
