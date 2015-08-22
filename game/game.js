@@ -67,6 +67,52 @@ var Map = (function (_super) {
     Map.CellSize = 24;
     return Map;
 })(ex.Scene);
+var BloodEmitter = (function (_super) {
+    __extends(BloodEmitter, _super);
+    function BloodEmitter(x, y) {
+        _super.call(this, x, y);
+        this.amount = 0.5;
+        this.force = 0.5;
+        this.angle = 0;
+        this._bleedTimer = 0;
+        this._splatterTimer = 0;
+        this._particles = [];
+    }
+    BloodEmitter.prototype.splatter = function () {
+        this._splatterTimer = 200;
+        this._particles.length = 0;
+        var pixelAmount = this.amount * 500;
+        var vMin = 5;
+        var vMax = 100;
+        for (var i = 0; i < pixelAmount; i++) {
+            this._particles.push({
+                x: this.x,
+                y: this.y,
+                d: ex.Vector.fromAngle(this.angle + ex.Util.randomInRange(-Math.PI / 4, Math.PI / 4)),
+                v: ex.Util.randomIntInRange(vMin, vMax)
+            });
+        }
+    };
+    BloodEmitter.prototype.bleed = function (duration) {
+        this._bleedTimer = duration;
+    };
+    BloodEmitter.prototype.draw = function (ctx, delta) {
+        _super.prototype.draw.call(this, ctx, delta);
+        // todo
+    };
+    BloodEmitter.prototype.update = function (engine, delta) {
+        this._bleedTimer = Math.max(0, this._bleedTimer - delta);
+        this._splatterTimer = Math.max(0, this._splatterTimer - delta);
+        // update particle positions
+        var particle, i, ray;
+        for (i = 0; i < this._particles.length; i++) {
+            particle = this._particles[i];
+            ray = new ex.Ray(new ex.Point(particle.x, particle.y), ex.Vector.fromAngle(particle.d));
+            particle.x = (this.force * (this._splatterTimer * particle.v));
+        }
+    };
+    return BloodEmitter;
+})(ex.Actor);
 /// <reference path="game.ts" />
 /// <reference path="config.ts" />
 var Monster = (function (_super) {
@@ -266,6 +312,7 @@ var Treasure = (function (_super) {
 /// <reference path="config.ts" />
 /// <reference path="util.ts" />
 /// <reference path="map.ts" />
+/// <reference path="blood.ts" />
 /// <reference path="monster.ts" />
 /// <reference path="resources.ts" />
 /// <reference path="hero.ts" />

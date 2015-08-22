@@ -1,6 +1,7 @@
 /// <reference path="config.ts" />
 /// <reference path="util.ts" />
 /// <reference path="map.ts" />
+/// <reference path="blood.ts" />
 /// <reference path="monster.ts" />
 /// <reference path="resources.ts" />
 /// <reference path="hero.ts" />
