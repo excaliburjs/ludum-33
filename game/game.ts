@@ -10,7 +10,7 @@
 var game = new ex.Engine({
    canvasElementId: "game",
    width: 960,
-   height: 480
+   height: 640
 });
 game.setAntialiasing(false);
 

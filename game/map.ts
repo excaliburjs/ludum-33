@@ -87,7 +87,7 @@ class Map extends ex.Scene {
       super.update(engine, delta);
       
       // update treasure indicator
-      var total = this._treasures.length * Config.TreasureHoardSize;      
+      var total = this._treasures.length * Config.TreasureHoardSize;
       var looting = _.sum(HeroSpawner.getHeroes(), x => x.getLootAmount());
       var curr = _.sum(this._treasures, (x) => x.getAmount());
       
@@ -104,6 +104,10 @@ class Map extends ex.Scene {
       this._lootProgress.x = this._treasureProgress.getRight();
       this._lootProgress.setWidth(lootWidth);
             
+      if ((curr + looting) <= 0) {
+         this._gameOver();
+      }
+
       var focus = game.currentScene.camera.getFocus().toVector();
       var position = new ex.Vector(this._player.x, this._player.y);
       var stretch = position.minus(focus).scale(Config.CameraElasticity);
@@ -118,4 +122,9 @@ class Map extends ex.Scene {
       this._treasures.push(t);
       this.add(t);
    }   
+   
+   private _gameOver() {
+      //TODO
+      console.log('game over');
+   }
 }

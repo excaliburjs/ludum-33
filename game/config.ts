@@ -6,8 +6,8 @@ var Config = {
    MonsterSpeed: 300,
    MonsterAttackRange: 80,
    
-   CameraElasticity: 0.01,//.01,
-	CameraFriction: 0.21,
+   CameraElasticity: 0.05,//.01,
+	CameraFriction: 0.5,//0.21,
 	CameraShake: 0,//7,
 	CameraShakeDuration: 0,//200,//800,      
    

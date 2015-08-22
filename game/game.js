@@ -3,8 +3,8 @@ var Config = {
     MonsterHeight: 48,
     MonsterSpeed: 300,
     MonsterAttackRange: 80,
-    CameraElasticity: 0.01,
-    CameraFriction: 0.21,
+    CameraElasticity: 0.05,
+    CameraFriction: 0.5,
     CameraShake: 0,
     CameraShakeDuration: 0,
     // Spawn interval
@@ -114,6 +114,9 @@ var Map = (function (_super) {
         this._treasureProgress.setWidth(progressWidth);
         this._lootProgress.x = this._treasureProgress.getRight();
         this._lootProgress.setWidth(lootWidth);
+        if ((curr + looting) <= 0) {
+            this._gameOver();
+        }
         var focus = game.currentScene.camera.getFocus().toVector();
         var position = new ex.Vector(this._player.x, this._player.y);
         var stretch = position.minus(focus).scale(Config.CameraElasticity);
@@ -126,6 +129,10 @@ var Map = (function (_super) {
     Map.prototype.addTreasure = function (t) {
         this._treasures.push(t);
         this.add(t);
+    };
+    Map.prototype._gameOver = function () {
+        //TODO
+        console.log('game over');
     };
     Map.CellSize = 24;
     return Map;
@@ -187,6 +194,7 @@ var Monster = (function (_super) {
         this._mouseY = 0;
         this._rays = new Array();
         this._attackable = new Array();
+        this.anchor = new ex.Point(0.35, 0.35);
     }
     Monster.prototype.onInitialize = function (engine) {
         var _this = this;
@@ -196,11 +204,16 @@ var Monster = (function (_super) {
             _this._mouseX = ev.x;
             _this._mouseY = ev.y;
         });
-        var spriteSheet = new ex.SpriteSheet(Resources.TextureMonster, 3, 1, 40, 36);
-        var idleAnim = spriteSheet.getAnimationForAll(engine, 500);
+        var spriteSheet = new ex.SpriteSheet(Resources.TextureMonster, 6, 1, 72, 72);
+        var attackDownAnim = spriteSheet.getAnimationBetween(engine, 3, 6, 100);
+        attackDownAnim.scale.setTo(2, 2);
+        attackDownAnim.loop = true;
+        this.addDrawing("attackDown", attackDownAnim);
+        var idleAnim = spriteSheet.getAnimationBetween(engine, 0, 2, 500);
         idleAnim.loop = true;
-        idleAnim.scale.setTo(3, 3);
+        idleAnim.scale.setTo(2, 2);
         this.addDrawing("idle", idleAnim);
+        this.setDrawing("idle");
         var sprite = Resources.TextureMonster.asSprite().clone();
         sprite.scale.setTo(3, 3);
         this.addDrawing(sprite);
@@ -211,9 +224,10 @@ var Monster = (function (_super) {
             var ray = new ex.Ray(rayPoint, rayVector);
             that._rays.push(ray);
         });
-        // attack
+        // attackda
         engine.input.pointers.primary.on("down", function (evt) {
             that._attack();
+            that.setDrawing("attackDown");
         });
     };
     Monster.prototype.update = function (engine, delta) {
@@ -249,6 +263,7 @@ var Monster = (function (_super) {
             var rotationAmt = _this.rotation - prevRotation;
             ray.dir = ray.dir.rotate(rotationAmt, new ex.Point(0, 0));
         });
+        this.setZIndex(this.y);
     };
     Monster.prototype._detectAttackable = function () {
         var _this = this;
@@ -294,7 +309,7 @@ var Monster = (function (_super) {
 var Resources = {
     // SomeSound: new ex.Sound('../sounds/foo.mp3')
     TextureHero: new ex.Texture("images/hero.png"),
-    TextureMonster: new ex.Texture("images/minotaur.png"),
+    TextureMonster: new ex.Texture("images/minotaurv2.png"),
     TextureTreasure: new ex.Texture("images/treasure.png"),
     TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
     TextureMap: new ex.Texture("images/map.png"),
@@ -357,6 +372,7 @@ var Hero = (function (_super) {
         this.collisionType = ex.CollisionType.Active;
         this.on('update', function (e) {
             if (_this.Health <= 0) {
+                map.getTreasures()[0].return(_this._treasure);
                 HeroSpawner.despawn(_this);
             }
         });
@@ -369,6 +385,10 @@ var Hero = (function (_super) {
             }
         });
         this.onSearching();
+    };
+    Hero.prototype.update = function (engine, delta) {
+        _super.prototype.update.call(this, engine, delta);
+        this.setZIndex(this.y);
     };
     Hero.prototype.getLootAmount = function () {
         return this._treasure;
@@ -435,16 +455,16 @@ var Treasure = (function (_super) {
         var treasure = Resources.TextureTreasure.asSprite().clone();
         this.addDrawing(treasure);
         this.collisionType = ex.CollisionType.Passive;
-        this._label = new ex.Label(this._hoard.toString(), 0, 24, "Arial 14px");
-        this.addChild(this._label);
     };
     Treasure.prototype.getAmount = function () {
         return this._hoard;
     };
     Treasure.prototype.steal = function () {
         this._hoard -= Config.TreasureStealAmount;
-        this._label.text = this._hoard.toString();
         return Config.TreasureStealAmount;
+    };
+    Treasure.prototype.return = function (amount) {
+        this._hoard += amount;
     };
     return Treasure;
 })(ex.Actor);
@@ -459,7 +479,7 @@ var Treasure = (function (_super) {
 var game = new ex.Engine({
     canvasElementId: "game",
     width: 960,
-    height: 480
+    height: 640
 });
 game.setAntialiasing(false);
 var loader = new ex.Loader();

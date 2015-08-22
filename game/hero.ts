@@ -67,6 +67,7 @@ class Hero extends ex.Actor {
       
       this.on('update', (e?: ex.UpdateEvent) => {
          if (this.Health <= 0) {
+            map.getTreasures()[0].return(this._treasure);
             HeroSpawner.despawn(this);
          }
       });
@@ -83,6 +84,11 @@ class Hero extends ex.Actor {
       this.onSearching();
    }
    
+   public update(engine: ex.Engine, delta: number) {
+      super.update(engine, delta);
+      this.setZIndex(this.y);
+   }
+
    public getLootAmount(): number {
       return this._treasure;
    }
