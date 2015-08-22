@@ -1,6 +1,8 @@
 /// <reference path="config.ts" />
 /// <reference path="monster.ts" />
 /// <reference path="resources.ts" />
+/// <reference path="hero.ts" />
+/// <reference path="treasure.ts" />
 
 var game = new ex.Engine({
    canvasElementId: "game",
@@ -40,4 +42,14 @@ game.start(loader).then(() => {
    // magic here
    var monster = new Monster(game.width/2, game.height/2);
    game.add(monster);   
+   
+   var hero = new Hero(50, 50, 50, 50, ex.Color.Red);
+   game.add(hero);
+   
+   var treasure = new Treasure(game.width - 50, game.height - 50, 50, 50, ex.Color.Yellow);
+   game.add(treasure);
+   treasure.setZIndex(-1);
+   
+   hero.moveTo(treasure.x, treasure.y, 100);
+   
 });
