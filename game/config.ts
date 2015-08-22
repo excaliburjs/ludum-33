@@ -6,10 +6,10 @@ var Config = {
    MonsterSpeed: 300,
    MonsterAttackRange: 50,
    
-   CameraElasticity: .01,
-	CameraFriction: .21,
-	CameraShake: 7,
-	CameraShakeDuration: 800,      
+   CameraElasticity: 0.01,//.01,
+	CameraFriction: 0.21,
+	CameraShake: 0,//7,
+	CameraShakeDuration: 0,//200,//800,      
    
    // Spawn interval
    HeroSpawnInterval: 10000, // in ms   

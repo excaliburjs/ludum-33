@@ -3,10 +3,10 @@ var Config = {
     MonsterHeight: 48,
     MonsterSpeed: 300,
     MonsterAttackRange: 50,
-    CameraElasticity: .01,
-    CameraFriction: .21,
-    CameraShake: 7,
-    CameraShakeDuration: 800,
+    CameraElasticity: 0.01,
+    CameraFriction: 0.21,
+    CameraShake: 0,
+    CameraShakeDuration: 0,
     // Spawn interval
     HeroSpawnInterval: 10000,
     // Max heroes to spawn at once
@@ -240,6 +240,8 @@ var Monster = (function (_super) {
     };
     Monster.prototype._attack = function () {
         _.forIn(this._attackable, function (hero) {
+            // hero.blink(500, 500, 5); //can't because moving already (no parallel actions support)
+            game.currentScene.camera.shake(3, 3, 300);
             hero.Health--;
         });
     };
