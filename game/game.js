@@ -16,11 +16,11 @@ var Config = {
     // Hero speed (in px/s)
     HeroSpeed: 100,
     // Hero with loot speed (in px/s)
-    HeroFleeingSpeed: 40,
+    HeroFleeingSpeed: 80,
     // Amount of gold heroes can carry
-    TreasureStealAmount: 100,
+    TreasureStealAmount: 1,
     // Amount of gold in each treasure stash
-    TreasureHoardSize: 10000,
+    TreasureHoardSize: 5,
     // Treasure progress indicator width (in px)
     TreasureProgressSize: 600
 };
