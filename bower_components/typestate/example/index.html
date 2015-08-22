@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+   <title>TypedFSM Example</title>
+   <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+   <h2>Elevator Finite State Machine</h2>
+   <hr/>
+   <ul>
+      <li>Doors on an elevator can go from opened to closed, and vice versa</li>
+      <li>If your hands are in the door, it won't close.</li> 
+      <li>Once the doors are closed the elevator may move.</li>
+      <li>When the elevator reaches its destination, it may stop moving.</li> 
+   </ul>
+
+
+   <label for="hands">Hands in door</label>
+   <input id="hands" type="checkbox" data-bind="checked: HandsInDoor"></input>
+   <input id="open" type="button" value="Open Doors" data-bind="click: Open, enable: CanOpen"></input>
+   <input id="close" type="button" value="Close Doors" data-bind="click: Close, enable: CanClose"></input>
+   <input id="move" type="button" value="Move" data-bind="click: Move, enable: CanMove"></input>
+   <div>Current State: <B data-bind="text: Elevator[CurrentState()]"> </b></div>
+
+   <script type="text/javascript" src="knockout-3.1.0.min.js"></script>
+   <script type="text/javascript" src="example.js"></script>
+</body>
+</html>

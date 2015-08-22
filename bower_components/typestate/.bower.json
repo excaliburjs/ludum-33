@@ -1,0 +1,34 @@
+{
+  "name": "typestate",
+  "version": "1.0.0",
+  "homepage": "https://github.com/eonarheim/TypeState",
+  "authors": [
+    "Erik Onarheim"
+  ],
+  "description": "A small finite state machine implementation in TypeScript.",
+  "main": "dist/typestate-1.0.0.js",
+  "keywords": [
+    "Finite",
+    "State",
+    "Machine",
+    "TypeScript"
+  ],
+  "license": "BSD 2-Clause",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "_release": "1.0.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.0.0",
+    "commit": "d041f88820d4ba0d95f810521ee138c3e323d8da"
+  },
+  "_source": "git://github.com/eonarheim/TypeState.git",
+  "_target": "~1.0.0",
+  "_originalSource": "typestate",
+  "_direct": true
+}
