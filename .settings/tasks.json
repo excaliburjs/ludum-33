@@ -15,9 +15,8 @@
 	"args": ["/C"],
 	"tasks": [
       {
-         "taskName": "copy excalibur",
-         "suppressTaskName": true,
-         "args": ["copy Excalibur\\dist\\excalibur.js excalibur.js"]
+         "taskName": "copy",
+         "args": ["Excalibur\\dist\\excalibur.js excalibur.js"]
       },
       {
          "taskName": "typescript",
