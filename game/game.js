@@ -435,6 +435,11 @@ var Hero = (function (_super) {
                     console.log('switching to attack');
                 }
                 break;
+            case HeroStates.Attacking:
+                if (heroVector.distance(monsterVector) > Config.HeroAggroDistance)
+                    this._fsm.go(HeroStates.Searching);
+                console.log('stopping attack');
+                break;
         }
     };
     Hero.prototype.getLootAmount = function () {
@@ -484,7 +489,7 @@ var Hero = (function (_super) {
         // stop any actions
         this.clearActions();
         // TODO attack monster
-        this.follow(map._player, 5);
+        this.meet(map._player, Config.HeroSpeed);
     };
     Hero.prototype.onExit = function () {
         // play negative sound or something

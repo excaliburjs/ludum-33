@@ -107,11 +107,11 @@ class Hero extends ex.Actor {
             console.log('switching to attack');
          }
          break;
-         // case HeroStates.Attacking:
-         // if (heroVector.distance(monsterVector) > Config.HeroAggroDistance)
-         //    this._fsm.go(HeroStates.Searching);
-         //    console.log('stopping attack');
-         // break;
+         case HeroStates.Attacking:
+         if (heroVector.distance(monsterVector) > Config.HeroAggroDistance)
+            this._fsm.go(HeroStates.Searching);
+            console.log('stopping attack');
+         break;
       }
    }
 
@@ -177,7 +177,7 @@ class Hero extends ex.Actor {
       this.clearActions();
       
       // TODO attack monster
-      this.follow(map._player, 5);
+      this.meet(map._player, Config.HeroSpeed);
    }
    
    private onExit() {     
