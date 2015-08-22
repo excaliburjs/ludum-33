@@ -136,15 +136,15 @@ var Monster = (function (_super) {
     Monster.prototype.debugDraw = function (ctx) {
         _super.prototype.debugDraw.call(this, ctx);
         //Debugging draw for LOS rays on the enemy
-        for (var i = 0; i < this._rays.length; i++) {
+        _.forIn(this._rays, function (ray) {
             ctx.beginPath();
-            ctx.moveTo(this._rays[i].pos.x, this._rays[i].pos.y);
-            var end = this._rays[i].getPoint(Config.MonsterAttackRange);
+            ctx.moveTo(ray.pos.x, ray.pos.y);
+            var end = ray.getPoint(Config.MonsterAttackRange);
             ctx.lineTo(end.x, end.y);
             ctx.strokeStyle = ex.Color.Chartreuse.toString();
             ctx.stroke();
             ctx.closePath();
-        }
+        });
     };
     return Monster;
 })(ex.Actor);

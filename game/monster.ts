@@ -73,25 +73,24 @@ class Monster extends ex.Actor {
       var prevRotation = this.rotation;
       this.rotation = new ex.Vector(this._mouseX - this.x, this._mouseY - this.y).toAngle();
       //updating attack rays
-      for (var i = 0; i < this._rays.length; i++) {
-         this._rays[i].pos = new ex.Point(this.x, this.y);
+      _.forIn(this._rays, (ray) =>{
+         ray.pos = new ex.Point(this.x, this.y);
          var rotationAmt = this.rotation - prevRotation;
-         this._rays[i].dir = this._rays[i].dir.rotate(rotationAmt, new ex.Point(0, 0));
-      }
+         ray.dir = ray.dir.rotate(rotationAmt, new ex.Point(0, 0));
+      });
    }
   
    public debugDraw(ctx: CanvasRenderingContext2D): void {
       super.debugDraw(ctx);
-
       //Debugging draw for LOS rays on the enemy
-      for (var i = 0; i < this._rays.length; i++) {
+      _.forIn(this._rays, (ray) => {
          ctx.beginPath();
-         ctx.moveTo(this._rays[i].pos.x, this._rays[i].pos.y);
-         var end = this._rays[i].getPoint(Config.MonsterAttackRange);
+         ctx.moveTo(ray.pos.x, ray.pos.y);
+         var end = ray.getPoint(Config.MonsterAttackRange);
          ctx.lineTo(end.x, end.y);
          ctx.strokeStyle = ex.Color.Chartreuse.toString();
          ctx.stroke();
          ctx.closePath();
-      }
+      });
    }
 }
