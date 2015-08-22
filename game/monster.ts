@@ -6,10 +6,11 @@ class Monster extends ex.Actor {
    private _mouseY: number;
    
    constructor(x, y){
-      super(x, y, Config.MonsterWidth, Config.MonsterHeight);
+      super(x, y, Config.MonsterWidth * 3, Config.MonsterHeight * 3);
       this.color = ex.Color.Red;
       this._mouseX = 0;
       this._mouseY = 0;
+      
    }
    
    onInitialize(engine: ex.Engine): void {
@@ -21,7 +22,9 @@ class Monster extends ex.Actor {
          this._mouseY = ev.y;
          
       });
-      
+      var sprite = Resources.TextureMonster.asSprite().clone();
+      sprite.scale.setTo(3, 3);
+      this.addDrawing(sprite);
    }
    
    public update(engine: ex.Engine, delta: number): void {

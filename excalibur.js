@@ -1,4 +1,4 @@
-/*! excalibur - v0.5.1 - 2015-07-13
+/*! excalibur - v0.5.1 - 2015-08-22
 * https://github.com/excaliburjs/Excalibur
 * Copyright (c) 2015 ; Licensed BSD-2-Clause*/
 if (typeof window === 'undefined') {
@@ -9,6 +9,11 @@ if (typeof window === 'undefined') {
 if (typeof window !== 'undefined' && !window.requestAnimationFrame) {
     window.requestAnimationFrame = window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function (callback) {
         window.setInterval(callback, 1000 / 60);
+    };
+}
+if (typeof window !== 'undefined' && !window.cancelAnimationFrame) {
+    window.cancelAnimationFrame = window.webkitCancelAnimationFrame || window.mozCancelAnimationFrame || function (callback) {
+        return;
     };
 }
 if (typeof window !== 'undefined' && !window.AudioContext) {
@@ -368,10 +373,16 @@ var ex;
             this._yMin = Math.min.apply(null, this._yCoords);
             this._xMax = Math.max.apply(null, this._xCoords);
             this._yMax = Math.max.apply(null, this._yCoords);
+            var minWorld = engine.screenToWorldCoordinates(new ex.Point(this._xMin, this._yMin));
+            var maxWorld = engine.screenToWorldCoordinates(new ex.Point(this._xMax, this._yMax));
+            this._xMinWorld = minWorld.x;
+            this._yMinWorld = minWorld.y;
+            this._xMaxWorld = maxWorld.x;
+            this._yMaxWorld = maxWorld.y;
             var boundingPoints = new Array();
             boundingPoints.push(new ex.Point(this._xMin, this._yMin), new ex.Point(this._xMax, this._yMin), new ex.Point(this._xMin, this._yMax), new ex.Point(this._xMax, this._yMax));
             for (var i = 0; i < boundingPoints.length; i++) {
-                if (boundingPoints[i].x > 0 && boundingPoints[i].y > 0 && boundingPoints[i].x < engine.width && boundingPoints[i].y < engine.height) {
+                if (boundingPoints[i].x > 0 && boundingPoints[i].y > 0 && boundingPoints[i].x < engine.canvas.clientWidth && boundingPoints[i].y < engine.canvas.clientHeight) {
                     return false;
                 }
             }
@@ -381,7 +392,7 @@ var ex;
             // bounding rectangle
             ctx.beginPath();
             ctx.strokeStyle = ex.Color.White.toString();
-            ctx.rect(this._xMin, this._yMin, this._xMax - this._xMin, this._yMax - this._yMin);
+            ctx.rect(this._xMinWorld, this._yMinWorld, this._xMaxWorld - this._xMinWorld, this._yMaxWorld - this._yMinWorld);
             ctx.stroke();
             ctx.fillStyle = ex.Color.Red.toString();
             ctx.beginPath();
@@ -1990,7 +2001,7 @@ var ex;
         };
         TileMap.prototype.update = function (engine, delta) {
             var worldCoordsUpperLeft = engine.screenToWorldCoordinates(new ex.Point(0, 0));
-            var worldCoordsLowerRight = engine.screenToWorldCoordinates(new ex.Point(engine.width, engine.height));
+            var worldCoordsLowerRight = engine.screenToWorldCoordinates(new ex.Point(engine.canvas.clientWidth, engine.canvas.clientHeight));
             this._onScreenXStart = Math.max(Math.floor(worldCoordsUpperLeft.x / this.cellWidth) - 2, 0);
             this._onScreenYStart = Math.max(Math.floor((worldCoordsUpperLeft.y - this.y) / this.cellHeight) - 2, 0);
             this._onScreenXEnd = Math.max(Math.floor(worldCoordsLowerRight.x / this.cellWidth) + 2, 0);
@@ -3371,8 +3382,10 @@ var ex;
             var yShake = 0;
             var canvasWidth = ctx.canvas.width;
             var canvasHeight = ctx.canvas.height;
-            var newCanvasWidth = canvasWidth * this.getZoom();
-            var newCanvasHeight = canvasHeight * this.getZoom();
+            // if zoom is 2x then canvas is 1/2 as high
+            // if zoom is .5x then canvas is 2x as high
+            var newCanvasWidth = canvasWidth / this.getZoom();
+            var newCanvasHeight = canvasHeight / this.getZoom();
             if (this._lerp) {
                 if (this._currentLerpTime < this._lerpDuration && this._cameraMoving) {
                     if (this._lerpEnd.x < this._lerpStart.x) {
@@ -3408,7 +3421,6 @@ var ex;
                 xShake = (Math.random() * this._shakeMagnitudeX | 0) + 1;
                 yShake = (Math.random() * this._shakeMagnitudeY | 0) + 1;
             }
-            ctx.translate(-focus.x + xShake + (newCanvasWidth / 2), -focus.y + yShake + (newCanvasHeight / 2));
             if (this._isDoneZooming()) {
                 this._isZooming = false;
                 this._elapsedZoomTime = 0;
@@ -3420,14 +3432,21 @@ var ex;
                 this._setCurrentZoomScale(this.getZoom() + this._zoomIncrement * delta / 1000);
             }
             ctx.scale(this.getZoom(), this.getZoom());
+            ctx.translate(-focus.x + newCanvasWidth / 2 + xShake, -focus.y + newCanvasHeight / 2 + yShake);
         };
         BaseCamera.prototype.debugDraw = function (ctx) {
             var focus = this.getFocus();
             ctx.fillStyle = 'red';
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
             ctx.beginPath();
             ctx.arc(focus.x, focus.y, 15, 0, Math.PI * 2);
             ctx.closePath();
-            ctx.fill();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(focus.x, focus.y, 5, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.stroke();
         };
         BaseCamera.prototype._isDoneShaking = function () {
             return !(this._isShaking) || (this._elapsedShakeTime >= this._shakeDuration);
@@ -3836,7 +3855,7 @@ var ex;
                                 break;
                             case 2 /* Clockwise */:
                                 this._direction = 1;
-                                if (this._shortDistance >= 0) {
+                                if (this._shortestPathIsPositive) {
                                     this._distance = this._shortDistance;
                                 }
                                 else {
@@ -3845,7 +3864,7 @@ var ex;
                                 break;
                             case 3 /* CounterClockwise */:
                                 this._direction = -1;
-                                if (this._shortDistance <= 0) {
+                                if (!this._shortestPathIsPositive) {
                                     this._distance = this._shortDistance;
                                 }
                                 else {
@@ -5376,7 +5395,7 @@ var ex;
             }
             // todo possibly enable this with excalibur flags features?
             //this._collisionResolver.debugDraw(ctx, 20);
-            //this.camera.debugDraw(ctx);
+            this.camera.debugDraw(ctx);
         };
         /**
          * Checks whether an actor is contained in this scene or not
@@ -6633,10 +6652,10 @@ var ex;
                 var xDiff = 0;
                 var yDiff = 0;
                 if (this.centerDrawingX) {
-                    xDiff = (this.currentDrawing.width * this.currentDrawing.scale.x - this.getWidth()) / 2 - this.currentDrawing.width * this.currentDrawing.scale.x * this.currentDrawing.anchor.x;
+                    xDiff = (this.currentDrawing.width - this.getWidth()) / 2 - this.currentDrawing.width * this.currentDrawing.scale.x * this.currentDrawing.anchor.x;
                 }
                 if (this.centerDrawingY) {
-                    yDiff = (this.currentDrawing.height * this.currentDrawing.scale.y - this.getHeight()) / 2 - this.currentDrawing.height * this.currentDrawing.scale.y * this.currentDrawing.anchor.y;
+                    yDiff = (this.currentDrawing.height - this.getHeight()) / 2 - this.currentDrawing.height * this.currentDrawing.anchor.y;
                 }
                 this.currentDrawing.draw(ctx, -anchorPoint.x - xDiff, -anchorPoint.y - yDiff);
             }
@@ -6656,9 +6675,12 @@ var ex;
          * @param ctx The rendering context
          */
         Actor.prototype.debugDraw = function (ctx) {
+            // Draw actor bounding box
             var bb = this.getBounds();
             bb.debugDraw(ctx);
+            // Draw actor Id
             ctx.fillText('id: ' + this.id, bb.left + 3, bb.top + 10);
+            // Draw actor anchor point
             ctx.fillStyle = ex.Color.Yellow.toString();
             ctx.beginPath();
             ctx.arc(this.getWorldX(), this.getWorldY(), 3, 0, Math.PI * 2);
@@ -6669,6 +6691,23 @@ var ex;
                     this.traits[j].cullingBox.debugDraw(ctx);
                 }
             }
+            // Unit Circle debug draw
+            ctx.strokeStyle = ex.Color.Yellow.toString();
+            ctx.beginPath();
+            var radius = Math.min(this.getWidth(), this.getHeight());
+            ctx.arc(this.getWorldX(), this.getWorldY(), radius, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.stroke();
+            var ticks = { '0 Pi': 0, 'Pi/2': Math.PI / 2, 'Pi': Math.PI, '3/2 Pi': 3 * Math.PI / 2 };
+            var oldFont = ctx.font;
+            for (var tick in ticks) {
+                ctx.fillStyle = ex.Color.Yellow.toString();
+                ctx.font = '14px';
+                ctx.textAlign = 'center';
+                ctx.fillText(tick, this.getWorldX() + Math.cos(ticks[tick]) * (radius + 10), this.getWorldY() + Math.sin(ticks[tick]) * (radius + 10));
+            }
+            ctx.font = oldFont;
+            // Draw child actors
             ctx.save();
             ctx.translate(this.x, this.y);
             ctx.rotate(this.rotation);
@@ -9250,7 +9289,8 @@ var ex;
                 }
             }
             if (!this._selectedFile) {
-                this._logger.warn('This browser does not support any of the files specified');
+                this._logger.warn('This browser does not support any of the audio files specified:', paths.join(', '));
+                this._logger.warn('Attempting to use', paths[0]);
                 this._selectedFile = paths[0]; // select the first specified
             }
             this.sound = new ex.Internal.FallbackAudio(this._selectedFile, 1.0);
@@ -9519,6 +9559,82 @@ var ex;
         return Loader;
     })();
     ex.Loader = Loader;
+})(ex || (ex = {}));
+/// <reference path="Log.ts" />
+var ex;
+(function (ex) {
+    var Detector = (function () {
+        function Detector() {
+            this.failedTests = [];
+            // critical browser features required for ex to run
+            this._criticalTests = {
+                // Test canvas/2d context support
+                canvasSupport: function () {
+                    var elem = document.createElement('canvas');
+                    return !!(elem.getContext && elem.getContext('2d'));
+                },
+                // Test array buffer support ex uses for downloading binary data
+                arrayBufferSupport: function () {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('GET', '/');
+                    try {
+                        xhr.responseType = 'arraybuffer';
+                    }
+                    catch (e) {
+                        return false;
+                    }
+                    return xhr.responseType === 'arraybuffer';
+                },
+                // Test data urls ex uses for sprites
+                dataUrlSupport: function () {
+                    var canvas = document.createElement('canvas');
+                    return canvas.toDataURL('image/png').indexOf('data:image/png') === 0;
+                },
+                // Test object url support for loading
+                objectUrlSupport: function () {
+                    return 'URL' in window && 'revokeObjectURL' in URL && 'createObjectURL' in URL;
+                },
+                // RGBA support for colors
+                rgbaSupport: function () {
+                    var style = document.createElement('a').style;
+                    style.cssText = 'background-color:rgba(150,255,150,.5)';
+                    return ('' + style.backgroundColor).indexOf('rgba') > -1;
+                }
+            };
+            // warnings excalibur performance will be degraded
+            this._warningTest = {
+                webAudioSupport: function () {
+                    return !!(window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext || window.oAudioContext);
+                },
+                webglSupport: function () {
+                    var elem = document.createElement('canvas');
+                    return !!(elem.getContext && elem.getContext('webgl'));
+                }
+            };
+        }
+        Detector.prototype.test = function () {
+            // Critical test will for ex not to run
+            var failedCritical = false;
+            for (var test in this._criticalTests) {
+                if (!this._criticalTests[test]()) {
+                    this.failedTests.push(test);
+                    ex.Logger.getInstance().error('Critical browser feature missing, Excalibur requires:', test);
+                    failedCritical = true;
+                }
+            }
+            if (failedCritical) {
+                return false;
+            }
+            for (var warning in this._warningTest) {
+                if (!this._warningTest[warning]()) {
+                    ex.Logger.getInstance().warn('Warning browser feature missing, Excalibur will have reduced performance:', warning);
+                }
+            }
+            return true;
+        };
+        return Detector;
+    })();
+    ex.Detector = Detector;
 })(ex || (ex = {}));
 /// <reference path="Promises.ts" />
 /// <reference path="Loader.ts" />
@@ -9977,12 +10093,14 @@ var ex;
         };
         Label.prototype.update = function (engine, delta) {
             _super.prototype.update.call(this, engine, delta);
-            if (this.spriteFont && this._color !== this.color) {
+            if (this.spriteFont && (this._color !== this.color || this.previousOpacity !== this.opacity)) {
                 for (var character in this._textSprites) {
                     this._textSprites[character].clearEffects();
-                    this._textSprites[character].addEffect(new ex.Effects.Fill(this.color.clone()));
-                    this._color = this.color;
+                    this._textSprites[character].fill(this.color.clone());
+                    this._textSprites[character].opacity(this.opacity);
                 }
+                this._color = this.color;
+                this.previousOpacity = this.opacity;
             }
             if (this.spriteFont && this._textShadowOn && this._shadowColorDirty && this._shadowColor) {
                 for (var characterShadow in this._shadowSprites) {
@@ -10017,19 +10135,12 @@ var ex;
                     }
                     try {
                         var charSprite = sprites[character];
-                        if (this.previousOpacity !== this.opacity) {
-                            charSprite.clearEffects();
-                            charSprite.addEffect(new ex.Effects.Opacity(this.opacity));
-                        }
                         charSprite.draw(ctx, currX, 0);
                         currX += (charSprite.swidth + this.letterSpacing);
                     }
                     catch (e) {
                         ex.Logger.getInstance().error('SpriteFont Error drawing char ' + character);
                     }
-                }
-                if (this.previousOpacity !== this.opacity) {
-                    this.previousOpacity = this.opacity;
                 }
             }
             else {
@@ -11091,6 +11202,7 @@ var ex;
 /// <reference path="Loader.ts" />
 /// <reference path="Promises.ts" />
 /// <reference path="Util/Util.ts" />
+/// <reference path="Util/Detector.ts" />
 /// <reference path="Binding.ts" />
 /// <reference path="TileMap.ts" />
 /// <reference path="Label.ts" />
@@ -11391,6 +11503,12 @@ var ex;
              * Sets the background color for the engine.
              */
             this.backgroundColor = new ex.Color(0, 0, 100);
+            /**
+             * The action to take when a fatal exception is thrown
+             */
+            this.onFatalException = function (e) {
+                ex.Logger.getInstance().fatal(e);
+            };
             this._isSmoothingEnabled = true;
             this._isLoading = false;
             this._progress = 0;
@@ -11412,6 +11530,25 @@ var ex;
                 height = options.height;
                 canvasElementId = options.canvasElementId;
                 displayMode = options.displayMode;
+            }
+            // Check compatibility 
+            var detector = new ex.Detector();
+            if (!(this._compatible = detector.test())) {
+                var message = document.createElement('div');
+                message.innerText = 'Sorry, your browser does not support all the features needed for Excalibur';
+                document.body.appendChild(message);
+                detector.failedTests.forEach(function (test) {
+                    var testMessage = document.createElement('div');
+                    testMessage.innerText = 'Browser feature missing ' + test;
+                    document.body.appendChild(testMessage);
+                });
+                if (canvasElementId) {
+                    var canvas = document.getElementById(canvasElementId);
+                    if (canvas) {
+                        canvas.parentElement.removeChild(canvas);
+                    }
+                }
+                return;
             }
             this._logger = ex.Logger.getInstance();
             this._logger.info('Powered by Excalibur.js visit", "http://excaliburjs.com", "for more information.');
@@ -11631,35 +11768,42 @@ var ex;
          * @param point  Screen coordinate to convert
          */
         Engine.prototype.screenToWorldCoordinates = function (point) {
-            // todo set these back this.canvas.clientWidth
             var newX = point.x;
             var newY = point.y;
+            // transform back to world space
+            newX = (newX / this.canvas.clientWidth) * this.getWidth();
+            newY = (newY / this.canvas.clientHeight) * this.getHeight();
+            // transform based on zoom
+            newX = newX - this.getWidth() / 2;
+            newY = newY - this.getHeight() / 2;
+            // shift by focus
             if (this.currentScene && this.currentScene.camera) {
                 var focus = this.currentScene.camera.getFocus();
-                newX = focus.x + (point.x - (this.getWidth() / 2));
-                newY = focus.y + (point.y - (this.getHeight() / 2));
+                newX += focus.x;
+                newY += focus.y;
             }
-            newX = Math.floor((newX / this.canvas.clientWidth) * this.getWidth());
-            newY = Math.floor((newY / this.canvas.clientHeight) * this.getHeight());
-            return new ex.Point(newX, newY);
+            return new ex.Point(Math.floor(newX), Math.floor(newY));
         };
         /**
          * Transforms a world coordinate, to a screen coordinate
          * @param point  World coordinate to convert
          */
         Engine.prototype.worldToScreenCoordinates = function (point) {
-            // todo set these back this.canvas.clientWidth
-            // this isn't correct on zoom
             var screenX = point.x;
             var screenY = point.y;
+            // shift by focus
             if (this.currentScene && this.currentScene.camera) {
                 var focus = this.currentScene.camera.getFocus();
-                screenX = (point.x - focus.x) + (this.getWidth() / 2);
-                screenY = (point.y - focus.y) + (this.getHeight() / 2);
+                screenX -= focus.x;
+                screenY -= focus.y;
             }
-            screenX = Math.floor((screenX / this.getWidth()) * this.canvas.clientWidth);
-            screenY = Math.floor((screenY / this.getHeight()) * this.canvas.clientHeight);
-            return new ex.Point(screenX, screenY);
+            // transfrom back on zoom
+            screenX = screenX + this.getWidth() / 2;
+            screenY = screenY + this.getHeight() / 2;
+            // transform back to screen space
+            screenX = (screenX * this.canvas.clientWidth) / this.getWidth();
+            screenY = (screenY * this.canvas.clientHeight) / this.getHeight();
+            return new ex.Point(Math.floor(screenX), Math.floor(screenY));
         };
         /**
          * Sets the internal canvas height based on the selected display mode.
@@ -11812,6 +11956,10 @@ var ex;
          * [[Sound]], or [[Texture]].
          */
         Engine.prototype.start = function (loader) {
+            if (!this._compatible) {
+                var promise = new ex.Promise();
+                return promise.reject('Excalibur is incompatible with your browser');
+            }
             var loadingComplete;
             if (loader) {
                 loader.wireEngine(this);
@@ -11830,20 +11978,27 @@ var ex;
                     if (!game._hasStarted) {
                         return;
                     }
-                    window.requestAnimationFrame(mainloop);
-                    // Get the time to calculate time-elapsed
-                    var now = Date.now();
-                    var elapsed = Math.floor(now - lastTime) || 1;
-                    // Resolves issue #138 if the game has been paused, or blurred for 
-                    // more than a 200 milliseconds, reset elapsed time to 1. This improves reliability 
-                    // and provides more expected behavior when the engine comes back
-                    // into focus
-                    if (elapsed > 200) {
-                        elapsed = 1;
+                    try {
+                        game._requestId = window.requestAnimationFrame(mainloop);
+                        // Get the time to calculate time-elapsed
+                        var now = Date.now();
+                        var elapsed = Math.floor(now - lastTime) || 1;
+                        // Resolves issue #138 if the game has been paused, or blurred for 
+                        // more than a 200 milliseconds, reset elapsed time to 1. This improves reliability 
+                        // and provides more expected behavior when the engine comes back
+                        // into focus
+                        if (elapsed > 200) {
+                            elapsed = 1;
+                        }
+                        game._update(elapsed);
+                        game._draw(elapsed);
+                        lastTime = now;
                     }
-                    game._update(elapsed);
-                    game._draw(elapsed);
-                    lastTime = now;
+                    catch (e) {
+                        window.cancelAnimationFrame(game._requestId);
+                        game.stop();
+                        game.onFatalException(e);
+                    }
                 })();
                 this._logger.debug('Game started');
             }

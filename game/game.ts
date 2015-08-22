@@ -9,6 +9,8 @@ var game = new ex.Engine({
    width: 960,
    height: 480
 });
+game.setAntialiasing(false);
+
 var loader = new ex.Loader();
 
 // load up all resources in dictionary
@@ -32,6 +34,8 @@ game.on('update', function () {
     }
 });
 
+game.currentScene.camera.zoom(2);
+
 game.start(loader).then(() => {
    
    // magic here bro
@@ -40,7 +44,7 @@ game.start(loader).then(() => {
    map.anchor.setTo(0, 0);
    game.add(map);
 
-   var monster = new Monster(game.width/2, game.height/2);
+   monster = new Monster(game.width/2, game.height/2);
    game.add(monster);
 
    var hero = new Hero(50, 50, 50, 50, ex.Color.Red);
