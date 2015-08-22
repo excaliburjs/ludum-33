@@ -5,5 +5,5 @@ var game = new ex.Engine({
     height: 600
 });
 game.start().then(function () {
-    // magic
+    // magic here
 });

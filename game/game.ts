@@ -8,6 +8,6 @@ var game = new ex.Engine({
 
 game.start().then(() => {
    
-   // magic
+   // magic here
    
 });
