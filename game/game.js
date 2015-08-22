@@ -327,6 +327,7 @@ var Monster = (function (_super) {
 var Resources = {
     // SomeSound: new ex.Sound('../sounds/foo.mp3')
     TextureHero: new ex.Texture("images/hero.png"),
+    TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
     TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
     TextureMonsterRight: new ex.Texture("images/minotaurv2right.png"),
     TextureTreasure: new ex.Texture("images/treasure.png"),
@@ -383,6 +384,10 @@ var Hero = (function (_super) {
     Hero.prototype.onInitialize = function (engine) {
         var _this = this;
         this.setZIndex(1);
+        this._lootIndicator = new ex.Actor(5, -24, 24, 24);
+        this._lootIndicator.addDrawing(Resources.TextureHeroLootIndicator);
+        this._lootIndicator.scale.setTo(1.5, 1.5);
+        this._lootIndicator.moveBy(0, -10, 500).moveBy(0, 10, 500).repeatForever();
         var spriteSheet = new ex.SpriteSheet(Resources.TextureHero, 3, 1, 28, 28);
         var idleAnim = spriteSheet.getAnimationForAll(engine, 300);
         idleAnim.loop = true;
@@ -408,6 +413,12 @@ var Hero = (function (_super) {
     Hero.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
         this.setZIndex(this.y);
+        if (this._treasure > 0) {
+            this.addChild(this._lootIndicator);
+        }
+        else {
+            this.removeChild(this._lootIndicator);
+        }
     };
     Hero.prototype.getLootAmount = function () {
         return this._treasure;
