@@ -18,7 +18,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 var Monster = (function (_super) {
     __extends(Monster, _super);
     function Monster(x, y) {
-        _super.call(this, x, y, Config.MonsterWidth, Config.MonsterHeight);
+        _super.call(this, x, y, Config.MonsterWidth * 3, Config.MonsterHeight * 3);
         this.color = ex.Color.Red;
         this._mouseX = 0;
         this._mouseY = 0;
@@ -31,6 +31,9 @@ var Monster = (function (_super) {
             _this._mouseX = ev.x;
             _this._mouseY = ev.y;
         });
+        var sprite = Resources.TextureMonster.asSprite().clone();
+        sprite.scale.setTo(3, 3);
+        this.addDrawing(sprite);
     };
     Monster.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
@@ -88,6 +91,7 @@ var game = new ex.Engine({
     width: 960,
     height: 480
 });
+game.setAntialiasing(false);
 var loader = new ex.Loader();
 // load up all resources in dictionary
 _.forIn(Resources, function (resource) {
@@ -108,6 +112,7 @@ game.on('update', function () {
         game.currentScene.camera.setFocus(focus.x, focus.y);
     }
 });
+game.currentScene.camera.zoom(2);
 game.start(loader).then(function () {
     // defend intro
     var defendIntro = new ex.Actor(game.width / 2, game.height / 2, 998, 412);
@@ -122,7 +127,7 @@ game.start(loader).then(function () {
     map.addDrawing(Resources.TextureMap);
     map.anchor.setTo(0, 0);
     game.add(map);
-    var monster = new Monster(game.width / 2, game.height / 2);
+    monster = new Monster(game.width / 2, game.height / 2);
     game.add(monster);
     var hero = new Hero(50, 50, 50, 50, ex.Color.Red);
     game.add(hero);
