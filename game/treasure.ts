@@ -5,4 +5,8 @@ class Treasure extends ex.Actor {
       this.addDrawing(Resources.TextureTreasure);
    }
    
+   onInitialize(engine: ex.Engine) {
+      this.collisionType = ex.CollisionType.Passive;
+   }
+   
 }
