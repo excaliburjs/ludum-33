@@ -40,11 +40,10 @@ class Hero extends ex.Actor {
    
    private _treasure: number = 0;
    private _fsm: TypeState.FiniteStateMachine<HeroStates>;
-   
+
    constructor(x: number, y: number) {
       super(x, y, 24, 24);
-      
-      this.addDrawing(Resources.TextureHero);
+            
       this._fsm = new TypeState.FiniteStateMachine<HeroStates>(HeroStates.Searching);
       
       // declare valid state transitions
@@ -58,6 +57,13 @@ class Hero extends ex.Actor {
    
    onInitialize(engine: ex.Engine) {
       this.setZIndex(1);
+      
+      var spriteSheet = new ex.SpriteSheet(Resources.TextureHero, 3, 1, 28, 28);
+      var idleAnim = spriteSheet.getAnimationForAll(engine, 300);
+      idleAnim.loop = true;
+      idleAnim.scale.setTo(2, 2);
+      
+      this.addDrawing("idle", idleAnim);
       
       this.collisionType = ex.CollisionType.Active;
       

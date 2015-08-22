@@ -70,6 +70,52 @@ var Map = (function (_super) {
     Map.CellSize = 24;
     return Map;
 })(ex.Scene);
+var BloodEmitter = (function (_super) {
+    __extends(BloodEmitter, _super);
+    function BloodEmitter(x, y) {
+        _super.call(this, x, y);
+        this.amount = 0.5;
+        this.force = 0.5;
+        this.angle = 0;
+        this._bleedTimer = 0;
+        this._splatterTimer = 0;
+        this._particles = [];
+    }
+    BloodEmitter.prototype.splatter = function () {
+        this._splatterTimer = 200;
+        this._particles.length = 0;
+        var pixelAmount = this.amount * 500;
+        var vMin = 5;
+        var vMax = 100;
+        for (var i = 0; i < pixelAmount; i++) {
+            this._particles.push({
+                x: this.x,
+                y: this.y,
+                d: ex.Vector.fromAngle(this.angle + ex.Util.randomInRange(-Math.PI / 4, Math.PI / 4)),
+                v: ex.Util.randomIntInRange(vMin, vMax)
+            });
+        }
+    };
+    BloodEmitter.prototype.bleed = function (duration) {
+        this._bleedTimer = duration;
+    };
+    BloodEmitter.prototype.draw = function (ctx, delta) {
+        _super.prototype.draw.call(this, ctx, delta);
+        // todo
+    };
+    BloodEmitter.prototype.update = function (engine, delta) {
+        this._bleedTimer = Math.max(0, this._bleedTimer - delta);
+        this._splatterTimer = Math.max(0, this._splatterTimer - delta);
+        // update particle positions
+        var particle, i, ray;
+        for (i = 0; i < this._particles.length; i++) {
+            particle = this._particles[i];
+            ray = new ex.Ray(new ex.Point(particle.x, particle.y), ex.Vector.fromAngle(particle.d));
+            particle.x = (this.force * (this._splatterTimer * particle.v));
+        }
+    };
+    return BloodEmitter;
+})(ex.Actor);
 /// <reference path="game.ts" />
 /// <reference path="config.ts" />
 var Monster = (function (_super) {
@@ -93,7 +139,7 @@ var Monster = (function (_super) {
         var spriteSheet = new ex.SpriteSheet(Resources.TextureMonster, 3, 1, 40, 36);
         var idleAnim = spriteSheet.getAnimationForAll(engine, 500);
         idleAnim.loop = true;
-        idleAnim.scale.setTo(2, 2);
+        idleAnim.scale.setTo(3, 3);
         this.addDrawing("idle", idleAnim);
         var sprite = Resources.TextureMonster.asSprite().clone();
         sprite.scale.setTo(3, 3);
@@ -229,7 +275,6 @@ var Hero = (function (_super) {
         _super.call(this, x, y, 24, 24);
         this.Health = Config.HeroHealth;
         this._treasure = 0;
-        this.addDrawing(Resources.TextureHero);
         this._fsm = new TypeState.FiniteStateMachine(HeroStates.Searching);
         // declare valid state transitions
         this._fsm.from(HeroStates.Searching).to(HeroStates.Attacking, HeroStates.Looting);
@@ -241,6 +286,11 @@ var Hero = (function (_super) {
     Hero.prototype.onInitialize = function (engine) {
         var _this = this;
         this.setZIndex(1);
+        var spriteSheet = new ex.SpriteSheet(Resources.TextureHero, 3, 1, 28, 28);
+        var idleAnim = spriteSheet.getAnimationForAll(engine, 300);
+        idleAnim.loop = true;
+        idleAnim.scale.setTo(2, 2);
+        this.addDrawing("idle", idleAnim);
         this.collisionType = ex.CollisionType.Active;
         this.on('update', function (e) {
             if (_this.Health <= 0) {
@@ -314,9 +364,11 @@ var Treasure = (function (_super) {
     function Treasure(x, y, width, height, color) {
         _super.call(this, x, y, width, height, color);
         this._hoard = Config.TreasureHoardSize;
-        this.addDrawing(Resources.TextureTreasure);
     }
     Treasure.prototype.onInitialize = function (engine) {
+        var treasure = Resources.TextureTreasure.asSprite().clone();
+        treasure.scale.setTo(2, 2);
+        this.addDrawing(treasure);
         this.collisionType = ex.CollisionType.Passive;
         this._label = new ex.Label(this._hoard.toString(), 0, 24, "Arial 14px");
         this.addChild(this._label);
@@ -331,6 +383,7 @@ var Treasure = (function (_super) {
 /// <reference path="config.ts" />
 /// <reference path="util.ts" />
 /// <reference path="map.ts" />
+/// <reference path="blood.ts" />
 /// <reference path="monster.ts" />
 /// <reference path="resources.ts" />
 /// <reference path="hero.ts" />
