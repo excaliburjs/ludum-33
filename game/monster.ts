@@ -5,12 +5,14 @@ class Monster extends ex.Actor {
    private _mouseX: number;
    private _mouseY: number;
    
+   private _rays: ex.Ray[];
+   
    constructor(x, y){
       super(x, y, Config.MonsterWidth * 3, Config.MonsterHeight * 3);
       this.color = ex.Color.Red;
       this._mouseX = 0;
       this._mouseY = 0;
-      
+      this._rays = new Array<ex.Ray>();
    }
    
    onInitialize(engine: ex.Engine): void {
@@ -27,6 +29,17 @@ class Monster extends ex.Actor {
       idleAnim.loop = true;
       idleAnim.scale.setTo(3, 3);
       this.addDrawing("idle", idleAnim);
+      var sprite = Resources.TextureMonster.asSprite().clone();
+      sprite.scale.setTo(3, 3);
+      this.addDrawing(sprite);
+      
+      var yValues = new Array<number>(-0.62, -0.25, 0, 0.25, 0.62);
+      for (var i = 0; i < yValues.length; i++) {
+         var rayVector = new ex.Vector(1, yValues[i]);
+         var rayPoint = new ex.Point(this.x, this.y);
+         var ray = new ex.Ray(rayPoint, rayVector);
+         that._rays.push(ray);
+      }
    }
    
    public update(engine: ex.Engine, delta: number): void {
@@ -56,8 +69,28 @@ class Monster extends ex.Actor {
          engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right)) {
          this.dx = Config.MonsterSpeed;
       }
-      
-      
+
+      var prevRotation = this.rotation;
       this.rotation = new ex.Vector(this._mouseX - this.x, this._mouseY - this.y).toAngle();
+      //updating attack rays
+      _.forIn(this._rays, (ray) =>{
+         ray.pos = new ex.Point(this.x, this.y);
+         var rotationAmt = this.rotation - prevRotation;
+         ray.dir = ray.dir.rotate(rotationAmt, new ex.Point(0, 0));
+      });
+   }
+  
+   public debugDraw(ctx: CanvasRenderingContext2D): void {
+      super.debugDraw(ctx);
+      //Debugging draw for LOS rays on the enemy
+      _.forIn(this._rays, (ray) => {
+         ctx.beginPath();
+         ctx.moveTo(ray.pos.x, ray.pos.y);
+         var end = ray.getPoint(Config.MonsterAttackRange);
+         ctx.lineTo(end.x, end.y);
+         ctx.strokeStyle = ex.Color.Chartreuse.toString();
+         ctx.stroke();
+         ctx.closePath();
+      });
    }
 }

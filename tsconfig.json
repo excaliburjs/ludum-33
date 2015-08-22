@@ -18,6 +18,7 @@
    "files": [
       "game/game.ts",
       "Excalibur/dist/Excalibur.d.ts",
+      "bower_components/typestate/dist/typestate.d.ts",
       "lodash.d.ts"
    ]
 }

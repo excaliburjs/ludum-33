@@ -1,4 +1,6 @@
 /// <reference path="config.ts" />
+/// <reference path="util.ts" />
+/// <reference path="map.ts" />
 /// <reference path="monster.ts" />
 /// <reference path="resources.ts" />
 /// <reference path="hero.ts" />
@@ -34,9 +36,16 @@ game.on('update', function () {
     }
 });
 
-game.currentScene.camera.zoom(2);
+var map = new Map(game);
 
 game.start(loader).then(() => {
+   
+   // load map
+   game.add("map", map);
+   game.goToScene("map");
+   
+   // set zoom
+   game.currentScene.camera.zoom(2);
    
    // defend intro
    var defendIntro = new ex.UIActor(game.width/2, game.height/2, 858, 105);
@@ -48,23 +57,12 @@ game.start(loader).then(() => {
    game.add(defendIntro);
    // fade don't work
    defendIntro.delay(1000).callMethod(() => defendIntro.opacity = 1).delay(2000).callMethod(() => defendIntro.kill());
-   
-   // magic here bro
-   var map = new ex.Actor(0, 0, game.width, game.height);
-   map.addDrawing(Resources.TextureMap);
-   map.anchor.setTo(0, 0);
-   game.add(map);
-
+      
    monster = new Monster(game.width/2, game.height/2);
    game.add(monster);
 
-   var hero = new Hero(50, 50, 50, 50, ex.Color.Red);
-   game.add(hero);
-   hero.setZIndex(1);
+   var heroTimer = new ex.Timer(() => HeroSpawner.spawnHero(), Config.HeroSpawnInterval, true);
+   game.add(heroTimer);
    
-   var treasure = new Treasure(game.width - 50, game.height - 50, 50, 50, ex.Color.Yellow);
-   game.add(treasure);
-   
-   hero.moveTo(treasure.x, treasure.y, 100);
-   
+   HeroSpawner.spawnHero();  
 });
