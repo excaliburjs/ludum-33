@@ -1,5 +1,3 @@
-/// <reference path="../Excalibur/dist/Excalibur.d.ts" />
-/// <reference path="../lodash.d.ts" />
 /// <reference path="resources.ts" />
 
 var game = new ex.Engine({
@@ -16,6 +14,6 @@ _.forIn(Resources, (resource) => {
 
 game.start(loader).then(() => {
    
-   // magic here
+   // magic here bro
    
 });

@@ -23,7 +23,7 @@
          "suppressTaskName": true,
          "isBuildCommand": true,
          "showOutput": "silent",
-         "args": ["tsc game/game.ts"],
+         "args": ["tsc"],
          "problemMatcher": "$tsc"
       }
    ]
