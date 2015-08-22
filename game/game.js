@@ -56,8 +56,10 @@ var Monster = (function (_super) {
 })(ex.Actor);
 var Resources = {
     // SomeSound: new ex.Sound('../sounds/foo.mp3')
-    TextureHero: new ex.Texture("../images/hero.png"),
-    TextureMonster: new ex.Texture("../images/monster.png")
+    TextureHero: new ex.Texture("images/hero.png"),
+    TextureMonster: new ex.Texture("images/monster.png"),
+    TextureTreasure: new ex.Texture("images/treasure.png"),
+    TextureMap: new ex.Texture("images/map.png")
 };
 var Hero = (function (_super) {
     __extends(Hero, _super);
@@ -84,8 +86,8 @@ var Treasure = (function (_super) {
 /// <reference path="treasure.ts" />
 var game = new ex.Engine({
     canvasElementId: "game",
-    width: 800,
-    height: 600
+    width: 960,
+    height: 480
 });
 var loader = new ex.Loader();
 // load up all resources in dictionary
@@ -108,6 +110,11 @@ game.on('update', function () {
     }
 });
 game.start(loader).then(function () {
+    // magic here bro
+    var map = new ex.Actor(0, 0, game.width, game.height);
+    map.addDrawing(Resources.TextureMap);
+    map.anchor.setTo(0, 0);
+    game.add(map);
     var monster = new Monster(game.width / 2, game.height / 2);
     game.add(monster);
     var hero = new Hero(50, 50, 50, 50, ex.Color.Red);

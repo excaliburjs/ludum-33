@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="40" height="20" tilewidth="24" tileheight="24" nextobjectid="1">
+ <tileset firstgid="1" name="world" tilewidth="24" tileheight="24" tilecount="2296">
+  <image source="../../../Users/g521211/OneDrive/Art/oryx_16-bit_fantasy_1.1/oryx_16bit_fantasy_world.png" width="1366" height="1007"/>
+ </tileset>
+ <layer name="Ground" width="40" height="20">
+  <data encoding="base64" compression="zlib">
+   eJztw0ENAAAMA6EzVv+25mIvSFg1VVXVhwc3p76h
+  </data>
+ </layer>
+ <layer name="Walls" width="40" height="20">
+  <data encoding="base64" compression="zlib">
+   eJztzqENAEAMw8DM1f1xZ3pa7oK+ZEuh0VWSWlovfs1dTR9LH0sfSx9LH0sfSx9LH+sX3+U9myUa3Q==
+  </data>
+ </layer>
+</map>

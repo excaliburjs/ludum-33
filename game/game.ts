@@ -6,8 +6,8 @@
 
 var game = new ex.Engine({
    canvasElementId: "game",
-   width: 800,
-   height: 600
+   width: 960,
+   height: 480
 });
 var loader = new ex.Loader();
 
@@ -34,9 +34,15 @@ game.on('update', function () {
 
 game.start(loader).then(() => {
    
+   // magic here bro
+   var map = new ex.Actor(0, 0, game.width, game.height);
+   map.addDrawing(Resources.TextureMap);
+   map.anchor.setTo(0, 0);
+   game.add(map);
+
    var monster = new Monster(game.width/2, game.height/2);
-   game.add(monster);   
-   
+   game.add(monster);
+
    var hero = new Hero(50, 50, 50, 50, ex.Color.Red);
    game.add(hero);
    
