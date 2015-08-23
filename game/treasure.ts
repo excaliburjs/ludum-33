@@ -8,8 +8,9 @@ class Treasure extends ex.Actor {
    }
    
    onInitialize(engine: ex.Engine) {
-      var treasure = Resources.TextureTreasure.asSprite().clone();
-      this.addDrawing(treasure);
+      
+      this.addDrawing("notempty", Resources.TextureTreasure.asSprite());
+      this.addDrawing("empty", Resources.TextureTreasureEmpty.asSprite());
       
       this.collisionType = ex.CollisionType.Passive;
    }
@@ -19,11 +20,26 @@ class Treasure extends ex.Actor {
    }
    
    public steal(): number {
-      this._hoard -= Config.TreasureStealAmount;
-      return Config.TreasureStealAmount; 
+      if (this._hoard > 0) {
+         this._hoard -= Config.TreasureStealAmount;
+         
+         return Config.TreasureStealAmount; 
+      } else {
+         return 0;
+      }
    }
    
    public return(amount: number) {
       this._hoard += amount;
+   }
+   
+   public update(engine: ex.Engine, delta: number) {
+      super.update(engine, delta);
+      
+      if (this._hoard <= 0) {
+         this.setDrawing("empty");
+      } else {
+         this.setDrawing("notempty");
+      }
    }
 }
