@@ -731,7 +731,6 @@ var HeroSpawner = (function () {
     function HeroSpawner() {
     }
     HeroSpawner.spawnHero = function () {
-        HeroSpawner._spawned++;
         // todo better spawning logic
         for (var i = 0; i < Math.min(Config.HeroSpawnPoolMax, HeroSpawner._spawned); i++) {
             var spawnPoints = map.getSpawnPoints();
@@ -739,6 +738,7 @@ var HeroSpawner = (function () {
             var hero = new Hero(spawnPoint.x, spawnPoint.y);
             game.add(hero);
             this._heroes.push(hero);
+            HeroSpawner._spawned++;
         }
     };
     HeroSpawner.getHeroes = function () {

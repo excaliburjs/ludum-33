@@ -11,8 +11,7 @@ class HeroSpawner {
    private static _tombstones: ex.Actor[] = [];
    
    public static spawnHero() {
-      HeroSpawner._spawned++;
-      
+            
       // todo better spawning logic
       for (var i = 0; i < Math.min(Config.HeroSpawnPoolMax, HeroSpawner._spawned); i++) {
          var spawnPoints = map.getSpawnPoints();
@@ -21,6 +20,7 @@ class HeroSpawner {
          var hero  = new Hero(spawnPoint.x, spawnPoint.y);
          game.add(hero);
          this._heroes.push(hero);
+         HeroSpawner._spawned++;
       }
    }
    
