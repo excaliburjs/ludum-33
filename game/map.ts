@@ -143,7 +143,7 @@ class Map extends ex.Scene {
       super.update(engine, delta);
       
       // update treasure indicator
-      var total = this._treasures.length * Config.TreasureHoardSize;
+      var total = this.getHoardAmount();
       var looting = _.sum(HeroSpawner.getHeroes(), x => x.getLootAmount());
       var curr = _.sum(this._treasures, (x) => x.getAmount());
       
@@ -184,6 +184,10 @@ class Map extends ex.Scene {
       this._treasures.push(t);
       this.add(t);
    }   
+   
+   public getHoardAmount() {
+      return this._treasures.length * Config.TreasureHoardSize;
+   }
    
    public _gameOver(type: GameOverType) {
       //TODO

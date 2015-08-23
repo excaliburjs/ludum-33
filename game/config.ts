@@ -1,7 +1,7 @@
 
 
 var Config = {
-   PlayerCellSpawnX: 19,
+   PlayerCellSpawnX: 10,
    PlayerCellSpawnY: 19,
    
    MonsterHealth: 30,
