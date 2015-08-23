@@ -316,6 +316,7 @@ var Monster = (function (_super) {
         _.forIn(this._attackable, function (hero) {
             // hero.blink(500, 500, 5); //can't because moving already (no parallel actions support)
             game.currentScene.camera.shake(3, 3, 300);
+            Stats.damageTaken++;
             hero.Health--;
         });
     };
@@ -427,6 +428,7 @@ var Hero = (function (_super) {
     Hero.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
         if (this.Health <= 0) {
+            Stats.numHeroesKilled++;
             map.getTreasures()[0].return(this._treasure);
             HeroSpawner.despawn(this);
         }
@@ -505,6 +507,8 @@ var Hero = (function (_super) {
     };
     Hero.prototype.onExit = function () {
         // play negative sound or something
+        Stats.goldLost += this._treasure;
+        Stats.numHeroesEscaped++;
         HeroSpawner.despawn(this);
     };
     return Hero;
@@ -533,6 +537,15 @@ var Treasure = (function (_super) {
     };
     return Treasure;
 })(ex.Actor);
+var Stats = (function () {
+    function Stats() {
+    }
+    Stats.numHeroesKilled = 0;
+    Stats.numHeroesEscaped = 0;
+    Stats.goldLost = 0;
+    Stats.damageTaken = 0;
+    return Stats;
+})();
 var GameOver = (function (_super) {
     __extends(GameOver, _super);
     function GameOver() {
@@ -551,6 +564,7 @@ var GameOver = (function (_super) {
 /// <reference path="resources.ts" />
 /// <reference path="hero.ts" />
 /// <reference path="treasure.ts" />
+/// <reference path="stats.ts" />
 /// <reference path="gameover.ts" />
 var game = new ex.Engine({
     canvasElementId: "game",
