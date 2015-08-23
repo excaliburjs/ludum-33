@@ -783,6 +783,8 @@ var Hero = (function (_super) {
         this._treasure = 0;
         this._attackCooldown = Config.HeroAttackCooldown;
         this._hasHitMinotaur = false;
+        this._isAttacking = false;
+        this._timeLeftAttacking = 0;
         this._fsm = new TypeState.FiniteStateMachine(HeroStates.Searching);
         // declare valid state transitions
         this._fsm.from(HeroStates.Searching).to(HeroStates.Attacking, HeroStates.Looting);
@@ -794,16 +796,31 @@ var Hero = (function (_super) {
         this._fsm.on(HeroStates.Attacking, this.onAttacking.bind(this));
     }
     Hero.prototype.onInitialize = function (engine) {
+        var _this = this;
         this.setZIndex(1);
         this._lootIndicator = new ex.Actor(5, -24, 24, 24);
         this._lootIndicator.addDrawing(Resources.TextureHeroLootIndicator);
         this._lootIndicator.scale.setTo(1.5, 1.5);
         this._lootIndicator.moveBy(5, -32, 200).moveBy(5, -24, 200).repeatForever();
-        var spriteSheet = new ex.SpriteSheet(Resources.TextureHero, 3, 1, 28, 28);
-        var idleAnim = spriteSheet.getAnimationForAll(engine, 300);
+        var spriteSheet = new ex.SpriteSheet(Resources.TextureHero, 7, 1, 28, 28);
+        var idleAnim = spriteSheet.getAnimationByIndices(engine, [0, 1, 2], 300);
         idleAnim.loop = true;
         idleAnim.scale.setTo(2, 2);
-        this.addDrawing("idle", idleAnim);
+        this.addDrawing("idleLeft", idleAnim);
+        var rightAnim = spriteSheet.getAnimationByIndices(engine, [0, 1, 2], 300);
+        rightAnim.flipHorizontal = true;
+        rightAnim.loop = true;
+        rightAnim.scale.setTo(2, 2);
+        this.addDrawing("idleRight", rightAnim);
+        var attackAnim = spriteSheet.getAnimationByIndices(engine, [3, 4, 5, 6], 100);
+        attackAnim.loop = true;
+        attackAnim.scale.setTo(2, 2);
+        this.addDrawing("attackLeft", attackAnim);
+        var attackRightAnim = spriteSheet.getAnimationByIndices(engine, [3, 4, 5, 6], 100);
+        attackRightAnim.flipHorizontal = true;
+        attackRightAnim.loop = true;
+        attackRightAnim.scale.setTo(2, 2);
+        this.addDrawing("attackRight", attackRightAnim);
         this.collisionType = ex.CollisionType.Passive;
         this.on('collision', function (e) {
             if (e.other instanceof Treasure) {
@@ -825,6 +842,16 @@ var Hero = (function (_super) {
                     monster.health--;
                     Stats.damageTaken++;
                     hero._attackCooldown = Config.HeroAttackCooldown;
+                    if (!hero._isAttacking) {
+                        if (_this._direction === 'right') {
+                            hero.setDrawing('attackRight');
+                        }
+                        else {
+                            hero.setDrawing('attackLeft');
+                        }
+                        hero._isAttacking = true;
+                        hero._timeLeftAttacking = 300;
+                    }
                     var origin = new ex.Vector(hero.x, hero.y);
                     var dest = new ex.Vector(monster.x, monster.y);
                     var a = dest.subtract(origin).toAngle();
@@ -851,9 +878,33 @@ var Hero = (function (_super) {
         this._attackCooldown = Math.max(this._attackCooldown - delta, 0);
         var heroVector = new ex.Vector(this.x, this.y);
         var monsterVector = new ex.Vector(map._player.x, map._player.y);
+        if (this.dx > 0) {
+            if (this._direction !== "right") {
+                this._direction = "right";
+                this.setDrawing("idleRight");
+            }
+        }
+        if (this.dx < 0) {
+            if (this._direction !== "left") {
+                this._direction = "left";
+                this.setDrawing("idleLeft");
+            }
+        }
+        if (this._isAttacking) {
+            this._timeLeftAttacking -= delta;
+            if (this._timeLeftAttacking <= 0) {
+                if (this._direction == "right") {
+                    this.setDrawing("idleRight");
+                }
+                else {
+                    this.setDrawing("idleLeft");
+                }
+                this._isAttacking = false;
+            }
+        }
         switch (this._fsm.currentState) {
             case HeroStates.Searching:
-                if (heroVector.distance(monsterVector) < Config.HeroAggroDistance) {
+                if (heroVector.distance(monsterVector) <= Config.HeroAggroDistance) {
                     this._fsm.go(HeroStates.Attacking);
                 }
                 break;
@@ -864,6 +915,7 @@ var Hero = (function (_super) {
                 }
                 else if (heroVector.distance(monsterVector) < Config.HeroMeleeRange) {
                     this.clearActions();
+                    console.log("do nothing");
                 }
                 break;
         }
