@@ -1,6 +1,7 @@
 var Resources = {
    
-   // SomeSound: new ex.Sound('../sounds/foo.mp3')
+   AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
+   AxeSwingHit: new ex.Sound('sounds/axe-swing-hit.wav'),
    
    TextureHero: new ex.Texture("images/hero.png"),
    TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),

@@ -358,11 +358,19 @@ var Monster = (function (_super) {
         }
     };
     Monster.prototype._attack = function () {
+        var hitHero = false;
         _.forIn(this._attackable, function (hero) {
             // hero.blink(500, 500, 5); //can't because moving already (no parallel actions support)
             game.currentScene.camera.shake(2, 2, 200);
             hero.Health--;
+            hitHero = true;
         });
+        if (hitHero) {
+            Resources.AxeSwingHit.play();
+        }
+        else {
+            Resources.AxeSwing.play();
+        }
     };
     Monster.prototype.debugDraw = function (ctx) {
         _super.prototype.debugDraw.call(this, ctx);
@@ -380,7 +388,8 @@ var Monster = (function (_super) {
     return Monster;
 })(ex.Actor);
 var Resources = {
-    // SomeSound: new ex.Sound('../sounds/foo.mp3')
+    AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
+    AxeSwingHit: new ex.Sound('sounds/axe-swing-hit.wav'),
     TextureHero: new ex.Texture("images/hero.png"),
     TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
     TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
@@ -649,6 +658,7 @@ var map = new Map(game);
 var gameOver = new GameOver(game);
 game.start(loader).then(function () {
     game.backgroundColor = ex.Color.Black;
+    // Resources.AxeSwing.setVolume(1);
     // load map
     game.add('map', map);
     game.goToScene('map');
