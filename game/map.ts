@@ -178,6 +178,7 @@ class Map extends ex.Scene {
    public _gameOver() {
       //TODO
       console.log('game over');
+      isGameOver = true;
       game.goToScene('gameover');
    }
    

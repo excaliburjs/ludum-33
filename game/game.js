@@ -178,6 +178,7 @@ var Map = (function (_super) {
     Map.prototype._gameOver = function () {
         //TODO
         console.log('game over');
+        isGameOver = true;
         game.goToScene('gameover');
     };
     Map.prototype.onDeactivate = function () {
@@ -679,6 +680,12 @@ var GameOver = (function (_super) {
     }
     GameOver.prototype.onInitialize = function (engine) {
         game.backgroundColor = ex.Color.Black;
+        var retryButton = new ex.Actor(game.width / 2, game.height / 2, 300, 60, ex.Color.DarkGray);
+        this.add(retryButton);
+        retryButton.on('pointerdown', function (e) {
+            isGameOver = false;
+            //TODO reset game
+        });
     };
     return GameOver;
 })(ex.Scene);
@@ -705,6 +712,7 @@ _.forIn(Resources, function (resource) {
 });
 var map = new Map(game);
 var gameOver = new GameOver(game);
+var isGameOver = false;
 game.start(loader).then(function () {
     game.backgroundColor = ex.Color.Black;
     // Resources.AxeSwing.setVolume(1);

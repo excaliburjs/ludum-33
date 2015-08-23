@@ -25,6 +25,7 @@ _.forIn(Resources, (resource) => {
 
 var map = new Map(game);
 var gameOver = new GameOver(game);
+var isGameOver = false;
 
 game.start(loader).then(() => {
    
