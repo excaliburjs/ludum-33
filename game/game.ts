@@ -27,6 +27,8 @@ var gameOver = new GameOver(game);
 
 game.start(loader).then(() => {
    
+   game.backgroundColor = ex.Color.Black;
+   
    // load map
    game.add('map', map);
    game.goToScene('map');

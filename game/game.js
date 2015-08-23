@@ -566,6 +566,7 @@ _.forIn(Resources, function (resource) {
 var map = new Map(game);
 var gameOver = new GameOver(game);
 game.start(loader).then(function () {
+    game.backgroundColor = ex.Color.Black;
     // load map
     game.add('map', map);
     game.goToScene('map');
