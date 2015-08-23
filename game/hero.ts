@@ -47,6 +47,10 @@ class HeroSpawner {
    public static reset() {
       HeroSpawner._spawned = 0;
    }
+   
+   public static getSpawnCount() {
+      return HeroSpawner._spawned;
+   }
 }
 
 class Hero extends ex.Actor {   

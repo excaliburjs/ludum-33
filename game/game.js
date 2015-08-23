@@ -195,7 +195,7 @@ var Map = (function (_super) {
     Map.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
         // update treasure indicator
-        var total = this._treasures.length * Config.TreasureHoardSize;
+        var total = this.getHoardAmount();
         var looting = _.sum(HeroSpawner.getHeroes(), function (x) { return x.getLootAmount(); });
         var curr = _.sum(this._treasures, function (x) { return x.getAmount(); });
         // % being looted right now
@@ -226,6 +226,9 @@ var Map = (function (_super) {
     Map.prototype.addTreasure = function (t) {
         this._treasures.push(t);
         this.add(t);
+    };
+    Map.prototype.getHoardAmount = function () {
+        return this._treasures.length * Config.TreasureHoardSize;
     };
     Map.prototype._gameOver = function (type) {
         //TODO
@@ -755,6 +758,9 @@ var HeroSpawner = (function () {
     HeroSpawner.reset = function () {
         HeroSpawner._spawned = 0;
     };
+    HeroSpawner.getSpawnCount = function () {
+        return HeroSpawner._spawned;
+    };
     HeroSpawner._spawned = 0;
     HeroSpawner._heroes = [];
     return HeroSpawner;
@@ -1080,10 +1086,10 @@ var GameOver = (function (_super) {
     };
     GameOver.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
-        this._labelHeroesKilled.text = Stats.numHeroesKilled.toString();
-        this._labelHeroesEscaped.text = Stats.numHeroesEscaped.toString();
-        this._labelGoldLost.text = Stats.goldLost.toString();
-        this._labelDamageTaken.text = Stats.damageTaken.toString();
+        this._labelHeroesKilled.text = Math.floor(100 * (Stats.numHeroesKilled / HeroSpawner.getSpawnCount())).toString() + '%';
+        this._labelHeroesEscaped.text = Math.floor(100 * (Stats.numHeroesEscaped / HeroSpawner.getSpawnCount())).toString() + '%';
+        this._labelGoldLost.text = Math.floor(100 * (Stats.goldLost / map.getHoardAmount())).toString() + '%';
+        this._labelDamageTaken.text = Math.floor(100 * (Stats.damageTaken / Config.MonsterHealth)).toString() + '%';
         // center labels
     };
     GameOver.prototype.setType = function (type) {

@@ -78,10 +78,10 @@ class GameOver extends ex.Scene {
    public update(engine: ex.Engine, delta: number) {
       super.update(engine, delta);
       
-      this._labelHeroesKilled.text = Stats.numHeroesKilled.toString();
-      this._labelHeroesEscaped.text = Stats.numHeroesEscaped.toString();
-      this._labelGoldLost.text = Stats.goldLost.toString();
-      this._labelDamageTaken.text = Stats.damageTaken.toString();
+      this._labelHeroesKilled.text = Math.floor(100 * (Stats.numHeroesKilled / HeroSpawner.getSpawnCount())).toString() + '%';
+      this._labelHeroesEscaped.text = Math.floor(100 * (Stats.numHeroesEscaped / HeroSpawner.getSpawnCount())).toString() + '%';
+      this._labelGoldLost.text = Math.floor(100 * (Stats.goldLost / map.getHoardAmount())).toString() + '%';
+      this._labelDamageTaken.text = Math.floor(100 * (Stats.damageTaken / Config.MonsterHealth)).toString() + '%';
       
       // center labels
    }
