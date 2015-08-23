@@ -1,9 +1,12 @@
 var Config = {
+    PlayerCellSpawnX: 19,
+    PlayerCellSpawnY: 19,
     MonsterHealth: 30,
     MonsterWidth: 48,
     MonsterHeight: 48,
     MonsterSpeed: 200,
     MonsterAttackRange: 90,
+    CloseMonsterAttackRange: 50,
     MonsterProgressSize: 200,
     MonsterAttackTime: 300,
     BloodMaxAmount: 300,
@@ -61,7 +64,9 @@ var Resources = {
     TextureTextDefend: new ex.Texture("images/text-defend.png"),
     TextureBloodPixel: new ex.Texture("images/blood-pixel.png"),
     TextureBloodPixelGreen: new ex.Texture("images/blood-pixel-green.png"),
-    TextureHeroDead: new ex.Texture("images/hero-dead.png")
+    TextureHeroDead: new ex.Texture("images/hero-dead.png"),
+    TextureHeroDead2: new ex.Texture("images/hero-dead-2.png"),
+    TextureHeroDead3: new ex.Texture("images/hero-dead-3.png")
 };
 var Util = (function () {
     function Util() {
@@ -89,8 +94,6 @@ var Map = (function (_super) {
         this._map.anchor.setTo(0, 0);
         this._map.addDrawing(Resources.TextureMap);
         this.add(this._map);
-        // start sounds
-        SoundManager.start();
         // Initialize blood
         this.add(blood);
         this.buildWalls();
@@ -134,12 +137,22 @@ var Map = (function (_super) {
             var treasure = new Treasure(treasures[i].x, treasures[i].y);
             this.addTreasure(treasure);
         }
-        var playerSpawn = this.getCellPos(19, 19);
+        var playerSpawn = this.getCellPos(Config.PlayerCellSpawnX, Config.PlayerCellSpawnY);
         this._player = new Monster(playerSpawn.x, playerSpawn.y);
         this.add(this._player);
     };
+    Map.prototype.onActivate = function () {
+        // start sounds
+        SoundManager.start();
+    };
     Map.prototype.getPlayer = function () {
         return this._player;
+    };
+    Map.prototype.resetPlayer = function () {
+        this._player.health = Config.MonsterHealth;
+        var playerSpawn = this.getCellPos(Config.PlayerCellSpawnX, Config.PlayerCellSpawnY);
+        this._player.x = playerSpawn.x;
+        this._player.y = playerSpawn.y;
     };
     Map.prototype.getTreasures = function () {
         return this._treasures;
@@ -160,6 +173,8 @@ var Map = (function (_super) {
                 cell = data[x + y * 40];
                 if (cell == 58) {
                     wall = new ex.Actor(x * Map.CellSize, y * Map.CellSize, 24, 24);
+                    wall.traits.length = 0;
+                    wall.traits.push(new ex.Traits.OffscreenCulling());
                     wall.anchor.setTo(0, 0);
                     wall.addDrawing(Resources.TextureWall);
                     wall.collisionType = ex.CollisionType.Fixed;
@@ -251,25 +266,29 @@ var Blood = (function (_super) {
         this._bleedTimer = duration;
     };
     Blood.prototype.draw = function (ctx, delta) {
-        _super.prototype.draw.call(this, ctx, delta);
-        // update particle positions
-        var emitter, i;
-        for (i = 0; i < this._emitters.length; i++) {
-            this._emitters[i].draw(this._sctx, delta);
+        if (Options.blood) {
+            _super.prototype.draw.call(this, ctx, delta);
+            // update particle positions
+            var emitter, i;
+            for (i = 0; i < this._emitters.length; i++) {
+                this._emitters[i].draw(this._sctx, delta);
+            }
+            // draw shadow ctx
+            ctx.drawImage(this._scvs, 0, 0);
         }
-        // draw shadow ctx
-        ctx.drawImage(this._scvs, 0, 0);
     };
     Blood.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
-        this._bleedTimer = Math.max(0, this._bleedTimer - delta);
-        // update particle positions
-        var emitter, i;
-        for (i = this._emitters.length - 1; i >= 0; i--) {
-            emitter = this._emitters[i];
-            emitter.update(engine, delta);
-            if (emitter.done) {
-                this._emitters.splice(i, 1);
+        if (Options.blood) {
+            this._bleedTimer = Math.max(0, this._bleedTimer - delta);
+            // update particle positions
+            var emitter, i;
+            for (i = this._emitters.length - 1; i >= 0; i--) {
+                emitter = this._emitters[i];
+                emitter.update(engine, delta);
+                if (emitter.done) {
+                    this._emitters.splice(i, 1);
+                }
             }
         }
     };
@@ -356,6 +375,7 @@ var Monster = (function (_super) {
         this._mouseX = 0;
         this._mouseY = 0;
         this._rays = new Array();
+        this._closeRays = new Array();
         this._attackable = new Array();
         this.anchor = new ex.Point(0.35, 0.35);
         this.collisionType = ex.CollisionType.Active;
@@ -433,7 +453,17 @@ var Monster = (function (_super) {
             var ray = new ex.Ray(rayPoint, rayVector);
             that._rays.push(ray);
         });
-        // attackda
+        var closeXValues = new Array(1, 0.71, 0, -0.71, -1); //(1, 0.86, 0.71, 0.5, 0, -0.5, -0.71, -0.86, -1)
+        var closeYValues = new Array(0, 0.71, 1, -0.71, 0);
+        _.forIn(closeYValues, function (closeYValue) {
+            _.forIn(closeXValues, function (closeXValue) {
+                var rayVector = new ex.Vector(closeXValue, closeYValue);
+                var rayPoint = new ex.Point(_this.x, _this.y);
+                var ray = new ex.Ray(rayPoint, rayVector);
+                that._closeRays.push(ray);
+            });
+        });
+        // attack
         engine.input.pointers.primary.on("down", function (evt) {
             that._attack();
             that._isAttacking = true;
@@ -568,6 +598,11 @@ var Monster = (function (_super) {
             var rotationAmt = _this._rotation - prevRotation;
             ray.dir = ray.dir.rotate(rotationAmt, new ex.Point(0, 0));
         });
+        _.forIn(this._closeRays, function (ray) {
+            ray.pos = new ex.Point(_this.x, _this.y);
+            var rotationAmt = _this._rotation - prevRotation;
+            ray.dir = ray.dir.rotate(rotationAmt, new ex.Point(0, 0));
+        });
         this.setZIndex(this.y);
     };
     Monster.prototype._detectAttackable = function () {
@@ -584,6 +619,14 @@ var Monster = (function (_super) {
             for (var j = 0; j < heroLines.length; j++) {
                 var distanceToIntersect = this._rays[i].intersect(heroLines[j]);
                 if ((distanceToIntersect > 0) && (distanceToIntersect <= Config.MonsterAttackRange)) {
+                    return true;
+                }
+            }
+        }
+        for (var i = 0; i < this._closeRays.length; i++) {
+            for (var j = 0; j < heroLines.length; j++) {
+                var distanceToIntersect = this._closeRays[i].intersect(heroLines[j]);
+                if ((distanceToIntersect > 0) && (distanceToIntersect <= Config.CloseMonsterAttackRange)) {
                     return true;
                 }
             }
@@ -624,6 +667,15 @@ var Monster = (function (_super) {
             ctx.stroke();
             ctx.closePath();
         });
+        _.forIn(this._closeRays, function (ray) {
+            ctx.beginPath();
+            ctx.moveTo(ray.pos.x, ray.pos.y);
+            var end = ray.getPoint(Config.CloseMonsterAttackRange);
+            ctx.lineTo(end.x, end.y);
+            ctx.strokeStyle = ex.Color.Azure.toString();
+            ctx.stroke();
+            ctx.closePath();
+        });
     };
     return Monster;
 })(ex.Actor);
@@ -655,15 +707,19 @@ var HeroSpawner = (function () {
         if (blood === void 0) { blood = false; }
         if (blood) {
             var tombstone = new ex.Actor(h.x, h.y, 24, 24);
-            //tombstone.traits.length = 0;      
+            var sprites = [Resources.TextureHeroDead, Resources.TextureHeroDead2, Resources.TextureHeroDead3];
+            tombstone.traits.length = 0;
             // todo bug with actor scaling
-            var sprite = Resources.TextureHeroDead.asSprite();
+            var sprite = Util.pickRandom(sprites).asSprite();
             sprite.scale.setTo(2, 2);
             tombstone.addDrawing("default", sprite);
             game.add(tombstone);
         }
         h.kill();
         _.remove(this._heroes, h);
+    };
+    HeroSpawner.reset = function () {
+        HeroSpawner._spawned = 0;
     };
     HeroSpawner._spawned = 0;
     HeroSpawner._heroes = [];
@@ -738,7 +794,7 @@ var Hero = (function (_super) {
             Stats.numHeroesKilled++;
             // map.getTreasures()[0].return(this._treasure);
             this._chestLooted.return(this._treasure);
-            HeroSpawner.despawn(this, true);
+            HeroSpawner.despawn(this, Options.blood);
         }
         this.setZIndex(this.y);
         this._attackCooldown = Math.max(this._attackCooldown - delta, 0);
@@ -852,6 +908,9 @@ var Treasure = (function (_super) {
     Treasure.prototype.return = function (amount) {
         this._hoard += amount;
     };
+    Treasure.prototype.reset = function () {
+        this._hoard = Config.TreasureHoardSize;
+    };
     Treasure.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
         if (this._hoard <= 0) {
@@ -883,7 +942,7 @@ var Settings = (function (_super) {
         _super.apply(this, arguments);
     }
     Settings.prototype.onInitialize = function (engine) {
-        var bloodToggle = new ex.Actor(game.width / 2, game.height / 2, 50, 50, ex.Color.Red);
+        var bloodToggle = new ex.Actor(game.width / 2, 100 + game.height / 2, 50, 50, ex.Color.Red);
         this.add(bloodToggle);
         bloodToggle.on('pointerdown', function (e) {
             if (Options.blood) {
@@ -893,6 +952,30 @@ var Settings = (function (_super) {
             else {
                 Options.blood = true;
                 bloodToggle.color = ex.Color.Red;
+            }
+        });
+        var musicToggle = new ex.Actor(game.width / 2, game.height / 2, 50, 50, ex.Color.Red);
+        this.add(musicToggle);
+        musicToggle.on('pointerdown', function (e) {
+            if (Options.music) {
+                Options.music = false;
+                musicToggle.color = ex.Color.DarkGray;
+            }
+            else {
+                Options.music = true;
+                musicToggle.color = ex.Color.Red;
+            }
+        });
+        var soundToggle = new ex.Actor(game.width / 2, game.height / 2, 50, 50, ex.Color.Red);
+        this.add(soundToggle);
+        soundToggle.on('pointerdown', function (e) {
+            if (Options.sound) {
+                Options.sound = false;
+                soundToggle.color = ex.Color.DarkGray;
+            }
+            else {
+                Options.sound = true;
+                soundToggle.color = ex.Color.Red;
             }
         });
     };
@@ -907,9 +990,26 @@ var GameOver = (function (_super) {
         game.backgroundColor = ex.Color.Black;
         var retryButton = new ex.Actor(game.width / 2, game.height / 2, 300, 60, ex.Color.DarkGray);
         this.add(retryButton);
+        // reset the game
         retryButton.on('pointerdown', function (e) {
             isGameOver = false;
-            //TODO reset game
+            Stats.numHeroesKilled = 0;
+            Stats.numHeroesEscaped = 0;
+            Stats.goldLost = 0;
+            Stats.damageTaken = 0;
+            map.resetPlayer();
+            // heroTimer.cancel();
+            // game.remove(heroTimer);
+            // heroTimer = new ex.Timer(() => HeroSpawner.spawnHero(), Config.HeroSpawnInterval, true);
+            // game.add(heroTimer);
+            _.forEach(map.getTreasures(), function (treasure) {
+                treasure.reset();
+            });
+            HeroSpawner.reset();
+            for (var i = HeroSpawner.getHeroes().length - 1; i >= 0; i--) {
+                HeroSpawner.despawn(HeroSpawner.getHeroes()[i], false);
+            }
+            game.goToScene('map');
         });
     };
     return GameOver;
@@ -927,12 +1027,14 @@ var SoundManager = (function () {
         Resources.AxeSwingHit.setVolume(0.2);
         Resources.SoundMusic.setVolume(0.05);
         Resources.SoundMusic.play();
+        Resources.SoundMusic.setLoop(true);
     };
     SoundManager.stop = function () {
         // make sure volume is set for sounds
         _.forIn(Resources, function (resource) {
             if (resource instanceof ex.Sound) {
                 resource.setVolume(0);
+                resource.stop();
             }
         });
     };
@@ -967,6 +1069,7 @@ var blood = new Blood();
 var map = new Map(game);
 var gameOver = new GameOver(game);
 var isGameOver = false;
+var heroTimer;
 game.start(loader).then(function () {
     game.backgroundColor = ex.Color.Black;
     // Resources.AxeSwing.setVolume(1);
@@ -989,7 +1092,7 @@ game.start(loader).then(function () {
         defendIntro.opacity = 1;
         Resources.AnnouncerDefend.play();
     }).delay(2000).callMethod(function () { return defendIntro.kill(); });
-    var heroTimer = new ex.Timer(function () { return HeroSpawner.spawnHero(); }, Config.HeroSpawnInterval, true);
+    heroTimer = new ex.Timer(function () { return HeroSpawner.spawnHero(); }, Config.HeroSpawnInterval, true);
     game.add(heroTimer);
     HeroSpawner.spawnHero();
 });

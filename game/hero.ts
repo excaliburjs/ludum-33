@@ -31,9 +31,10 @@ class HeroSpawner {
       
       if (blood) {
          var tombstone = new ex.Actor(h.x, h.y, 24, 24);
-         //tombstone.traits.length = 0;      
+         var sprites = [Resources.TextureHeroDead, Resources.TextureHeroDead2, Resources.TextureHeroDead3];         
+         tombstone.traits.length = 0;      
          // todo bug with actor scaling
-         var sprite = Resources.TextureHeroDead.asSprite();
+         var sprite = Util.pickRandom(sprites).asSprite();
          sprite.scale.setTo(2, 2);
          tombstone.addDrawing("default", sprite);
          game.add(tombstone);
@@ -41,6 +42,10 @@ class HeroSpawner {
       
       h.kill();
       _.remove(this._heroes, h);
+   }
+   
+   public static reset() {
+      HeroSpawner._spawned = 0;
    }
 }
 
@@ -105,6 +110,7 @@ class Hero extends ex.Actor {
             if (hero._attackCooldown == 0 && hero._hasHitMinotaur) {
                var monster = <Monster>e.other;
                monster.health--;
+               Stats.damageTaken++;
                hero._attackCooldown = Config.HeroAttackCooldown;
                
                var origin = new ex.Vector(hero.x, hero.y);
@@ -131,7 +137,7 @@ class Hero extends ex.Actor {
             Stats.numHeroesKilled++;
             // map.getTreasures()[0].return(this._treasure);
             this._chestLooted.return(this._treasure);
-            HeroSpawner.despawn(this, true);
+            HeroSpawner.despawn(this, Options.blood);
       }
       this.setZIndex(this.y);
       this._attackCooldown = Math.max(this._attackCooldown - delta, 0);

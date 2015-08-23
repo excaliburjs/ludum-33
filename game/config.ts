@@ -1,11 +1,15 @@
 
 
 var Config = {
+   PlayerCellSpawnX: 19,
+   PlayerCellSpawnY: 19,
+   
    MonsterHealth: 30,
    MonsterWidth: 48,
    MonsterHeight: 48,
    MonsterSpeed: 200,
    MonsterAttackRange: 90,
+   CloseMonsterAttackRange: 50,
    MonsterProgressSize: 200,
    MonsterAttackTime: 300,
    

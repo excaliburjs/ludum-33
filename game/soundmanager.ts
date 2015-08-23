@@ -11,6 +11,7 @@ class SoundManager {
       Resources.AxeSwingHit.setVolume(0.2);
       Resources.SoundMusic.setVolume(0.05);  
       Resources.SoundMusic.play();    
+      Resources.SoundMusic.setLoop(true);
    }
    
    public static stop() {
@@ -18,6 +19,7 @@ class SoundManager {
       _.forIn(Resources, (resource) => {
          if (resource instanceof ex.Sound) {
             (<ex.Sound>resource).setVolume(0);
+            (<ex.Sound>resource).stop();
          }
       });
    }
