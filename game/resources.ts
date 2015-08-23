@@ -6,6 +6,7 @@ var Resources = {
    TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
    TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
    TextureMonsterRight: new ex.Texture("images/minotaurv2right.png"),
+   TextureMonsterUp: new ex.Texture("images/minotaurv2back.png"),
    TextureTreasure: new ex.Texture("images/treasure.png"),
    TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
    TextureMonsterIndicator: new ex.Texture("images/mino-indicator.png"),

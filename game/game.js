@@ -248,10 +248,15 @@ var Monster = (function (_super) {
         });
         var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 6, 1, 72, 72);
         var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 6, 1, 72, 72);
+        var upSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterUp, 6, 1, 72, 72);
         var attackDownAnim = downSpriteSheet.getAnimationBetween(engine, 3, 6, 100);
         attackDownAnim.scale.setTo(2, 2);
         attackDownAnim.loop = true;
         this.addDrawing("attackDown", attackDownAnim);
+        var attackUpAnim = upSpriteSheet.getAnimationBetween(engine, 2, 6, 100);
+        attackUpAnim.scale.setTo(2, 2);
+        attackUpAnim.loop = true;
+        this.addDrawing("attackUp", attackUpAnim);
         var attackRightAnim = rightSpriteSheet.getAnimationBetween(engine, 3, 6, 100);
         attackRightAnim.scale.setTo(2, 2);
         attackRightAnim.loop = true;
@@ -265,6 +270,10 @@ var Monster = (function (_super) {
         idleAnim.loop = true;
         idleAnim.scale.setTo(2, 2);
         this.addDrawing("idleDown", idleAnim);
+        var idleUpAnim = upSpriteSheet.getAnimationBetween(engine, 0, 2, 500);
+        idleUpAnim.loop = true;
+        idleUpAnim.scale.setTo(2, 2);
+        this.addDrawing("idleUp", idleUpAnim);
         var idleRightAnim = rightSpriteSheet.getAnimationBetween(engine, 0, 2, 500);
         idleRightAnim.scale.setTo(2, 2);
         idleRightAnim.loop = true;
@@ -330,6 +339,9 @@ var Monster = (function (_super) {
         if (this._rotation > Math.PI * (3 / 4) && this._rotation < Math.PI * (5 / 4)) {
             this.setDrawing("attackLeft");
         }
+        if (this._rotation > Math.PI * (5 / 4) && this._rotation < Math.PI * (7 / 4)) {
+            this.setDrawing("attackUp");
+        }
         // updating attack rays
         _.forIn(this._rays, function (ray) {
             ray.pos = new ex.Point(_this.x, _this.y);
@@ -385,6 +397,7 @@ var Resources = {
     TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
     TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
     TextureMonsterRight: new ex.Texture("images/minotaurv2right.png"),
+    TextureMonsterUp: new ex.Texture("images/minotaurv2back.png"),
     TextureTreasure: new ex.Texture("images/treasure.png"),
     TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
     TextureMonsterIndicator: new ex.Texture("images/mino-indicator.png"),
