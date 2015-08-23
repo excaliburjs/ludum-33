@@ -935,10 +935,9 @@ var Hero = (function (_super) {
                 else if (heroVector.distance(monsterVector) <= Config.HeroAggroDistance) {
                     this.clearActions();
                     this.meet(map._player, Config.HeroSpeed);
-                }
-                else if (heroVector.distance(monsterVector) < Config.HeroMeleeRange) {
-                    this.clearActions();
-                    console.log("do nothing");
+                    if (heroVector.distance(monsterVector) < Config.HeroMeleeRange) {
+                        this.clearActions();
+                    }
                 }
                 break;
         }
