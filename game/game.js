@@ -4,6 +4,7 @@ var Config = {
     MonsterHeight: 48,
     MonsterSpeed: 200,
     MonsterAttackRange: 80,
+    MonsterProgressSize: 200,
     CameraElasticity: 0.05,
     CameraFriction: 0.5,
     CameraShake: 0,
@@ -72,6 +73,17 @@ var Map = (function (_super) {
         var treasureIndicator = new ex.UIActor(10, 10, 64, 64);
         treasureIndicator.addDrawing(Resources.TextureTreasureIndicator);
         this.add(treasureIndicator);
+        var monsterProgressBack = new ex.UIActor(game.getWidth() - 66, 23, Config.MonsterProgressSize + 4, 40);
+        monsterProgressBack.anchor.setTo(1, 0);
+        monsterProgressBack.color = ex.Color.Black;
+        this.add(monsterProgressBack);
+        this._monsterProgress = new ex.UIActor(game.getWidth() - 66, 27, Config.MonsterProgressSize, 32);
+        this._monsterProgress.anchor.setTo(1, 0);
+        this._monsterProgress.color = ex.Color.fromHex("#ab2800");
+        this.add(this._monsterProgress);
+        var monsterIndicator = new ex.UIActor(game.getWidth() - 74, 10, 64, 64);
+        monsterIndicator.addDrawing(Resources.TextureMonsterIndicator);
+        this.add(monsterIndicator);
         //
         // todo load from Tiled
         //     
@@ -136,6 +148,10 @@ var Map = (function (_super) {
         this._treasureProgress.setWidth(progressWidth);
         this._lootProgress.x = this._treasureProgress.getRight();
         this._lootProgress.setWidth(lootWidth);
+        // update monster health bar
+        var monsterHealth = this._player.health;
+        var progress = monsterHealth / Config.MonsterHealth;
+        this._monsterProgress.setWidth(Math.floor(progress * Config.MonsterProgressSize));
         if ((curr + looting) <= 0) {
             this._gameOver();
         }
@@ -342,6 +358,7 @@ var Resources = {
     TextureMonsterRight: new ex.Texture("images/minotaurv2right.png"),
     TextureTreasure: new ex.Texture("images/treasure.png"),
     TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
+    TextureMonsterIndicator: new ex.Texture("images/mino-indicator.png"),
     TextureMap: new ex.Texture("images/map.png"),
     TextureTextDefend: new ex.Texture("images/text-defend.png")
 };
