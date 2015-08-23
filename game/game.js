@@ -1050,6 +1050,7 @@ var GameOver = (function (_super) {
         });
     };
     GameOver.prototype.update = function (engine, delta) {
+        _super.prototype.update.call(this, engine, delta);
         this._labelHeroesKilled.text = Stats.numHeroesKilled.toString();
         this._labelHeroesEscaped.text = Stats.numHeroesEscaped.toString();
         this._labelGoldLost.text = Stats.goldLost.toString();

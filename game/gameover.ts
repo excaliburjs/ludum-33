@@ -76,6 +76,8 @@ class GameOver extends ex.Scene {
    }
    
    public update(engine: ex.Engine, delta: number) {
+      super.update(engine, delta);
+      
       this._labelHeroesKilled.text = Stats.numHeroesKilled.toString();
       this._labelHeroesEscaped.text = Stats.numHeroesEscaped.toString();
       this._labelGoldLost.text = Stats.goldLost.toString();
