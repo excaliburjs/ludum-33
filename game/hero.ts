@@ -41,6 +41,7 @@ class Hero extends ex.Actor {
    private _chestLooted: Treasure;
    private _fsm: TypeState.FiniteStateMachine<HeroStates>;
    private _attackCooldown: number = Config.HeroAttackCooldown;
+   private _hasHitMinotaur: boolean = false; 
 
    constructor(x: number, y: number) {
       super(x, y, 24, 24);
@@ -88,11 +89,16 @@ class Hero extends ex.Actor {
                
             }
          } else if (e.other instanceof Monster) {
-            if (this._attackCooldown == 0) {
+            
+            if (this._attackCooldown == 0 && this._hasHitMinotaur) {
                var monster = <Monster>e.other;
                monster.health--;
                this._attackCooldown = Config.HeroAttackCooldown;
-         }
+            }
+            if (!this._hasHitMinotaur) {
+               this._hasHitMinotaur = true;
+               this._attackCooldown = Config.HeroAttackCooldown;
+            }
          }
       });
      
@@ -104,6 +110,7 @@ class Hero extends ex.Actor {
       super.update(engine, delta);
       
       if (this.Health <= 0) {
+            Resources.BloodSpatter.play();
             Stats.numHeroesKilled++;
             // map.getTreasures()[0].return(this._treasure);
             this._chestLooted.return(this._treasure);

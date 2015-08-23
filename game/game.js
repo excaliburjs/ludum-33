@@ -21,7 +21,7 @@ var Config = {
     // Hero with loot speed (in px/s)
     HeroFleeingSpeed: 80,
     // The cooldown amount for a hero's attack
-    HeroAttackCooldown: 2000,
+    HeroAttackCooldown: 1500,
     // The maximum distance a hero will aggro to the monster
     HeroAggroDistance: 100,
     // Amount of gold heroes can carry
@@ -57,6 +57,12 @@ var Map = (function (_super) {
         this._map.anchor.setTo(0, 0);
         this._map.addDrawing(Resources.TextureMap);
         this.add(this._map);
+        // make sure volume is set for sounds
+        _.forIn(Resources, function (resource) {
+            if (resource instanceof ex.Sound) {
+                resource.setVolume(1);
+            }
+        });
         this.buildWalls();
         // show GUI
         var progressBack = new ex.UIActor(60, 23, Config.TreasureProgressSize + 4, 40);
@@ -172,7 +178,16 @@ var Map = (function (_super) {
     Map.prototype._gameOver = function () {
         //TODO
         console.log('game over');
+        isGameOver = true;
         game.goToScene('gameover');
+    };
+    Map.prototype.onDeactivate = function () {
+        _.forIn(Resources, function (resource) {
+            if (resource instanceof ex.Sound) {
+                resource.setVolume(0);
+            }
+        });
+        //TODO clean up hero generation
     };
     Map.CellSize = 24;
     return Map;
@@ -436,6 +451,7 @@ var Monster = (function (_super) {
 var Resources = {
     AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
     AxeSwingHit: new ex.Sound('sounds/axe-swing-hit.wav'),
+    BloodSpatter: new ex.Sound('sounds/blood-splatter-1.wav'),
     TextureHero: new ex.Texture("images/hero.png"),
     TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
     TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
@@ -487,6 +503,7 @@ var Hero = (function (_super) {
         this.Health = Config.HeroHealth;
         this._treasure = 0;
         this._attackCooldown = Config.HeroAttackCooldown;
+        this._hasHitMinotaur = false;
         this._fsm = new TypeState.FiniteStateMachine(HeroStates.Searching);
         // declare valid state transitions
         this._fsm.from(HeroStates.Searching).to(HeroStates.Attacking, HeroStates.Looting);
@@ -524,9 +541,13 @@ var Hero = (function (_super) {
                 }
             }
             else if (e.other instanceof Monster) {
-                if (_this._attackCooldown == 0) {
+                if (_this._attackCooldown == 0 && _this._hasHitMinotaur) {
                     var monster = e.other;
                     monster.health--;
+                    _this._attackCooldown = Config.HeroAttackCooldown;
+                }
+                if (!_this._hasHitMinotaur) {
+                    _this._hasHitMinotaur = true;
                     _this._attackCooldown = Config.HeroAttackCooldown;
                 }
             }
@@ -536,6 +557,7 @@ var Hero = (function (_super) {
     Hero.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
         if (this.Health <= 0) {
+            Resources.BloodSpatter.play();
             Stats.numHeroesKilled++;
             // map.getTreasures()[0].return(this._treasure);
             this._chestLooted.return(this._treasure);
@@ -677,6 +699,12 @@ var GameOver = (function (_super) {
     }
     GameOver.prototype.onInitialize = function (engine) {
         game.backgroundColor = ex.Color.Black;
+        var retryButton = new ex.Actor(game.width / 2, game.height / 2, 300, 60, ex.Color.DarkGray);
+        this.add(retryButton);
+        retryButton.on('pointerdown', function (e) {
+            isGameOver = false;
+            //TODO reset game
+        });
     };
     return GameOver;
 })(ex.Scene);
@@ -703,6 +731,7 @@ _.forIn(Resources, function (resource) {
 });
 var map = new Map(game);
 var gameOver = new GameOver(game);
+var isGameOver = false;
 game.start(loader).then(function () {
     game.backgroundColor = ex.Color.Black;
     // Resources.AxeSwing.setVolume(1);
