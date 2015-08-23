@@ -36,7 +36,7 @@ class Monster extends ex.Actor {
       });
       var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 14, 1, 96, 96);
       var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 14, 1, 96, 96);
-      var upSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterUp, 7, 1, 96, 96);
+      var upSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterUp, 14, 1, 96, 96);
       
       var attackDownAnim = downSpriteSheet.getAnimationBetween(engine, 9, 13, Config.MonsterAttackTime/4);
       attackDownAnim.scale.setTo(2, 2);
@@ -48,10 +48,15 @@ class Monster extends ex.Actor {
       walkDownAnim.loop = true;
       this.addDrawing("walkDown", walkDownAnim);
       
-      var attackUpAnim = upSpriteSheet.getAnimationBetween(engine, 2, 7, Config.MonsterAttackTime/4);
+      var attackUpAnim = upSpriteSheet.getAnimationBetween(engine, 9, 13, Config.MonsterAttackTime/4);
       attackUpAnim.scale.setTo(2, 2);
       attackUpAnim.loop = true;
       this.addDrawing("attackUp", attackUpAnim);
+      
+      var walkUpAnim = upSpriteSheet.getAnimationByIndices(engine, [2, 3, 4, 5, 6, 7], 150);
+      walkUpAnim.scale.setTo(2, 2);
+      walkUpAnim.loop = true;
+      this.addDrawing("walkUp", walkUpAnim);
       
       var attackRightAnim = rightSpriteSheet.getAnimationBetween(engine, 9, 13, Config.MonsterAttackTime/4);
       attackRightAnim.scale.setTo(2, 2);
@@ -136,9 +141,9 @@ class Monster extends ex.Actor {
       if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.W) || 
          engine.input.keyboard.isKeyPressed(ex.Input.Keys.Up)) {
             if(!this._isAttacking){
-         this.dy = -Config.MonsterSpeed;
-               this.setDrawing("idleUp");
-      }
+               this.dy = -Config.MonsterSpeed;
+               this.setDrawing("walkUp");
+            }
       }
       
       if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.S) ||
