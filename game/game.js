@@ -6,6 +6,15 @@ var Config = {
     MonsterAttackRange: 90,
     MonsterProgressSize: 200,
     MonsterAttackTime: 300,
+    BloodMaxAmount: 300,
+    BloodMinFriction: 0.15,
+    BloodMaxFriction: 0.40,
+    BloodXYVariation: 6,
+    BloodSplatterMinAngle: ex.Util.toRadians(20),
+    BloodSplatterMaxAngle: ex.Util.toRadians(20),
+    BloodSplatterAngleVariation: ex.Util.toRadians(15),
+    BloodVelocityMin: 10,
+    BloodVelocityMax: 40,
     CameraElasticity: 0.1,
     CameraFriction: 0.5,
     CameraShake: 0,
@@ -30,6 +39,26 @@ var Config = {
     TreasureHoardSize: 5,
     // Treasure progress indicator width (in px)
     TreasureProgressSize: 600
+};
+var Resources = {
+    AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
+    AxeSwingHit: new ex.Sound('sounds/axe-swing-hit.wav'),
+    BloodSpatter: new ex.Sound('sounds/blood-splatter-1.wav'),
+    TextureHero: new ex.Texture("images/hero.png"),
+    TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
+    TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
+    TextureMonsterRight: new ex.Texture("images/minotaurv2right.png"),
+    TextureMonsterUp: new ex.Texture("images/minotaurv2back.png"),
+    TextureTreasure: new ex.Texture("images/treasure.png"),
+    TextureTreasureEmpty: new ex.Texture("images/treasure-empty.png"),
+    TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
+    TextureMonsterIndicator: new ex.Texture("images/mino-indicator.png"),
+    TextureMap: new ex.Texture("images/map.png"),
+    TextureWall: new ex.Texture("images/wall.png"),
+    TextureTextDefend: new ex.Texture("images/text-defend.png"),
+    TextureBloodPixel: new ex.Texture("images/blood-pixel.png"),
+    TextureBloodPixelGreen: new ex.Texture("images/blood-pixel-green.png"),
+    TextureHeroDead: new ex.Texture("images/hero-dead.png")
 };
 var Util = (function () {
     function Util() {
@@ -63,7 +92,12 @@ var Map = (function (_super) {
                 resource.setVolume(1);
             }
         });
+<<<<<<< HEAD
         Resources.AxeSwingHit.setVolume(0.2);
+=======
+        // Initialize blood
+        this.add(blood);
+>>>>>>> 9170f07c2ad94de61541bc56bd2e860a82130f35
         this.buildWalls();
         // show GUI
         var progressBack = new ex.UIActor(60, 23, Config.TreasureProgressSize + 4, 40);
@@ -129,9 +163,10 @@ var Map = (function (_super) {
         for (x = 0; x < 40; x++) {
             for (y = 0; y < 40; y++) {
                 cell = data[x + y * 40];
-                if (cell !== 0 && cell !== 199) {
-                    wall = new ex.Actor(x * Map.CellSize, y * Map.CellSize, 24, 24 /*, ex.Color.Red*/);
+                if (cell == 58) {
+                    wall = new ex.Actor(x * Map.CellSize, y * Map.CellSize, 24, 24);
                     wall.anchor.setTo(0, 0);
+                    wall.addDrawing(Resources.TextureWall);
                     wall.collisionType = ex.CollisionType.Fixed;
                     this.add(wall);
                 }
@@ -193,52 +228,128 @@ var Map = (function (_super) {
     Map.CellSize = 24;
     return Map;
 })(ex.Scene);
-var BloodEmitter = (function (_super) {
-    __extends(BloodEmitter, _super);
-    function BloodEmitter(x, y) {
-        _super.call(this, x, y);
-        this.amount = 0.5;
-        this.force = 0.5;
-        this.angle = 0;
+var Blood = (function (_super) {
+    __extends(Blood, _super);
+    function Blood() {
+        _super.call(this, 0, 0);
         this._bleedTimer = 0;
-        this._splatterTimer = 0;
-        this._particles = [];
+        this._emitters = [];
+        this._scvs = document.createElement('canvas');
+        this._scvs.width = 960;
+        this._scvs.height = 960;
+        this._sctx = this._scvs.getContext('2d');
+        this._sctx.globalCompositeOperation = 'source-over';
+        this.traits.length = 0;
     }
-    BloodEmitter.prototype.splatter = function () {
-        this._splatterTimer = 200;
-        this._particles.length = 0;
-        var pixelAmount = this.amount * 500;
-        var vMin = 5;
-        var vMax = 100;
-        for (var i = 0; i < pixelAmount; i++) {
-            this._particles.push({
-                x: this.x,
-                y: this.y,
-                d: ex.Vector.fromAngle(this.angle + ex.Util.randomInRange(-Math.PI / 4, Math.PI / 4)),
-                v: ex.Util.randomIntInRange(vMin, vMax)
-            });
-        }
+    Blood.prototype.onInitialize = function () {
+        Blood.BloodPixel = Resources.TextureBloodPixel.asSprite();
+        Blood.BloodPixelGreen = Resources.TextureBloodPixelGreen.asSprite();
     };
-    BloodEmitter.prototype.bleed = function (duration) {
+    Blood.prototype.splatter = function (x, y, sprite, amount, force, angle) {
+        if (amount === void 0) { amount = 0.4; }
+        if (force === void 0) { force = 0.5; }
+        if (angle === void 0) { angle = 0; }
+        this._emitters.push(new SplatterEmitter(x, y, sprite, amount, force, angle - ex.Util.toRadians(15), angle + ex.Util.toRadians(15)));
+    };
+    Blood.prototype.pop = function (x, y, sprite, amount, force) {
+        if (amount === void 0) { amount = 0.4; }
+        if (force === void 0) { force = 0.5; }
+        this._emitters.push(new SplatterEmitter(x, y, sprite, amount, force, 0, Math.PI * 2));
+    };
+    Blood.prototype.bleed = function (duration) {
         this._bleedTimer = duration;
     };
-    BloodEmitter.prototype.draw = function (ctx, delta) {
+    Blood.prototype.draw = function (ctx, delta) {
         _super.prototype.draw.call(this, ctx, delta);
-        // todo
-    };
-    BloodEmitter.prototype.update = function (engine, delta) {
-        this._bleedTimer = Math.max(0, this._bleedTimer - delta);
-        this._splatterTimer = Math.max(0, this._splatterTimer - delta);
         // update particle positions
-        var particle, i, ray;
-        for (i = 0; i < this._particles.length; i++) {
-            particle = this._particles[i];
-            ray = new ex.Ray(new ex.Point(particle.x, particle.y), ex.Vector.fromAngle(particle.d));
-            particle.x = (this.force * (this._splatterTimer * particle.v));
+        var emitter, i;
+        for (i = 0; i < this._emitters.length; i++) {
+            this._emitters[i].draw(this._sctx, delta);
+        }
+        // draw shadow ctx
+        ctx.drawImage(this._scvs, 0, 0);
+    };
+    Blood.prototype.update = function (engine, delta) {
+        _super.prototype.update.call(this, engine, delta);
+        this._bleedTimer = Math.max(0, this._bleedTimer - delta);
+        // update particle positions
+        var emitter, i;
+        for (i = this._emitters.length - 1; i >= 0; i--) {
+            emitter = this._emitters[i];
+            emitter.update(engine, delta);
+            if (emitter.done) {
+                this._emitters.splice(i, 1);
+            }
         }
     };
-    return BloodEmitter;
+    return Blood;
 })(ex.Actor);
+var SplatterEmitter = (function () {
+    /**
+     *
+     */
+    function SplatterEmitter(x, y, sprite, amount, force, minAngle, maxAngle) {
+        this.x = x;
+        this.y = y;
+        this.sprite = sprite;
+        this.amount = amount;
+        this.force = force;
+        this.minAngle = minAngle;
+        this.maxAngle = maxAngle;
+        this._particles = [];
+        this._stopTimer = 200;
+        this.done = false;
+        var pixelAmount = amount * Config.BloodMaxAmount;
+        var vMin = Config.BloodVelocityMin;
+        var vMax = force * Config.BloodVelocityMax;
+        var xMin = x - Config.BloodXYVariation;
+        var yMin = y - Config.BloodXYVariation;
+        var xMax = x + Config.BloodXYVariation;
+        var yMax = y + Config.BloodXYVariation;
+        // curve in direction
+        var av = ex.Util.randomInRange(-Config.BloodSplatterAngleVariation, Config.BloodSplatterAngleVariation);
+        for (var i = 0; i < pixelAmount; i++) {
+            this._particles.push({
+                x: ex.Util.randomIntInRange(xMin, xMax),
+                y: ex.Util.randomIntInRange(yMin, yMax),
+                f: ex.Util.randomInRange(Config.BloodMinFriction, Config.BloodMaxFriction),
+                d: ex.Vector.fromAngle(ex.Util.randomInRange(minAngle, maxAngle)),
+                v: ex.Util.randomIntInRange(vMin, vMax),
+                av: av,
+                s: ex.Util.randomInRange(1, 2)
+            });
+        }
+    }
+    SplatterEmitter.prototype.update = function (engine, delta) {
+        var i, particle, currPos, d, vel, f;
+        this._stopTimer -= delta;
+        if (this._stopTimer < 0) {
+            this.done = true;
+            return;
+        }
+        for (i = 0; i < this._particles.length; i++) {
+            particle = this._particles[i];
+            currPos = new ex.Vector(particle.x, particle.y);
+            d = particle.d.rotate(particle.av, ex.Vector.Zero);
+            vel = d.scale(particle.v);
+            f = vel.scale(-1).scale(particle.f);
+            vel = vel.plus(f);
+            currPos = currPos.plus(vel);
+            particle.x = currPos.x;
+            particle.y = currPos.y;
+            particle.v = vel.distance();
+        }
+    };
+    SplatterEmitter.prototype.draw = function (ctx, delta) {
+        var i, particle;
+        for (i = 0; i < this._particles.length; i++) {
+            particle = this._particles[i];
+            this.sprite.scale.setTo(particle.s, particle.s);
+            this.sprite.draw(ctx, particle.x, particle.y);
+        }
+    };
+    return SplatterEmitter;
+})();
 /// <reference path="game.ts" />
 /// <reference path="config.ts" />
 var Monster = (function (_super) {
@@ -265,26 +376,39 @@ var Monster = (function (_super) {
             _this._mouseX = ev.x;
             _this._mouseY = ev.y;
         });
-        var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 6, 1, 96, 96);
-        var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 6, 1, 96, 96);
-        var upSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterUp, 6, 1, 96, 96);
-        var attackDownAnim = downSpriteSheet.getAnimationBetween(engine, 2, 6, Config.MonsterAttackTime / 4);
+        var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 14, 1, 96, 96);
+        var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 14, 1, 96, 96);
+        var upSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterUp, 7, 1, 96, 96);
+        var attackDownAnim = downSpriteSheet.getAnimationBetween(engine, 9, 13, Config.MonsterAttackTime / 4);
         attackDownAnim.scale.setTo(2, 2);
         attackDownAnim.loop = true;
         this.addDrawing("attackDown", attackDownAnim);
-        var attackUpAnim = upSpriteSheet.getAnimationBetween(engine, 2, 6, Config.MonsterAttackTime / 4);
+        var walkDownAnim = downSpriteSheet.getAnimationByIndices(engine, [2, 3, 4, 5, 6, 7], 150);
+        walkDownAnim.scale.setTo(2, 2);
+        walkDownAnim.loop = true;
+        this.addDrawing("walkDown", walkDownAnim);
+        var attackUpAnim = upSpriteSheet.getAnimationBetween(engine, 2, 7, Config.MonsterAttackTime / 4);
         attackUpAnim.scale.setTo(2, 2);
         attackUpAnim.loop = true;
         this.addDrawing("attackUp", attackUpAnim);
-        var attackRightAnim = rightSpriteSheet.getAnimationBetween(engine, 2, 6, Config.MonsterAttackTime / 4);
+        var attackRightAnim = rightSpriteSheet.getAnimationBetween(engine, 9, 13, Config.MonsterAttackTime / 4);
         attackRightAnim.scale.setTo(2, 2);
         attackRightAnim.loop = true;
         this.addDrawing("attackRight", attackRightAnim);
-        var attackLeftAnim = rightSpriteSheet.getAnimationBetween(engine, 2, 6, Config.MonsterAttackTime / 4);
+        var walkRightAnim = rightSpriteSheet.getAnimationByIndices(engine, [2, 3, 4, 5, 6, 7], 150);
+        walkRightAnim.scale.setTo(2, 2);
+        walkRightAnim.loop = true;
+        this.addDrawing("walkRight", walkRightAnim);
+        var attackLeftAnim = rightSpriteSheet.getAnimationBetween(engine, 9, 13, Config.MonsterAttackTime / 4);
         attackLeftAnim.flipHorizontal = true;
         attackLeftAnim.scale.setTo(2, 2);
         attackLeftAnim.loop = true;
         this.addDrawing("attackLeft", attackLeftAnim);
+        var walkLeftAnim = rightSpriteSheet.getAnimationByIndices(engine, [2, 3, 4, 5, 6, 7], 150);
+        walkLeftAnim.flipHorizontal = true;
+        walkLeftAnim.scale.setTo(2, 2);
+        walkLeftAnim.loop = true;
+        this.addDrawing("walkLeft", walkLeftAnim);
         var idleAnim = downSpriteSheet.getAnimationBetween(engine, 0, 2, 500);
         idleAnim.loop = true;
         idleAnim.scale.setTo(2, 2);
@@ -334,23 +458,38 @@ var Monster = (function (_super) {
         // WASD
         if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.W) ||
             engine.input.keyboard.isKeyPressed(ex.Input.Keys.Up)) {
-            this.dy = -Config.MonsterSpeed;
+            if (!this._isAttacking) {
+                this.dy = -Config.MonsterSpeed;
+                this.setDrawing("idleUp");
+            }
         }
         if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.S) ||
             engine.input.keyboard.isKeyPressed(ex.Input.Keys.Down)) {
-            this.dy = Config.MonsterSpeed;
+            if (!this._isAttacking) {
+                this.dy = Config.MonsterSpeed;
+                this.setDrawing("walkDown");
+            }
         }
         if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.A) ||
             engine.input.keyboard.isKeyPressed(ex.Input.Keys.Left)) {
-            this.dx = -Config.MonsterSpeed;
+            if (!this._isAttacking) {
+                this.dx = -Config.MonsterSpeed;
+                this.setDrawing("walkLeft");
+            }
         }
         if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.D) ||
             engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right)) {
-            this.dx = Config.MonsterSpeed;
+            if (!this._isAttacking) {
+                this.dx = Config.MonsterSpeed;
+                this.setDrawing("walkRight");
+            }
+        }
+        if (this.dx == 0 && this.dy == 0 && !this._isAttacking) {
+            this.setDrawing("idleDown");
         }
         var prevRotation = this._rotation;
         this._rotation = ex.Util.canonicalizeAngle(new ex.Vector(this._mouseX - this.x, this._mouseY - this.y).toAngle());
-        if (this._isAttacking && this._timeLeftAttacking > 0) {
+        if (this._isAttacking) {
             if (this._rotation < Math.PI / 4 || this._rotation > Math.PI * (7 / 4)) {
                 this.setDrawing("attackRight");
             }
@@ -367,11 +506,6 @@ var Monster = (function (_super) {
             if (this._timeLeftAttacking < 0) {
                 this._isAttacking = false;
             }
-        }
-        else {
-            this._isAttacking = false;
-            this._timeLeftAttacking = 0;
-            this.setDrawing("idleDown");
         }
         // updating attack rays
         _.forIn(this._rays, function (ray) {
@@ -401,12 +535,17 @@ var Monster = (function (_super) {
         }
     };
     Monster.prototype._attack = function () {
+        var _this = this;
         var hitHero = false;
         _.forIn(this._attackable, function (hero) {
             // hero.blink(500, 500, 5); //can't because moving already (no parallel actions support)
             game.currentScene.camera.shake(2, 2, 200);
             hero.Health--;
             hitHero = true;
+            var origin = new ex.Vector(hero.x, hero.y);
+            var dest = new ex.Vector(_this.x, _this.y);
+            var a = origin.subtract(dest).toAngle();
+            blood.splatter(hero.x, hero.y, Blood.BloodPixel, 0.7, 0.8, a);
         });
         if (hitHero) {
             Resources.AxeSwingHit.play();
@@ -414,6 +553,9 @@ var Monster = (function (_super) {
         else {
             Resources.AxeSwing.play();
         }
+    };
+    Monster.prototype.getRotation = function () {
+        return this._rotation;
     };
     Monster.prototype.debugDraw = function (ctx) {
         _super.prototype.debugDraw.call(this, ctx);
@@ -430,6 +572,7 @@ var Monster = (function (_super) {
     };
     return Monster;
 })(ex.Actor);
+<<<<<<< HEAD
 var Resources = {
     AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
     AxeSwingHit: new ex.Sound('sounds/axe-swing-hit-2.wav'),
@@ -446,6 +589,8 @@ var Resources = {
     TextureMap: new ex.Texture("images/map.png"),
     TextureTextDefend: new ex.Texture("images/text-defend.png")
 };
+=======
+>>>>>>> 9170f07c2ad94de61541bc56bd2e860a82130f35
 var HeroStates;
 (function (HeroStates) {
     HeroStates[HeroStates["Searching"] = 0] = "Searching";
@@ -470,7 +615,17 @@ var HeroSpawner = (function () {
     HeroSpawner.getHeroes = function () {
         return this._heroes;
     };
-    HeroSpawner.despawn = function (h) {
+    HeroSpawner.despawn = function (h, blood) {
+        if (blood === void 0) { blood = false; }
+        if (blood) {
+            var tombstone = new ex.Actor(h.x, h.y, 24, 24);
+            //tombstone.traits.length = 0;      
+            // todo bug with actor scaling
+            var sprite = Resources.TextureHeroDead.asSprite();
+            sprite.scale.setTo(2, 2);
+            tombstone.addDrawing("default", sprite);
+            game.add(tombstone);
+        }
         h.kill();
         _.remove(this._heroes, h);
     };
@@ -497,7 +652,6 @@ var Hero = (function (_super) {
         this._fsm.on(HeroStates.Attacking, this.onAttacking.bind(this));
     }
     Hero.prototype.onInitialize = function (engine) {
-        var _this = this;
         this.setZIndex(1);
         this._lootIndicator = new ex.Actor(5, -24, 24, 24);
         this._lootIndicator.addDrawing(Resources.TextureHeroLootIndicator);
@@ -523,14 +677,19 @@ var Hero = (function (_super) {
                 }
             }
             else if (e.other instanceof Monster) {
-                if (_this._attackCooldown == 0 && _this._hasHitMinotaur) {
+                var hero = e.actor;
+                if (hero._attackCooldown == 0 && hero._hasHitMinotaur) {
                     var monster = e.other;
                     monster.health--;
-                    _this._attackCooldown = Config.HeroAttackCooldown;
+                    hero._attackCooldown = Config.HeroAttackCooldown;
+                    var origin = new ex.Vector(hero.x, hero.y);
+                    var dest = new ex.Vector(monster.x, monster.y);
+                    var a = dest.subtract(origin).toAngle();
+                    blood.splatter(monster.x, monster.y, Blood.BloodPixelGreen, 0.2, 0.2, a);
                 }
-                if (!_this._hasHitMinotaur) {
-                    _this._hasHitMinotaur = true;
-                    _this._attackCooldown = Config.HeroAttackCooldown;
+                if (!hero._hasHitMinotaur) {
+                    hero._hasHitMinotaur = true;
+                    hero._attackCooldown = Config.HeroAttackCooldown;
                 }
             }
         });
@@ -543,7 +702,7 @@ var Hero = (function (_super) {
             Stats.numHeroesKilled++;
             // map.getTreasures()[0].return(this._treasure);
             this._chestLooted.return(this._treasure);
-            HeroSpawner.despawn(this);
+            HeroSpawner.despawn(this, true);
         }
         this.setZIndex(this.y);
         this._attackCooldown = Math.max(this._attackCooldown - delta, 0);
@@ -698,11 +857,11 @@ var GameOver = (function (_super) {
     return GameOver;
 })(ex.Scene);
 /// <reference path="config.ts" />
+/// <reference path="resources.ts" />
 /// <reference path="util.ts" />
 /// <reference path="map.ts" />
 /// <reference path="blood.ts" />
 /// <reference path="monster.ts" />
-/// <reference path="resources.ts" />
 /// <reference path="hero.ts" />
 /// <reference path="treasure.ts" />
 /// <reference path="stats.ts" />
@@ -719,13 +878,14 @@ var loader = new ex.Loader();
 _.forIn(Resources, function (resource) {
     loader.addResource(resource);
 });
+var blood = new Blood();
 var map = new Map(game);
 var gameOver = new GameOver(game);
 var isGameOver = false;
 game.start(loader).then(function () {
     game.backgroundColor = ex.Color.Black;
     // Resources.AxeSwing.setVolume(1);
-    // load map
+    // load map   
     game.add('map', map);
     game.goToScene('map');
     game.add('gameover', gameOver);

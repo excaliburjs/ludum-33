@@ -27,7 +27,18 @@ class HeroSpawner {
       return this._heroes;
 }
 
-   public static despawn(h: Hero) {
+   public static despawn(h: Hero, blood: boolean = false) {
+      
+      if (blood) {
+         var tombstone = new ex.Actor(h.x, h.y, 24, 24);
+         //tombstone.traits.length = 0;      
+         // todo bug with actor scaling
+         var sprite = Resources.TextureHeroDead.asSprite();
+         sprite.scale.setTo(2, 2);
+         tombstone.addDrawing("default", sprite);
+         game.add(tombstone);
+      }
+      
       h.kill();
       _.remove(this._heroes, h);
    }
@@ -89,15 +100,21 @@ class Hero extends ex.Actor {
                
             }
          } else if (e.other instanceof Monster) {
+            var hero = <Hero>e.actor;
             
-            if (this._attackCooldown == 0 && this._hasHitMinotaur) {
+            if (hero._attackCooldown == 0 && hero._hasHitMinotaur) {
                var monster = <Monster>e.other;
                monster.health--;
-               this._attackCooldown = Config.HeroAttackCooldown;
-            }
-            if (!this._hasHitMinotaur) {
-               this._hasHitMinotaur = true;
-               this._attackCooldown = Config.HeroAttackCooldown;
+               hero._attackCooldown = Config.HeroAttackCooldown;
+               
+               var origin = new ex.Vector(hero.x, hero.y);
+               var dest = new ex.Vector(monster.x, monster.y);
+               var a = dest.subtract(origin).toAngle();
+               blood.splatter(monster.x, monster.y, Blood.BloodPixelGreen, 0.2, 0.2, a);
+         }
+            if (!hero._hasHitMinotaur) {
+               hero._hasHitMinotaur = true;
+               hero._attackCooldown = Config.HeroAttackCooldown;
             }
          }
       });
@@ -114,7 +131,7 @@ class Hero extends ex.Actor {
             Stats.numHeroesKilled++;
             // map.getTreasures()[0].return(this._treasure);
             this._chestLooted.return(this._treasure);
-            HeroSpawner.despawn(this);
+            HeroSpawner.despawn(this, true);
       }
       this.setZIndex(this.y);
       this._attackCooldown = Math.max(this._attackCooldown - delta, 0);

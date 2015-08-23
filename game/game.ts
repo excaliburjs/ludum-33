@@ -1,9 +1,9 @@
 /// <reference path="config.ts" />
+/// <reference path="resources.ts" />
 /// <reference path="util.ts" />
 /// <reference path="map.ts" />
 /// <reference path="blood.ts" />
 /// <reference path="monster.ts" />
-/// <reference path="resources.ts" />
 /// <reference path="hero.ts" />
 /// <reference path="treasure.ts" />
 /// <reference path="stats.ts" />
@@ -24,6 +24,7 @@ _.forIn(Resources, (resource) => {
    loader.addResource(resource);
 });
 
+var blood = new Blood();
 var map = new Map(game);
 var gameOver = new GameOver(game);
 var isGameOver = false;
@@ -33,7 +34,7 @@ game.start(loader).then(() => {
    game.backgroundColor = ex.Color.Black;
    // Resources.AxeSwing.setVolume(1);
    
-   // load map
+   // load map   
    game.add('map', map);
    game.goToScene('map');
    game.add('gameover', gameOver);

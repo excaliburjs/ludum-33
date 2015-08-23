@@ -27,7 +27,9 @@ class Map extends ex.Scene {
          }
       });
       Resources.AxeSwingHit.setVolume(0.2);
-      
+
+      // Initialize blood
+      this.add(blood);
       this.buildWalls();
       
       // show GUI
@@ -113,9 +115,10 @@ class Map extends ex.Scene {
          for (y = 0; y < 40; y++) {
             cell = data[x + y * 40];
             
-            if (cell !== 0 && cell !== 199) { // ground or doors
-               wall = new ex.Actor(x * Map.CellSize, y * Map.CellSize, 24, 24/*, ex.Color.Red*/);
+            if (cell == 58) { // wall tile
+               wall = new ex.Actor(x * Map.CellSize, y * Map.CellSize, 24, 24);
                wall.anchor.setTo(0, 0);
+               wall.addDrawing(Resources.TextureWall);
                wall.collisionType = ex.CollisionType.Fixed;
                
                this.add(wall);
