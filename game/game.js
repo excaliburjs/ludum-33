@@ -1,7 +1,8 @@
 var Config = {
+    MonsterHealth: 30,
     MonsterWidth: 48,
     MonsterHeight: 48,
-    MonsterSpeed: 300,
+    MonsterSpeed: 200,
     MonsterAttackRange: 80,
     CameraElasticity: 0.05,
     CameraFriction: 0.5,
@@ -17,6 +18,10 @@ var Config = {
     HeroSpeed: 100,
     // Hero with loot speed (in px/s)
     HeroFleeingSpeed: 80,
+    // The cooldown amount for a hero's attack
+    HeroAttackCooldown: 2000,
+    // The maximum distance a hero will aggro to the monster
+    HeroAggroDistance: 100,
     // Amount of gold heroes can carry
     TreasureStealAmount: 1,
     // Amount of gold in each treasure stash
@@ -206,6 +211,7 @@ var Monster = (function (_super) {
     __extends(Monster, _super);
     function Monster(x, y) {
         _super.call(this, x, y, Config.MonsterWidth, Config.MonsterHeight);
+        this.health = Config.MonsterHealth;
         this.color = ex.Color.Red;
         this._mouseX = 0;
         this._mouseY = 0;
@@ -251,6 +257,9 @@ var Monster = (function (_super) {
     Monster.prototype.update = function (engine, delta) {
         var _this = this;
         _super.prototype.update.call(this, engine, delta);
+        if (this.health <= 0) {
+            map._gameOver();
+        }
         this._attackable.length = 0;
         this._detectAttackable();
         // clear move
@@ -373,13 +382,16 @@ var Hero = (function (_super) {
         _super.call(this, x, y, 24, 24);
         this.Health = Config.HeroHealth;
         this._treasure = 0;
+        this._attackCooldown = Config.HeroAttackCooldown;
         this._fsm = new TypeState.FiniteStateMachine(HeroStates.Searching);
         // declare valid state transitions
         this._fsm.from(HeroStates.Searching).to(HeroStates.Attacking, HeroStates.Looting);
+        this._fsm.from(HeroStates.Attacking).to(HeroStates.Searching);
         this._fsm.from(HeroStates.Looting).to(HeroStates.Fleeing);
         this._fsm.on(HeroStates.Searching, this.onSearching.bind(this));
         this._fsm.on(HeroStates.Looting, this.onLooting.bind(this));
         this._fsm.on(HeroStates.Fleeing, this.onFleeing.bind(this));
+        this._fsm.on(HeroStates.Attacking, this.onAttacking.bind(this));
     }
     Hero.prototype.onInitialize = function (engine) {
         var _this = this;
@@ -393,13 +405,7 @@ var Hero = (function (_super) {
         idleAnim.loop = true;
         idleAnim.scale.setTo(2, 2);
         this.addDrawing("idle", idleAnim);
-        this.collisionType = ex.CollisionType.Active;
-        this.on('update', function (e) {
-            if (_this.Health <= 0) {
-                map.getTreasures()[0].return(_this._treasure);
-                HeroSpawner.despawn(_this);
-            }
-        });
+        this.collisionType = ex.CollisionType.Passive;
         this.on('collision', function (e) {
             if (e.other instanceof Treasure) {
                 if (e.actor._treasure === 0) {
@@ -407,17 +413,45 @@ var Hero = (function (_super) {
                     e.actor._fsm.go(HeroStates.Looting);
                 }
             }
+            else if (e.other instanceof Monster) {
+                if (_this._attackCooldown == 0) {
+                    var monster = e.other;
+                    monster.health--;
+                    _this._attackCooldown = Config.HeroAttackCooldown;
+                }
+            }
         });
         this.onSearching();
     };
     Hero.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
+        if (this.Health <= 0) {
+            map.getTreasures()[0].return(this._treasure);
+            HeroSpawner.despawn(this);
+        }
         this.setZIndex(this.y);
+        this._attackCooldown = Math.max(this._attackCooldown - delta, 0);
+        var heroVector = new ex.Vector(this.x, this.y);
+        var monsterVector = new ex.Vector(map._player.x, map._player.y);
+        switch (this._fsm.currentState) {
+            case HeroStates.Searching:
+                if (heroVector.distance(monsterVector) < Config.HeroAggroDistance) {
+                    this._fsm.go(HeroStates.Attacking);
+                    console.log('switching to attack');
+                }
+                break;
+            case HeroStates.Attacking:
+                if (heroVector.distance(monsterVector) > Config.HeroAggroDistance)
+                    this._fsm.go(HeroStates.Searching);
+                console.log('stopping attack');
+                break;
+        }
+
         if (this._treasure > 0) {
-            this.addChild(this._lootIndicator);
+           this.addChild(this._lootIndicator);
         }
         else {
-            this.removeChild(this._lootIndicator);
+           this.removeChild(this._lootIndicator);
         }
     };
     Hero.prototype.getLootAmount = function () {
@@ -466,7 +500,8 @@ var Hero = (function (_super) {
     Hero.prototype.onAttacking = function (from) {
         // stop any actions
         this.clearActions();
-        // attack monster
+        // TODO attack monster
+        this.meet(map._player, Config.HeroSpeed);
     };
     Hero.prototype.onExit = function () {
         // play negative sound or something

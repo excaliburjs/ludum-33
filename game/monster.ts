@@ -2,6 +2,8 @@
 /// <reference path="config.ts" />
 
 class Monster extends ex.Actor {
+   public health: number = Config.MonsterHealth;
+   
    private _mouseX: number;
    private _mouseY: number;
    
@@ -63,6 +65,10 @@ class Monster extends ex.Actor {
    
    public update(engine: ex.Engine, delta: number): void {
       super.update(engine, delta);
+      
+      if (this.health <= 0) {
+         map._gameOver();
+      }
       
       this._attackable.length = 0;
       this._detectAttackable();
