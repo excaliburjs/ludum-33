@@ -7,6 +7,7 @@ class Monster extends ex.Actor {
    private _mouseX: number;
    private _mouseY: number;
    
+   private _rotation: number = 0;
    private _rays: ex.Ray[];
    private _attackable: Hero[]; // heroes that can be attacked during current update loop
    
@@ -30,23 +31,46 @@ class Monster extends ex.Actor {
          this._mouseY = ev.y;
          
       });
-      var spriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 6, 1, 72, 72);
+      var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 6, 1, 72, 72);
+      var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 6, 1, 72, 72);
       
-      var attackDownAnim = spriteSheet.getAnimationBetween(engine, 3, 6, 100);
+      var attackDownAnim = downSpriteSheet.getAnimationBetween(engine, 3, 6, 100);
       attackDownAnim.scale.setTo(2, 2);
       attackDownAnim.loop = true;
       this.addDrawing("attackDown", attackDownAnim);
       
-      var idleAnim = spriteSheet.getAnimationBetween(engine, 0, 2, 500);
+      var attackRightAnim = rightSpriteSheet.getAnimationBetween(engine, 3, 6, 100);
+      attackRightAnim.scale.setTo(2, 2);
+      attackRightAnim.loop = true;
+      this.addDrawing("attackRight", attackRightAnim);
+      
+      var attackLeftAnim = rightSpriteSheet.getAnimationBetween(engine, 3, 6, 100);
+      attackLeftAnim.flipHorizontal = true;
+      attackLeftAnim.scale.setTo(2, 2);
+      attackLeftAnim.loop = true;
+      this.addDrawing("attackLeft", attackLeftAnim);
+      
+      var idleAnim = downSpriteSheet.getAnimationBetween(engine, 0, 2, 500);
       idleAnim.loop = true;
       idleAnim.scale.setTo(2, 2);
       this.addDrawing("idleDown", idleAnim);
+      
+      var idleRightAnim = rightSpriteSheet.getAnimationBetween(engine, 0, 2, 500);
+      idleRightAnim.scale.setTo(2, 2);
+      idleRightAnim.loop = true;
+      this.addDrawing("idleRight", idleRightAnim);
+      
+      var idleLeftAnim = rightSpriteSheet.getAnimationBetween(engine, 0, 2, 500);
+      idleLeftAnim.flipHorizontal = true;
+      idleLeftAnim.scale.setTo(2, 2);
+      idleLeftAnim.loop = true;
+      this.addDrawing("idleLeft", idleLeftAnim);
       
       
       var sprite = Resources.TextureMonsterRight.asSprite().clone();
       sprite.scale.setTo(2, 2);
       this.addDrawing("idleRight", sprite);
-      this.setDrawing("idleRight");
+      this.setDrawing("idleDown");
       
       var yValues = new Array<number>(-0.62, -0.25, 0, 0.25, 0.62);
       _.forIn(yValues, (yValue) => {
@@ -59,7 +83,7 @@ class Monster extends ex.Actor {
       // attackda
       engine.input.pointers.primary.on("down", function (evt) {
          that._attack();
-         that.setDrawing("attackDown");
+         //that.setDrawing("attackDown");
       });
    }
    
@@ -98,12 +122,26 @@ class Monster extends ex.Actor {
          this.dx = Config.MonsterSpeed;
       }
 
-      var prevRotation = this.rotation;
-      this.rotation = new ex.Vector(this._mouseX - this.x, this._mouseY - this.y).toAngle();
+      var prevRotation = this._rotation;
+      this._rotation = ex.Util.canonicalizeAngle(new ex.Vector(this._mouseX - this.x, this._mouseY - this.y).toAngle());
+      
+      if(this._rotation < Math.PI/4 || this._rotation > Math.PI * (7/4)) {
+         this.setDrawing("attackRight");
+      }
+      
+      if(this._rotation > Math.PI/4 && this._rotation < Math.PI * (3/4)) {
+         this.setDrawing("attackDown");
+      }
+      
+      if(this._rotation > Math.PI * (3/4) && this._rotation < Math.PI * (5/4)){
+         this.setDrawing("attackLeft");
+      }
+      
+      
       // updating attack rays
       _.forIn(this._rays, (ray: ex.Ray) =>{
          ray.pos = new ex.Point(this.x, this.y);
-         var rotationAmt = this.rotation - prevRotation;
+         var rotationAmt = this._rotation - prevRotation;
          ray.dir = ray.dir.rotate(rotationAmt, new ex.Point(0, 0));
       });
       
@@ -134,7 +172,6 @@ class Monster extends ex.Actor {
       _.forIn(this._attackable, (hero: Hero) => {
          // hero.blink(500, 500, 5); //can't because moving already (no parallel actions support)
          game.currentScene.camera.shake(3, 3, 300);
-         Stats.damageTaken++;
          hero.Health--;
       });
    }
