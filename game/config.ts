@@ -6,6 +6,7 @@ var Config = {
    MonsterHeight: 48,
    MonsterSpeed: 200,
    MonsterAttackRange: 90,
+   CloseMonsterAttackRange: 50,
    MonsterProgressSize: 200,
    MonsterAttackTime: 300,
    

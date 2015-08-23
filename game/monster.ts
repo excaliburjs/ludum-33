@@ -9,6 +9,7 @@ class Monster extends ex.Actor {
    
    private _rotation: number = 0;
    private _rays: ex.Ray[];
+   private _closeRays: ex.Ray[];
    private _attackable: Hero[]; // heroes that can be attacked during current update loop
    
    private _isAttacking: boolean = false;
@@ -20,6 +21,7 @@ class Monster extends ex.Actor {
       this._mouseX = 0;
       this._mouseY = 0;
       this._rays = new Array<ex.Ray>();
+      this._closeRays = new Array<ex.Ray>();
       this._attackable = new Array<Hero>();
       this.anchor = new ex.Point(0.35, 0.35);
       this.collisionType = ex.CollisionType.Active;
@@ -109,8 +111,18 @@ class Monster extends ex.Actor {
          var ray = new ex.Ray(rayPoint, rayVector);
          that._rays.push(ray);
       });
+      var closeXValues = new Array<number>(1, 0.71, 0, -0.71, -1);//(1, 0.86, 0.71, 0.5, 0, -0.5, -0.71, -0.86, -1)
+      var closeYValues = new Array<number>(0, 0.71, 1, -0.71, 0);
+      _.forIn(closeYValues, (closeYValue) => {
+         _.forIn(closeXValues, (closeXValue) => {
+            var rayVector = new ex.Vector(closeXValue, closeYValue);
+            var rayPoint = new ex.Point(this.x, this.y);
+            var ray = new ex.Ray(rayPoint, rayVector);
+            that._closeRays.push(ray);
+         }); 
+      });
       
-      // attackda
+      // attack
       engine.input.pointers.primary.on("down", function (evt) {
          that._attack();
          that._isAttacking = true;
@@ -200,6 +212,11 @@ class Monster extends ex.Actor {
          var rotationAmt = this._rotation - prevRotation;
          ray.dir = ray.dir.rotate(rotationAmt, new ex.Point(0, 0));
       });
+      _.forIn(this._closeRays, (ray: ex.Ray) =>{
+         ray.pos = new ex.Point(this.x, this.y);
+         var rotationAmt = this._rotation - prevRotation;
+         ray.dir = ray.dir.rotate(rotationAmt, new ex.Point(0, 0));
+      });
       
       this.setZIndex(this.y);
    }
@@ -218,6 +235,14 @@ class Monster extends ex.Actor {
          for (var j = 0; j < heroLines.length; j++) {
             var distanceToIntersect = this._rays[i].intersect(heroLines[j]);
             if ((distanceToIntersect > 0) && (distanceToIntersect <= Config.MonsterAttackRange)) {
+               return true;
+            }
+         }
+      }
+      for (var i = 0; i < this._closeRays.length; i++) {
+         for (var j = 0; j < heroLines.length; j++) {
+            var distanceToIntersect = this._closeRays[i].intersect(heroLines[j]);
+            if ((distanceToIntersect > 0) && (distanceToIntersect <= Config.CloseMonsterAttackRange)) {
                return true;
             }
          }
@@ -257,6 +282,15 @@ class Monster extends ex.Actor {
          var end = ray.getPoint(Config.MonsterAttackRange);
          ctx.lineTo(end.x, end.y);
          ctx.strokeStyle = ex.Color.Chartreuse.toString();
+         ctx.stroke();
+         ctx.closePath();
+      });
+      _.forIn(this._closeRays, (ray: ex.Ray) => {
+         ctx.beginPath();
+         ctx.moveTo(ray.pos.x, ray.pos.y);
+         var end = ray.getPoint(Config.CloseMonsterAttackRange);
+         ctx.lineTo(end.x, end.y);
+         ctx.strokeStyle = ex.Color.Azure.toString();
          ctx.stroke();
          ctx.closePath();
       });

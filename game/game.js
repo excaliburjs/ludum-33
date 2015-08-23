@@ -4,6 +4,7 @@ var Config = {
     MonsterHeight: 48,
     MonsterSpeed: 200,
     MonsterAttackRange: 90,
+    CloseMonsterAttackRange: 50,
     MonsterProgressSize: 200,
     MonsterAttackTime: 300,
     BloodMaxAmount: 300,
@@ -362,6 +363,7 @@ var Monster = (function (_super) {
         this._mouseX = 0;
         this._mouseY = 0;
         this._rays = new Array();
+        this._closeRays = new Array();
         this._attackable = new Array();
         this.anchor = new ex.Point(0.35, 0.35);
         this.collisionType = ex.CollisionType.Active;
@@ -435,7 +437,17 @@ var Monster = (function (_super) {
             var ray = new ex.Ray(rayPoint, rayVector);
             that._rays.push(ray);
         });
-        // attackda
+        var closeXValues = new Array(1, 0.71, 0, -0.71, -1); //(1, 0.86, 0.71, 0.5, 0, -0.5, -0.71, -0.86, -1)
+        var closeYValues = new Array(0, 0.71, 1, -0.71, 0);
+        _.forIn(closeYValues, function (closeYValue) {
+            _.forIn(closeXValues, function (closeXValue) {
+                var rayVector = new ex.Vector(closeXValue, closeYValue);
+                var rayPoint = new ex.Point(_this.x, _this.y);
+                var ray = new ex.Ray(rayPoint, rayVector);
+                that._closeRays.push(ray);
+            });
+        });
+        // attack
         engine.input.pointers.primary.on("down", function (evt) {
             that._attack();
             that._isAttacking = true;
@@ -511,6 +523,11 @@ var Monster = (function (_super) {
             var rotationAmt = _this._rotation - prevRotation;
             ray.dir = ray.dir.rotate(rotationAmt, new ex.Point(0, 0));
         });
+        _.forIn(this._closeRays, function (ray) {
+            ray.pos = new ex.Point(_this.x, _this.y);
+            var rotationAmt = _this._rotation - prevRotation;
+            ray.dir = ray.dir.rotate(rotationAmt, new ex.Point(0, 0));
+        });
         this.setZIndex(this.y);
     };
     Monster.prototype._detectAttackable = function () {
@@ -527,6 +544,14 @@ var Monster = (function (_super) {
             for (var j = 0; j < heroLines.length; j++) {
                 var distanceToIntersect = this._rays[i].intersect(heroLines[j]);
                 if ((distanceToIntersect > 0) && (distanceToIntersect <= Config.MonsterAttackRange)) {
+                    return true;
+                }
+            }
+        }
+        for (var i = 0; i < this._closeRays.length; i++) {
+            for (var j = 0; j < heroLines.length; j++) {
+                var distanceToIntersect = this._closeRays[i].intersect(heroLines[j]);
+                if ((distanceToIntersect > 0) && (distanceToIntersect <= Config.CloseMonsterAttackRange)) {
                     return true;
                 }
             }
@@ -564,6 +589,15 @@ var Monster = (function (_super) {
             var end = ray.getPoint(Config.MonsterAttackRange);
             ctx.lineTo(end.x, end.y);
             ctx.strokeStyle = ex.Color.Chartreuse.toString();
+            ctx.stroke();
+            ctx.closePath();
+        });
+        _.forIn(this._closeRays, function (ray) {
+            ctx.beginPath();
+            ctx.moveTo(ray.pos.x, ray.pos.y);
+            var end = ray.getPoint(Config.CloseMonsterAttackRange);
+            ctx.lineTo(end.x, end.y);
+            ctx.strokeStyle = ex.Color.Azure.toString();
             ctx.stroke();
             ctx.closePath();
         });
