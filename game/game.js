@@ -456,9 +456,15 @@ var Hero = (function (_super) {
         this.collisionType = ex.CollisionType.Passive;
         this.on('collision', function (e) {
             if (e.other instanceof Treasure) {
-                if (e.actor._treasure === 0) {
-                    e.actor._treasure = e.other.steal();
-                    e.actor._fsm.go(HeroStates.Looting);
+                var hero = e.actor;
+                if (hero._treasure === 0) {
+                    hero._treasure = e.other.steal();
+                    if (hero._treasure === 0) {
+                        hero._fsm.go(HeroStates.Searching);
+                    }
+                    else {
+                        hero._fsm.go(HeroStates.Looting);
+                    }
                 }
             }
             else if (e.other instanceof Monster) {
@@ -475,7 +481,8 @@ var Hero = (function (_super) {
         _super.prototype.update.call(this, engine, delta);
         if (this.Health <= 0) {
             Stats.numHeroesKilled++;
-            map.getTreasures()[0].return(this._treasure);
+            // map.getTreasures()[0].return(this._treasure);
+            this._chestLooted.return(this._treasure);
             HeroSpawner.despawn(this);
         }
         this.setZIndex(this.y);
@@ -532,6 +539,7 @@ var Hero = (function (_super) {
         var loot = Util.pickRandom(treasures);
         // move to it
         this.moveTo(loot.x, loot.y, Config.HeroSpeed);
+        this._chestLooted = loot;
     };
     Hero.prototype.onLooting = function (from) {
         var _this = this;
