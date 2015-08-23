@@ -136,15 +136,15 @@ class Monster extends ex.Actor {
       if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.W) || 
          engine.input.keyboard.isKeyPressed(ex.Input.Keys.Up)) {
             if(!this._isAttacking){
-               this.dy = -Config.MonsterSpeed;
+         this.dy = -Config.MonsterSpeed;
                this.setDrawing("idleUp");
-            }
+      }
       }
       
       if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.S) ||
          engine.input.keyboard.isKeyPressed(ex.Input.Keys.Down)) {
             if(!this._isAttacking) {
-               this.dy = Config.MonsterSpeed;
+         this.dy = Config.MonsterSpeed;
                this.setDrawing("walkDown");
             }         
       }
@@ -152,7 +152,7 @@ class Monster extends ex.Actor {
       if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.A) ||
          engine.input.keyboard.isKeyPressed(ex.Input.Keys.Left)) {
          if(!this._isAttacking) {
-            this.dx = -Config.MonsterSpeed;         
+         this.dx = -Config.MonsterSpeed;
             this.setDrawing("walkLeft");
          }
       }
@@ -160,11 +160,11 @@ class Monster extends ex.Actor {
       if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.D) ||
          engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right)) {
          if(!this._isAttacking) {
-            this.dx = Config.MonsterSpeed;         
+         this.dx = Config.MonsterSpeed;
             this.setDrawing("walkRight");
          }
       }
-      
+
       if(this.dx == 0 && this.dy == 0 && !this._isAttacking){
          this.setDrawing("idleDown");
       }
@@ -173,18 +173,18 @@ class Monster extends ex.Actor {
       this._rotation = ex.Util.canonicalizeAngle(new ex.Vector(this._mouseX - this.x, this._mouseY - this.y).toAngle());
       
       if(this._isAttacking) {
-         if(this._rotation < Math.PI/4 || this._rotation > Math.PI * (7/4)) {
-            this.setDrawing("attackRight");
-         }
-         
-         if(this._rotation > Math.PI/4 && this._rotation < Math.PI * (3/4)) {
-            this.setDrawing("attackDown");
-         }
-         
-         if(this._rotation > Math.PI * (3/4) && this._rotation < Math.PI * (5/4)){
-            this.setDrawing("attackLeft");
-         }
-         
+      if(this._rotation < Math.PI/4 || this._rotation > Math.PI * (7/4)) {
+         this.setDrawing("attackRight");
+      }
+      
+      if(this._rotation > Math.PI/4 && this._rotation < Math.PI * (3/4)) {
+         this.setDrawing("attackDown");
+      }
+      
+      if(this._rotation > Math.PI * (3/4) && this._rotation < Math.PI * (5/4)){
+         this.setDrawing("attackLeft");
+      }
+      
          if(this._rotation > Math.PI * (5/4) && this._rotation < Math.PI * (7/4)){
             this.setDrawing("attackUp");
          }
@@ -231,12 +231,21 @@ class Monster extends ex.Actor {
          game.currentScene.camera.shake(2, 2, 200);
          hero.Health--;
          hitHero = true;
+
+         var origin = new ex.Vector(hero.x, hero.y);
+         var dest = new ex.Vector(this.x, this.y);
+         var a = origin.subtract(dest).toAngle();
+         blood.splatter(hero.x, hero.y, Blood.BloodPixel, 0.7, 0.8, a);
       });
       if (hitHero) {
          Resources.AxeSwingHit.play();
       } else {
          Resources.AxeSwing.play();
       }
+   }
+  
+   public getRotation(): number {
+      return this._rotation;
    }
   
    public debugDraw(ctx: CanvasRenderingContext2D): void {
