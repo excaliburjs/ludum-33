@@ -19,9 +19,6 @@ class Map extends ex.Scene {
       this._map.anchor.setTo(0, 0);
       this._map.addDrawing(Resources.TextureMap);
       this.add(this._map);
-      
-      // start sounds
-      SoundManager.start();
 
       // Initialize blood
       this.add(blood);
@@ -81,6 +78,11 @@ class Map extends ex.Scene {
       this._player = new Monster(playerSpawn.x, playerSpawn.y);
       
       this.add(this._player);
+   }
+   
+   public onActivate() {
+      // start sounds
+      SoundManager.start();
    }
    
    public getPlayer(): Monster {

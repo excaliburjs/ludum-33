@@ -92,8 +92,6 @@ var Map = (function (_super) {
         this._map.anchor.setTo(0, 0);
         this._map.addDrawing(Resources.TextureMap);
         this.add(this._map);
-        // start sounds
-        SoundManager.start();
         // Initialize blood
         this.add(blood);
         this.buildWalls();
@@ -140,6 +138,10 @@ var Map = (function (_super) {
         var playerSpawn = this.getCellPos(19, 19);
         this._player = new Monster(playerSpawn.x, playerSpawn.y);
         this.add(this._player);
+    };
+    Map.prototype.onActivate = function () {
+        // start sounds
+        SoundManager.start();
     };
     Map.prototype.getPlayer = function () {
         return this._player;
@@ -866,7 +868,7 @@ var Settings = (function (_super) {
         _super.apply(this, arguments);
     }
     Settings.prototype.onInitialize = function (engine) {
-        var bloodToggle = new ex.Actor(game.width / 2, game.height / 2, 50, 50, ex.Color.Red);
+        var bloodToggle = new ex.Actor(game.width / 2, 100 + game.height / 2, 50, 50, ex.Color.Red);
         this.add(bloodToggle);
         bloodToggle.on('pointerdown', function (e) {
             if (Options.blood) {
@@ -876,6 +878,30 @@ var Settings = (function (_super) {
             else {
                 Options.blood = true;
                 bloodToggle.color = ex.Color.Red;
+            }
+        });
+        var musicToggle = new ex.Actor(game.width / 2, game.height / 2, 50, 50, ex.Color.Red);
+        this.add(musicToggle);
+        musicToggle.on('pointerdown', function (e) {
+            if (Options.music) {
+                Options.music = false;
+                musicToggle.color = ex.Color.DarkGray;
+            }
+            else {
+                Options.music = true;
+                musicToggle.color = ex.Color.Red;
+            }
+        });
+        var soundToggle = new ex.Actor(game.width / 2, game.height / 2, 50, 50, ex.Color.Red);
+        this.add(soundToggle);
+        soundToggle.on('pointerdown', function (e) {
+            if (Options.sound) {
+                Options.sound = false;
+                soundToggle.color = ex.Color.DarkGray;
+            }
+            else {
+                Options.sound = true;
+                soundToggle.color = ex.Color.Red;
             }
         });
     };
