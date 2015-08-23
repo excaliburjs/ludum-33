@@ -24,5 +24,10 @@ var Resources = {
    TextureBloodPixelGreen: new ex.Texture("images/blood-pixel-green.png"),
    TextureHeroDead: new ex.Texture("images/hero-dead.png"),
    TextureHeroDead2: new ex.Texture("images/hero-dead-2.png"),
-   TextureHeroDead3: new ex.Texture("images/hero-dead-3.png")
+   TextureHeroDead3: new ex.Texture("images/hero-dead-3.png"),
+   
+   TextureGameOverBg: new ex.Texture("images/game-over-bg.png"),
+   TextureGameOverSlain: new ex.Texture("images/game-over-slain.png"),
+   TextureGameOverHoard: new ex.Texture("images/game-over-hoard.png"),
+   TextureGameOverRetry: new ex.Texture("images/try-again.png")
 };
