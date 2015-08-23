@@ -1,7 +1,7 @@
 var Resources = {
    
    AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
-   AxeSwingHit: new ex.Sound('sounds/axe-swing-hit.wav'),
+   AxeSwingHit: new ex.Sound('sounds/axe-swing-hit-2.wav'),
    BloodSpatter: new ex.Sound('sounds/blood-splatter-1.wav'),
    AnnouncerDefend: new ex.Sound('sounds/defend.wav'),
    

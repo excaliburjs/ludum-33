@@ -7,6 +7,7 @@
 /// <reference path="hero.ts" />
 /// <reference path="treasure.ts" />
 /// <reference path="stats.ts" />
+/// <reference path="options.ts" />
 /// <reference path="gameover.ts" />
 /// <reference path="soundmanager.ts" />
 

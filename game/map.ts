@@ -25,7 +25,6 @@ class Map extends ex.Scene {
 
       // Initialize blood
       this.add(blood);
-      
       this.buildWalls();
       
       // show GUI

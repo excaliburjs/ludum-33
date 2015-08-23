@@ -3,7 +3,7 @@ var Config = {
     MonsterWidth: 48,
     MonsterHeight: 48,
     MonsterSpeed: 200,
-    MonsterAttackRange: 80,
+    MonsterAttackRange: 90,
     MonsterProgressSize: 200,
     MonsterAttackTime: 300,
     BloodMaxAmount: 300,
@@ -33,6 +33,7 @@ var Config = {
     HeroAttackCooldown: 1500,
     // The maximum distance a hero will aggro to the monster
     HeroAggroDistance: 100,
+    HeroMeleeRange: 20,
     // Amount of gold heroes can carry
     TreasureStealAmount: 1,
     // Amount of gold in each treasure stash
@@ -42,7 +43,7 @@ var Config = {
 };
 var Resources = {
     AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
-    AxeSwingHit: new ex.Sound('sounds/axe-swing-hit.wav'),
+    AxeSwingHit: new ex.Sound('sounds/axe-swing-hit-2.wav'),
     BloodSpatter: new ex.Sound('sounds/blood-splatter-1.wav'),
     AnnouncerDefend: new ex.Sound('sounds/defend.wav'),
     SoundMusic: new ex.Sound('sounds/music.mp3'),
@@ -686,10 +687,13 @@ var Hero = (function (_super) {
                 }
                 break;
             case HeroStates.Attacking:
-                if (heroVector.distance(monsterVector) > Config.HeroAggroDistance)
+                if (heroVector.distance(monsterVector) > Config.HeroAggroDistance) {
                     this.clearActions();
-                this._fsm.go(HeroStates.Searching);
-                // console.log('stopping attack');
+                    this._fsm.go(HeroStates.Searching);
+                }
+                else if (heroVector.distance(monsterVector) < Config.HeroMeleeRange) {
+                    this.clearActions();
+                }
                 break;
         }
         if (this._treasure > 0) {
@@ -804,6 +808,32 @@ var Stats = (function () {
     Stats.damageTaken = 0;
     return Stats;
 })();
+var Options = {
+    blood: true,
+    music: true,
+    sound: true
+};
+var Settings = (function (_super) {
+    __extends(Settings, _super);
+    function Settings() {
+        _super.apply(this, arguments);
+    }
+    Settings.prototype.onInitialize = function (engine) {
+        var bloodToggle = new ex.Actor(game.width / 2, game.height / 2, 50, 50, ex.Color.Red);
+        this.add(bloodToggle);
+        bloodToggle.on('pointerdown', function (e) {
+            if (Options.blood) {
+                Options.blood = false;
+                bloodToggle.color = ex.Color.DarkGray;
+            }
+            else {
+                Options.blood = true;
+                bloodToggle.color = ex.Color.Red;
+            }
+        });
+    };
+    return Settings;
+})(ex.Scene);
 var GameOver = (function (_super) {
     __extends(GameOver, _super);
     function GameOver() {
@@ -830,6 +860,7 @@ var SoundManager = (function () {
                 resource.setVolume(1);
             }
         });
+        Resources.AxeSwingHit.setVolume(0.2);
         Resources.SoundMusic.setVolume(0.05);
         Resources.SoundMusic.play();
     };
@@ -852,6 +883,7 @@ var SoundManager = (function () {
 /// <reference path="hero.ts" />
 /// <reference path="treasure.ts" />
 /// <reference path="stats.ts" />
+/// <reference path="options.ts" />
 /// <reference path="gameover.ts" />
 /// <reference path="soundmanager.ts" />
 var game = new ex.Engine({
