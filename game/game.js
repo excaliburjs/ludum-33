@@ -360,7 +360,7 @@ var Monster = (function (_super) {
     Monster.prototype._attack = function () {
         _.forIn(this._attackable, function (hero) {
             // hero.blink(500, 500, 5); //can't because moving already (no parallel actions support)
-            game.currentScene.camera.shake(3, 3, 300);
+            game.currentScene.camera.shake(2, 2, 200);
             hero.Health--;
         });
     };
