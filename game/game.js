@@ -21,7 +21,7 @@ var Config = {
     // Hero with loot speed (in px/s)
     HeroFleeingSpeed: 80,
     // The cooldown amount for a hero's attack
-    HeroAttackCooldown: 2000,
+    HeroAttackCooldown: 1500,
     // The maximum distance a hero will aggro to the monster
     HeroAggroDistance: 100,
     // Amount of gold heroes can carry
@@ -483,6 +483,7 @@ var Hero = (function (_super) {
         this.Health = Config.HeroHealth;
         this._treasure = 0;
         this._attackCooldown = Config.HeroAttackCooldown;
+        this._hasHitMinotaur = false;
         this._fsm = new TypeState.FiniteStateMachine(HeroStates.Searching);
         // declare valid state transitions
         this._fsm.from(HeroStates.Searching).to(HeroStates.Attacking, HeroStates.Looting);
@@ -520,9 +521,13 @@ var Hero = (function (_super) {
                 }
             }
             else if (e.other instanceof Monster) {
-                if (_this._attackCooldown == 0) {
+                if (_this._attackCooldown == 0 && _this._hasHitMinotaur) {
                     var monster = e.other;
                     monster.health--;
+                    _this._attackCooldown = Config.HeroAttackCooldown;
+                }
+                if (!_this._hasHitMinotaur) {
+                    _this._hasHitMinotaur = true;
                     _this._attackCooldown = Config.HeroAttackCooldown;
                 }
             }

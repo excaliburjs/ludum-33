@@ -25,7 +25,7 @@ var Config = {
    // Hero with loot speed (in px/s)
    HeroFleeingSpeed: 80,
    // The cooldown amount for a hero's attack
-   HeroAttackCooldown: 2000,
+   HeroAttackCooldown: 1500,
    // The maximum distance a hero will aggro to the monster
    HeroAggroDistance: 100,
    
