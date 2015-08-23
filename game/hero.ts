@@ -104,6 +104,7 @@ class Hero extends ex.Actor {
       super.update(engine, delta);
       
       if (this.Health <= 0) {
+            Resources.BloodSpatter.play();
             Stats.numHeroesKilled++;
             // map.getTreasures()[0].return(this._treasure);
             this._chestLooted.return(this._treasure);

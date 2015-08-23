@@ -417,6 +417,7 @@ var Monster = (function (_super) {
 var Resources = {
     AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
     AxeSwingHit: new ex.Sound('sounds/axe-swing-hit.wav'),
+    BloodSpatter: new ex.Sound('sounds/blood-splatter-1.wav'),
     TextureHero: new ex.Texture("images/hero.png"),
     TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
     TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
@@ -517,6 +518,7 @@ var Hero = (function (_super) {
     Hero.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
         if (this.Health <= 0) {
+            Resources.BloodSpatter.play();
             Stats.numHeroesKilled++;
             // map.getTreasures()[0].return(this._treasure);
             this._chestLooted.return(this._treasure);
