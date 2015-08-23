@@ -1,33 +1,37 @@
-class BloodEmitter extends ex.Actor {
+class Blood extends ex.Actor {
      
-   public amount: number = 0.5;
-   public force: number = 0.5;
-   public angle: number = 0;
    private _bleedTimer = 0;
-   private _splatterTimer = 0;
-   private _particles: {x: number, y: number, v: number, d: ex.Vector}[] = [];
+   private _scvs: HTMLCanvasElement;
+   private _sctx: CanvasRenderingContext2D;
+   private _emitters: IBloodEmitter[] = [];
+   public static BloodPixel: ex.Sprite;
+   public static BloodPixelGreen: ex.Sprite;
    
-   constructor(x: number, y: number) {
-      super(x, y);
+   constructor() {
+      super(0, 0);
       
+      this._scvs = document.createElement('canvas');
+      this._scvs.width = 960;
+      this._scvs.height = 960;
+      this._sctx = this._scvs.getContext('2d');
+      this._sctx.globalCompositeOperation = 'source-over';     
+      
+      this.traits.length = 0;
    }
    
-   public splatter() {
-      this._splatterTimer = 200;
-      this._particles.length = 0;
+   public onInitialize() {
+      Blood.BloodPixel = Resources.TextureBloodPixel.asSprite();
+      Blood.BloodPixelGreen = Resources.TextureBloodPixelGreen.asSprite();
+   }
+   
+   public splatter(x: number, y: number, sprite: ex.Sprite, amount: number = 0.4, force: number = 0.5, angle: number = 0) {
       
-      var pixelAmount = this.amount * 500;
-      var vMin = 5;
-      var vMax = 100;
+      this._emitters.push(new SplatterEmitter(x, y, sprite, amount, force, angle - ex.Util.toRadians(15), angle + ex.Util.toRadians(15)));            
+   }
+   
+   public pop(x: number, y: number, sprite: ex.Sprite, amount: number = 0.4, force: number = 0.5) {
       
-      for (var i = 0; i < pixelAmount; i++) {
-         this._particles.push({
-            x: this.x,
-            y: this.y,
-            d: ex.Vector.fromAngle(this.angle + ex.Util.randomInRange(-Math.PI / 4, Math.PI / 4)),
-            v: ex.Util.randomIntInRange(vMin, vMax)
-         });
-      }
+      this._emitters.push(new SplatterEmitter(x, y, sprite, amount, force, 0, Math.PI * 2));            
    }
    
    public bleed(duration: number) {
@@ -37,23 +41,121 @@ class BloodEmitter extends ex.Actor {
    public draw(ctx: CanvasRenderingContext2D, delta: number) {
       super.draw(ctx, delta);
       
-      // todo
+      // update particle positions
+      var emitter: IBloodEmitter, i;
+      for (i = 0; i < this._emitters.length; i++) {         
+         this._emitters[i].draw(this._sctx, delta);
+      }
+      
+      // draw shadow ctx
+      ctx.drawImage(this._scvs, 0, 0);
    }
    
    public update(engine: ex.Engine, delta: number) {
+      super.update(engine, delta);
       
       this._bleedTimer = Math.max(0, this._bleedTimer - delta);
-      this._splatterTimer = Math.max(0, this._splatterTimer - delta);
       
       // update particle positions
-      var particle, i, ray;
-      for (i = 0; i < this._particles.length; i++) {
+      var emitter: IBloodEmitter, i;
+      for (i = this._emitters.length -1; i >= 0; i--) {
+         emitter = this._emitters[i];
+         emitter.update(engine, delta);
          
-         particle = this._particles[i];
-         
-         ray = new ex.Ray(new ex.Point(particle.x, particle.y), ex.Vector.fromAngle(particle.d));
-         
-         particle.x = (this.force * (this._splatterTimer * particle.v));
+         if (emitter.done) {
+            this._emitters.splice(i, 1);
+         }
       }
    }
+}
+
+interface IBloodEmitter {
+   done: boolean;
+   draw(ctx: CanvasRenderingContext2D, delta: number): void;
+   update(engine: ex.Engine, delta: number): void;
+}
+
+interface IBloodParticle {
+   x: number;
+   y: number;
+   v: number;
+   d: ex.Vector;
+   f: number;
+   av: number;
+   s: number;
+}
+
+class SplatterEmitter implements IBloodEmitter {
+   private _particles: IBloodParticle[] = [];      
+   private _stopTimer = 200;
+   public done = false;
+   
+   /**
+    *
+    */
+   constructor(public x: number, public y: number, public sprite: ex.Sprite, public amount: number, public force: number, public minAngle: number, public maxAngle: number) {      
+      
+      var pixelAmount = amount * Config.BloodMaxAmount;
+      var vMin = Config.BloodVelocityMin;
+      var vMax = force * Config.BloodVelocityMax;
+      var xMin = x - Config.BloodXYVariation;
+      var yMin = y - Config.BloodXYVariation;
+      var xMax = x + Config.BloodXYVariation;
+      var yMax = y + Config.BloodXYVariation;
+      
+      // curve in direction
+      var av = ex.Util.randomInRange(-Config.BloodSplatterAngleVariation, Config.BloodSplatterAngleVariation);
+      
+      for (var i = 0; i < pixelAmount; i++) {
+         this._particles.push({
+            x: ex.Util.randomIntInRange(xMin, xMax),
+            y: ex.Util.randomIntInRange(yMin, yMax),
+            f: ex.Util.randomInRange(Config.BloodMinFriction, Config.BloodMaxFriction),
+            d: ex.Vector.fromAngle(ex.Util.randomInRange(minAngle, maxAngle)),
+            v: ex.Util.randomIntInRange(vMin, vMax),
+            av: av,
+            s: ex.Util.randomInRange(1, 2)
+         });
+      }
+   }
+   
+   public update(engine: ex.Engine, delta: number): void {
+      var i: number, particle: IBloodParticle, currPos: ex.Vector, d: ex.Vector, vel: ex.Vector, f: ex.Vector;
+      
+      this._stopTimer -= delta;
+      
+      if (this._stopTimer < 0) {
+         this.done = true;
+         return;
+      }
+      
+      for (i = 0; i < this._particles.length; i++) {
+         particle = this._particles[i];
+         
+         currPos = new ex.Vector(particle.x, particle.y);
+         d = particle.d.rotate(particle.av, ex.Vector.Zero);
+         vel = d.scale(particle.v);
+         f = vel.scale(-1).scale(particle.f);
+         vel = vel.plus(f);
+         
+         currPos = currPos.plus(vel);
+         
+         particle.x = currPos.x;
+         particle.y = currPos.y;
+         particle.v = vel.distance();
+      }
+   }
+   
+   public draw(ctx: CanvasRenderingContext2D, delta: number): void {
+      var i: number, particle: IBloodParticle;
+      
+      for (i = 0; i < this._particles.length; i++) {
+         particle = this._particles[i];
+         
+         this.sprite.scale.setTo(particle.s, particle.s);
+         this.sprite.draw(ctx, particle.x, particle.y);
+      }
+      
+   }
+   
 }
