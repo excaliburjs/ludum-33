@@ -38,6 +38,7 @@ class Hero extends ex.Actor {
    
    private _lootIndicator: ex.Actor;
    private _treasure: number = 0;
+   private _chestLooted: Treasure;
    private _fsm: TypeState.FiniteStateMachine<HeroStates>;
    private _attackCooldown: number = Config.HeroAttackCooldown;
 
@@ -76,9 +77,15 @@ class Hero extends ex.Actor {
       
       this.on('collision', (e?: ex.CollisionEvent) => {
          if (e.other instanceof Treasure) {
-            if ((<Hero>e.actor)._treasure === 0) {
-               (<Hero>e.actor)._treasure = (<Treasure>e.other).steal();
-               (<Hero>e.actor)._fsm.go(HeroStates.Looting);
+            var hero = <Hero>e.actor;
+            if (hero._treasure === 0) {
+               hero._treasure = (<Treasure>e.other).steal();
+               if (hero._treasure === 0) {
+                  hero._fsm.go(HeroStates.Searching);
+               } else {
+                  hero._fsm.go(HeroStates.Looting);
+               }
+               
             }
          } else if (e.other instanceof Monster) {
             if (this._attackCooldown == 0) {
@@ -98,7 +105,8 @@ class Hero extends ex.Actor {
       
       if (this.Health <= 0) {
             Stats.numHeroesKilled++;
-            map.getTreasures()[0].return(this._treasure);
+            // map.getTreasures()[0].return(this._treasure);
+            this._chestLooted.return(this._treasure);
             HeroSpawner.despawn(this);
       }
       this.setZIndex(this.y);
@@ -169,6 +177,7 @@ class Hero extends ex.Actor {
       
       // move to it
       this.moveTo(loot.x, loot.y, Config.HeroSpeed);
+      this._chestLooted = loot;
    }
    
    private onLooting(from?: HeroStates) {

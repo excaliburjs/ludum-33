@@ -8,6 +8,7 @@ var Resources = {
    TextureMonsterRight: new ex.Texture("images/minotaurv2right.png"),
    TextureMonsterUp: new ex.Texture("images/minotaurv2back.png"),
    TextureTreasure: new ex.Texture("images/treasure.png"),
+   TextureTreasureEmpty: new ex.Texture("images/treasure-empty.png"),
    TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
    TextureMonsterIndicator: new ex.Texture("images/mino-indicator.png"),
    TextureMap: new ex.Texture("images/map.png"),

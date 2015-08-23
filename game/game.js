@@ -372,7 +372,7 @@ var Monster = (function (_super) {
     Monster.prototype._attack = function () {
         _.forIn(this._attackable, function (hero) {
             // hero.blink(500, 500, 5); //can't because moving already (no parallel actions support)
-            game.currentScene.camera.shake(3, 3, 300);
+            game.currentScene.camera.shake(2, 2, 200);
             hero.Health--;
         });
     };
@@ -399,6 +399,7 @@ var Resources = {
     TextureMonsterRight: new ex.Texture("images/minotaurv2right.png"),
     TextureMonsterUp: new ex.Texture("images/minotaurv2back.png"),
     TextureTreasure: new ex.Texture("images/treasure.png"),
+    TextureTreasureEmpty: new ex.Texture("images/treasure-empty.png"),
     TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
     TextureMonsterIndicator: new ex.Texture("images/mino-indicator.png"),
     TextureMap: new ex.Texture("images/map.png"),
@@ -468,9 +469,15 @@ var Hero = (function (_super) {
         this.collisionType = ex.CollisionType.Passive;
         this.on('collision', function (e) {
             if (e.other instanceof Treasure) {
-                if (e.actor._treasure === 0) {
-                    e.actor._treasure = e.other.steal();
-                    e.actor._fsm.go(HeroStates.Looting);
+                var hero = e.actor;
+                if (hero._treasure === 0) {
+                    hero._treasure = e.other.steal();
+                    if (hero._treasure === 0) {
+                        hero._fsm.go(HeroStates.Searching);
+                    }
+                    else {
+                        hero._fsm.go(HeroStates.Looting);
+                    }
                 }
             }
             else if (e.other instanceof Monster) {
@@ -487,7 +494,8 @@ var Hero = (function (_super) {
         _super.prototype.update.call(this, engine, delta);
         if (this.Health <= 0) {
             Stats.numHeroesKilled++;
-            map.getTreasures()[0].return(this._treasure);
+            // map.getTreasures()[0].return(this._treasure);
+            this._chestLooted.return(this._treasure);
             HeroSpawner.despawn(this);
         }
         this.setZIndex(this.y);
@@ -544,6 +552,7 @@ var Hero = (function (_super) {
         var loot = Util.pickRandom(treasures);
         // move to it
         this.moveTo(loot.x, loot.y, Config.HeroSpeed);
+        this._chestLooted = loot;
     };
     Hero.prototype.onLooting = function (from) {
         var _this = this;
@@ -579,19 +588,33 @@ var Treasure = (function (_super) {
         this.anchor.setTo(0, 0);
     }
     Treasure.prototype.onInitialize = function (engine) {
-        var treasure = Resources.TextureTreasure.asSprite().clone();
-        this.addDrawing(treasure);
+        this.addDrawing("notempty", Resources.TextureTreasure.asSprite());
+        this.addDrawing("empty", Resources.TextureTreasureEmpty.asSprite());
         this.collisionType = ex.CollisionType.Passive;
     };
     Treasure.prototype.getAmount = function () {
         return this._hoard;
     };
     Treasure.prototype.steal = function () {
-        this._hoard -= Config.TreasureStealAmount;
-        return Config.TreasureStealAmount;
+        if (this._hoard > 0) {
+            this._hoard -= Config.TreasureStealAmount;
+            return Config.TreasureStealAmount;
+        }
+        else {
+            return 0;
+        }
     };
     Treasure.prototype.return = function (amount) {
         this._hoard += amount;
+    };
+    Treasure.prototype.update = function (engine, delta) {
+        _super.prototype.update.call(this, engine, delta);
+        if (this._hoard <= 0) {
+            this.setDrawing("empty");
+        }
+        else {
+            this.setDrawing("notempty");
+        }
     };
     return Treasure;
 })(ex.Actor);
