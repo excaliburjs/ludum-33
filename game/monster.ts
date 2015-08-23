@@ -14,6 +14,7 @@ class Monster extends ex.Actor {
    
    private _isAttacking: boolean = false;
    private _timeLeftAttacking: number = 0;
+   private _direction: string = "none";
    
    constructor(x, y){
       super(x, y, Config.MonsterWidth, Config.MonsterHeight);
@@ -133,13 +134,25 @@ class Monster extends ex.Actor {
          that._isAttacking = true;
          that._timeLeftAttacking = Config.MonsterAttackTime;
       });
+      
+      
+   }
+   
+   private _findFirstValidPad(engine: ex.Engine): ex.Input.Gamepad {
+      var gamePad;
+      for(var i = 1; i < 5; i++) {
+         gamePad = engine.input.gamepads.at(i);
+         if(gamePad && gamePad._buttons && gamePad._buttons.length > 0){
+            return gamePad;
+         }
+      }
    }
    
    public update(engine: ex.Engine, delta: number): void {
       super.update(engine, delta);
       
       if (this.health <= 0) {
-         map._gameOver();
+         map._gameOver(GameOverType.Slain);
       }
       
       this._attackable.length = 0;
@@ -148,6 +161,68 @@ class Monster extends ex.Actor {
       // clear move
       this.dx = 0;
       this.dy = 0;
+      
+      
+      var prevRotation = this._rotation;
+      this._rotation = ex.Util.canonicalizeAngle(new ex.Vector(this._mouseX - this.x, this._mouseY - this.y).toAngle());
+      
+      // Controller input
+      var pad = this._findFirstValidPad(engine);
+      if(pad) {
+         // sticks
+         var leftAxisY = pad.getAxes(ex.Input.Axes.LeftStickY);
+         var leftAxisX = pad.getAxes(ex.Input.Axes.LeftStickX);
+         var rightAxisX = pad.getAxes(ex.Input.Axes.RightStickX);
+         var rightAxisY = pad.getAxes(ex.Input.Axes.RightStickY);
+         
+         var leftVector = new ex.Vector(leftAxisX, leftAxisY);
+         var rightVector = new ex.Vector(rightAxisX, rightAxisY);
+         
+         if(pad.getButton(ex.Input.Buttons.RightTrigger) > .2 || 
+            pad.getButton(ex.Input.Buttons.Face1) > 0) {
+            this._attack();
+            this._isAttacking = true;
+            this._timeLeftAttacking = Config.MonsterAttackTime;
+         }
+         
+         
+         if(leftVector.distance() > .2) {
+            this._rotation = ex.Util.canonicalizeAngle(leftVector.normalize().toAngle());
+            if(!this._isAttacking){
+               var speed = leftVector.scale(Config.MonsterSpeed);
+               this.dx = speed.x;
+               this.dy = speed.y;
+               
+               if(Math.abs(this.dx) > Math.abs(this.dy) && this.dx > 0) {
+                  if(this._direction !== "walkRight") {
+                     this.setDrawing("walkRight");
+                     this._direction = "walkRight"
+                  }
+               }
+               if(Math.abs(this.dy) > Math.abs(this.dx) && this.dy < 0) {
+                  if(this._direction !== "walkUp") {
+                     this.setDrawing("walkUp");
+                     this._direction = "walkUp";
+                  }
+               }
+               
+               if(Math.abs(this.dx) > Math.abs(this.dy) && this.dx < 0) {
+                  if(this._direction !== "walkLeft") {
+                     this.setDrawing("walkLeft");
+                     this._direction = "walkLeft";
+                  }
+               }
+               if(Math.abs(this.dy) > Math.abs(this.dx) && this.dy > 0) {
+                  if(this._direction !== "walkDown") {
+                     this.setDrawing("walkDown");
+                     this._direction = "walkDown";
+                  }
+               }
+               
+            }
+         }
+      }
+      
       
       // WASD
       if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.W) || 
@@ -186,28 +261,27 @@ class Monster extends ex.Actor {
          this.setDrawing("idleDown");
       }
 
-      var prevRotation = this._rotation;
-      this._rotation = ex.Util.canonicalizeAngle(new ex.Vector(this._mouseX - this.x, this._mouseY - this.y).toAngle());
       
       if(this._isAttacking) {
-      if(this._rotation < Math.PI/4 || this._rotation > Math.PI * (7/4)) {
-         this.setDrawing("attackRight");
-      }
-      
-      if(this._rotation > Math.PI/4 && this._rotation < Math.PI * (3/4)) {
-         this.setDrawing("attackDown");
-      }
-      
-      if(this._rotation > Math.PI * (3/4) && this._rotation < Math.PI * (5/4)){
-         this.setDrawing("attackLeft");
-      }
+         if(this._rotation < Math.PI/4 || this._rotation > Math.PI * (7/4)) {
+            this.setDrawing("attackRight");
+         }
+         
+         if(this._rotation > Math.PI/4 && this._rotation < Math.PI * (3/4)) {
+            this.setDrawing("attackDown");
+         }
+         
+         if(this._rotation > Math.PI * (3/4) && this._rotation < Math.PI * (5/4)){
+            this.setDrawing("attackLeft");
+         }
       
          if(this._rotation > Math.PI * (5/4) && this._rotation < Math.PI * (7/4)){
             this.setDrawing("attackUp");
          }
+         this._direction = "attack";
          this._timeLeftAttacking -= delta;
-         if(this._timeLeftAttacking < 0){
-            this._isAttacking = false;
+         if(this._timeLeftAttacking <= 0){
+            this._isAttacking = false;            
          }
       }      
       

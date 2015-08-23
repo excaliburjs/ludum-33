@@ -1,11 +1,52 @@
-class GameOver extends ex.Scene {
+enum GameOverType {
+   Hoard,
+   Slain
+}
+
+class GameOver extends ex.Scene {   
+   private _type: ex.Actor;
+   private _labelHeroesKilled: ex.Label;
+   private _labelHeroesEscaped: ex.Label;
+   private _labelGoldLost: ex.Label;
+   private _labelDamageTaken: ex.Label;
    
    public onInitialize(engine: ex.Engine) {
       game.backgroundColor = ex.Color.Black;
+      var bg = new ex.Actor(0, 0, game.getWidth(), game.getHeight());
+      bg.anchor.setTo(0, 0);
+      bg.addDrawing(Resources.TextureGameOverBg);      
+      this.add(bg);
       
-      var retryButton = new ex.Actor(game.width / 2, game.height / 2, 300, 60, ex.Color.DarkGray)
+      this._type = new ex.Actor(0, 0, game.getWidth(), game.getHeight());
+      this._type.anchor.setTo(0, 0);
+      this._type.addDrawing("hoard", Resources.TextureGameOverHoard.asSprite());
+      this._type.addDrawing("slain", Resources.TextureGameOverSlain.asSprite());
+      this.add(this._type);
+      
+      // stats
+      this._labelHeroesKilled = new ex.Label(null, 219, 340, "36px Arial");
+      this._labelHeroesKilled.textAlign = ex.TextAlign.Center;
+      this._labelHeroesEscaped = new ex.Label(null, 402, 340, "36px Arial");
+      this._labelHeroesEscaped.textAlign = ex.TextAlign.Center;
+      this._labelGoldLost = new ex.Label(null, 570, 340, "36px Arial");
+      this._labelGoldLost.textAlign = ex.TextAlign.Center;
+      this._labelDamageTaken = new ex.Label(null, 743, 340, "36px Arial");
+      this._labelDamageTaken.textAlign = ex.TextAlign.Center;
+      
+      this._labelHeroesKilled.color = ex.Color.White;
+      this._labelHeroesEscaped.color  = ex.Color.White;
+      this._labelGoldLost.color  = ex.Color.White;
+      this._labelDamageTaken.color  = ex.Color.White;
+      
+      this.add(this._labelHeroesKilled);
+      this.add(this._labelHeroesEscaped);
+      this.add(this._labelGoldLost);
+      this.add(this._labelDamageTaken);
+      
+      var retryButton = new ex.Actor(game.width / 2, 423, 252, 56);
+      retryButton.addDrawing(Resources.TextureGameOverRetry);      
       this.add(retryButton);
-      // reset the game
+
       retryButton.on('pointerdown', (e?: ex.Input.PointerEvent) => {
          isGameOver = false;
          
@@ -32,5 +73,18 @@ class GameOver extends ex.Scene {
          
          game.goToScene('map');
       });
+   }
+   
+   public update(engine: ex.Engine, delta: number) {
+      this._labelHeroesKilled.text = Stats.numHeroesKilled.toString();
+      this._labelHeroesEscaped.text = Stats.numHeroesEscaped.toString();
+      this._labelGoldLost.text = Stats.goldLost.toString();
+      this._labelDamageTaken.text = Stats.damageTaken.toString();
+      
+      // center labels
+   }
+   
+   public setType(type: GameOverType): void {
+      this._type.setDrawing(type === GameOverType.Hoard ? "hoard" : "slain");
    }
 }
