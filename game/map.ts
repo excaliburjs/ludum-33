@@ -26,6 +26,7 @@ class Map extends ex.Scene {
             resource.setVolume(1);
          }
       });
+      Resources.AxeSwingHit.setVolume(0.2);
       
       this.buildWalls();
       

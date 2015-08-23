@@ -3,7 +3,7 @@ var Config = {
     MonsterWidth: 48,
     MonsterHeight: 48,
     MonsterSpeed: 200,
-    MonsterAttackRange: 80,
+    MonsterAttackRange: 90,
     MonsterProgressSize: 200,
     MonsterAttackTime: 300,
     CameraElasticity: 0.1,
@@ -63,6 +63,7 @@ var Map = (function (_super) {
                 resource.setVolume(1);
             }
         });
+        Resources.AxeSwingHit.setVolume(0.2);
         this.buildWalls();
         // show GUI
         var progressBack = new ex.UIActor(60, 23, Config.TreasureProgressSize + 4, 40);
@@ -431,7 +432,7 @@ var Monster = (function (_super) {
 })(ex.Actor);
 var Resources = {
     AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
-    AxeSwingHit: new ex.Sound('sounds/axe-swing-hit.wav'),
+    AxeSwingHit: new ex.Sound('sounds/axe-swing-hit-2.wav'),
     BloodSpatter: new ex.Sound('sounds/blood-splatter-1.wav'),
     TextureHero: new ex.Texture("images/hero.png"),
     TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
