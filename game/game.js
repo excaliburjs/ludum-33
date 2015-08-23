@@ -442,7 +442,8 @@ var Hero = (function (_super) {
                 break;
             case HeroStates.Attacking:
                 if (heroVector.distance(monsterVector) > Config.HeroAggroDistance)
-                    this._fsm.go(HeroStates.Searching);
+                    this.clearActions();
+                this._fsm.go(HeroStates.Searching);
                 // console.log('stopping attack');
                 break;
         }
