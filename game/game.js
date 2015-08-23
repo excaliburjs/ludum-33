@@ -63,7 +63,11 @@ var Resources = {
     TextureBloodPixelGreen: new ex.Texture("images/blood-pixel-green.png"),
     TextureHeroDead: new ex.Texture("images/hero-dead.png"),
     TextureHeroDead2: new ex.Texture("images/hero-dead-2.png"),
-    TextureHeroDead3: new ex.Texture("images/hero-dead-3.png")
+    TextureHeroDead3: new ex.Texture("images/hero-dead-3.png"),
+    TextureGameOverBg: new ex.Texture("images/game-over-bg.png"),
+    TextureGameOverSlain: new ex.Texture("images/game-over-slain.png"),
+    TextureGameOverHoard: new ex.Texture("images/game-over-hoard.png"),
+    TextureGameOverRetry: new ex.Texture("images/try-again.png")
 };
 var Util = (function () {
     function Util() {
@@ -195,7 +199,7 @@ var Map = (function (_super) {
         var progress = monsterHealth / Config.MonsterHealth;
         this._monsterProgress.setWidth(Math.floor(progress * Config.MonsterProgressSize));
         if ((curr + looting) <= 0) {
-            this._gameOver();
+            this._gameOver(GameOverType.Hoard);
         }
         var focus = game.currentScene.camera.getFocus().toVector();
         var position = new ex.Vector(this._player.x, this._player.y);
@@ -210,11 +214,12 @@ var Map = (function (_super) {
         this._treasures.push(t);
         this.add(t);
     };
-    Map.prototype._gameOver = function () {
+    Map.prototype._gameOver = function (type) {
         //TODO
         console.log('game over');
         isGameOver = true;
         game.goToScene('gameover');
+        gameOver.setType(type);
     };
     Map.prototype.onDeactivate = function () {
         SoundManager.stop();
@@ -447,7 +452,7 @@ var Monster = (function (_super) {
         var _this = this;
         _super.prototype.update.call(this, engine, delta);
         if (this.health <= 0) {
-            map._gameOver();
+            map._gameOver(GameOverType.Slain);
         }
         this._attackable.length = 0;
         this._detectAttackable();
@@ -843,6 +848,11 @@ var Settings = (function (_super) {
     };
     return Settings;
 })(ex.Scene);
+var GameOverType;
+(function (GameOverType) {
+    GameOverType[GameOverType["Hoard"] = 0] = "Hoard";
+    GameOverType[GameOverType["Slain"] = 1] = "Slain";
+})(GameOverType || (GameOverType = {}));
 var GameOver = (function (_super) {
     __extends(GameOver, _super);
     function GameOver() {
@@ -850,12 +860,49 @@ var GameOver = (function (_super) {
     }
     GameOver.prototype.onInitialize = function (engine) {
         game.backgroundColor = ex.Color.Black;
-        var retryButton = new ex.Actor(game.width / 2, game.height / 2, 300, 60, ex.Color.DarkGray);
+        var bg = new ex.Actor(0, 0, game.getWidth(), game.getHeight());
+        bg.anchor.setTo(0, 0);
+        bg.addDrawing(Resources.TextureGameOverBg);
+        this.add(bg);
+        this._type = new ex.Actor(0, 0, game.getWidth(), game.getHeight());
+        this._type.anchor.setTo(0, 0);
+        this._type.addDrawing("hoard", Resources.TextureGameOverHoard.asSprite());
+        this._type.addDrawing("slain", Resources.TextureGameOverSlain.asSprite());
+        this.add(this._type);
+        // stats
+        this._labelHeroesKilled = new ex.Label(null, 219, 335, "36px Arial");
+        this._labelHeroesKilled.textAlign = ex.TextAlign.Center;
+        this._labelHeroesEscaped = new ex.Label(null, 402, 335, "36px Arial");
+        this._labelHeroesEscaped.textAlign = ex.TextAlign.Center;
+        this._labelGoldLost = new ex.Label(null, 570, 335, "36px Arial");
+        this._labelGoldLost.textAlign = ex.TextAlign.Center;
+        this._labelDamageTaken = new ex.Label(null, 743, 335, "36px Arial");
+        this._labelDamageTaken.textAlign = ex.TextAlign.Center;
+        this._labelHeroesKilled.color = ex.Color.White;
+        this._labelHeroesEscaped.color = ex.Color.White;
+        this._labelGoldLost.color = ex.Color.White;
+        this._labelDamageTaken.color = ex.Color.White;
+        this.add(this._labelHeroesKilled);
+        this.add(this._labelHeroesEscaped);
+        this.add(this._labelGoldLost);
+        this.add(this._labelDamageTaken);
+        var retryButton = new ex.Actor(game.width / 2, 423, 252, 56);
+        retryButton.addDrawing(Resources.TextureGameOverRetry);
         this.add(retryButton);
         retryButton.on('pointerdown', function (e) {
             isGameOver = false;
             //TODO reset game
         });
+    };
+    GameOver.prototype.update = function (engine, delta) {
+        this._labelHeroesKilled.text = Stats.numHeroesKilled.toString();
+        this._labelHeroesEscaped.text = Stats.numHeroesEscaped.toString();
+        this._labelGoldLost.text = Stats.goldLost.toString();
+        this._labelDamageTaken.text = Stats.damageTaken.toString();
+        // center labels
+    };
+    GameOver.prototype.setType = function (type) {
+        this._type.setDrawing(type === GameOverType.Hoard ? "hoard" : "slain");
     };
     return GameOver;
 })(ex.Scene);

@@ -158,7 +158,7 @@ class Map extends ex.Scene {
       this._monsterProgress.setWidth(Math.floor(progress * Config.MonsterProgressSize));
             
       if ((curr + looting) <= 0) {
-         this._gameOver();
+         this._gameOver(GameOverType.Hoard);
       }
 
       var focus = game.currentScene.camera.getFocus().toVector();
@@ -176,11 +176,12 @@ class Map extends ex.Scene {
       this.add(t);
    }   
    
-   public _gameOver() {
+   public _gameOver(type: GameOverType) {
       //TODO
       console.log('game over');
       isGameOver = true;
       game.goToScene('gameover');
+      gameOver.setType(type);
    }
    
    public onDeactivate() {

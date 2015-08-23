@@ -127,7 +127,7 @@ class Monster extends ex.Actor {
       super.update(engine, delta);
       
       if (this.health <= 0) {
-         map._gameOver();
+         map._gameOver(GameOverType.Slain);
       }
       
       this._attackable.length = 0;
