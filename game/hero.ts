@@ -141,16 +141,19 @@ class Hero extends ex.Actor {
       
       switch (this._fsm.currentState) {
          case HeroStates.Searching:
-         if (heroVector.distance(monsterVector) < Config.HeroAggroDistance) {
-            this._fsm.go(HeroStates.Attacking);
-            // console.log('switching to attack');
-         }
+            if (heroVector.distance(monsterVector) < Config.HeroAggroDistance) {
+               this._fsm.go(HeroStates.Attacking);
+               // console.log('switching to attack');
+            }
          break;
          case HeroStates.Attacking:
-         if (heroVector.distance(monsterVector) > Config.HeroAggroDistance)
-            this.clearActions();
-            this._fsm.go(HeroStates.Searching);
-            // console.log('stopping attack');
+            if (heroVector.distance(monsterVector) > Config.HeroAggroDistance) {
+               this.clearActions();
+               this._fsm.go(HeroStates.Searching);
+               // console.log('stopping attack');
+            } else if (heroVector.distance(monsterVector) < Config.HeroMeleeRange) {
+               this.clearActions();
+            }
          break;
       }
 

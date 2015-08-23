@@ -38,6 +38,8 @@ var Config = {
    HeroAttackCooldown: 1500,
    // The maximum distance a hero will aggro to the monster
    HeroAggroDistance: 100,
+
+   HeroMeleeRange: 20,
    
    // Amount of gold heroes can carry
    TreasureStealAmount: 1,   

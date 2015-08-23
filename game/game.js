@@ -33,6 +33,7 @@ var Config = {
     HeroAttackCooldown: 1500,
     // The maximum distance a hero will aggro to the monster
     HeroAggroDistance: 100,
+    HeroMeleeRange: 20,
     // Amount of gold heroes can carry
     TreasureStealAmount: 1,
     // Amount of gold in each treasure stash
@@ -42,7 +43,7 @@ var Config = {
 };
 var Resources = {
     AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
-    AxeSwingHit: new ex.Sound('sounds/axe-swing-hit.wav'),
+    AxeSwingHit: new ex.Sound('sounds/axe-swing-hit-2.wav'),
     BloodSpatter: new ex.Sound('sounds/blood-splatter-1.wav'),
     TextureHero: new ex.Texture("images/hero.png"),
     TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
@@ -92,12 +93,9 @@ var Map = (function (_super) {
                 resource.setVolume(1);
             }
         });
-<<<<<<< HEAD
         Resources.AxeSwingHit.setVolume(0.2);
-=======
         // Initialize blood
         this.add(blood);
->>>>>>> 9170f07c2ad94de61541bc56bd2e860a82130f35
         this.buildWalls();
         // show GUI
         var progressBack = new ex.UIActor(60, 23, Config.TreasureProgressSize + 4, 40);
@@ -572,25 +570,6 @@ var Monster = (function (_super) {
     };
     return Monster;
 })(ex.Actor);
-<<<<<<< HEAD
-var Resources = {
-    AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
-    AxeSwingHit: new ex.Sound('sounds/axe-swing-hit-2.wav'),
-    BloodSpatter: new ex.Sound('sounds/blood-splatter-1.wav'),
-    TextureHero: new ex.Texture("images/hero.png"),
-    TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
-    TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
-    TextureMonsterRight: new ex.Texture("images/minotaurv2right.png"),
-    TextureMonsterUp: new ex.Texture("images/minotaurv2back.png"),
-    TextureTreasure: new ex.Texture("images/treasure.png"),
-    TextureTreasureEmpty: new ex.Texture("images/treasure-empty.png"),
-    TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
-    TextureMonsterIndicator: new ex.Texture("images/mino-indicator.png"),
-    TextureMap: new ex.Texture("images/map.png"),
-    TextureTextDefend: new ex.Texture("images/text-defend.png")
-};
-=======
->>>>>>> 9170f07c2ad94de61541bc56bd2e860a82130f35
 var HeroStates;
 (function (HeroStates) {
     HeroStates[HeroStates["Searching"] = 0] = "Searching";
@@ -715,10 +694,13 @@ var Hero = (function (_super) {
                 }
                 break;
             case HeroStates.Attacking:
-                if (heroVector.distance(monsterVector) > Config.HeroAggroDistance)
+                if (heroVector.distance(monsterVector) > Config.HeroAggroDistance) {
                     this.clearActions();
-                this._fsm.go(HeroStates.Searching);
-                // console.log('stopping attack');
+                    this._fsm.go(HeroStates.Searching);
+                }
+                else if (heroVector.distance(monsterVector) < Config.HeroMeleeRange) {
+                    this.clearActions();
+                }
                 break;
         }
         if (this._treasure > 0) {
@@ -833,12 +815,31 @@ var Stats = (function () {
     Stats.damageTaken = 0;
     return Stats;
 })();
-var Options = (function (_super) {
-    __extends(Options, _super);
-    function Options() {
+var Options = {
+    blood: true,
+    music: true,
+    sound: true
+};
+var Settings = (function (_super) {
+    __extends(Settings, _super);
+    function Settings() {
         _super.apply(this, arguments);
     }
-    return Options;
+    Settings.prototype.onInitialize = function (engine) {
+        var bloodToggle = new ex.Actor(game.width / 2, game.height / 2, 50, 50, ex.Color.Red);
+        this.add(bloodToggle);
+        bloodToggle.on('pointerdown', function (e) {
+            if (Options.blood) {
+                Options.blood = false;
+                bloodToggle.color = ex.Color.DarkGray;
+            }
+            else {
+                Options.blood = true;
+                bloodToggle.color = ex.Color.Red;
+            }
+        });
+    };
+    return Settings;
 })(ex.Scene);
 var GameOver = (function (_super) {
     __extends(GameOver, _super);
