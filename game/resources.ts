@@ -3,6 +3,7 @@ var Resources = {
    // SomeSound: new ex.Sound('../sounds/foo.mp3')
    
    TextureHero: new ex.Texture("images/hero.png"),
+   TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
    TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
    TextureMonsterRight: new ex.Texture("images/minotaurv2right.png"),
    TextureTreasure: new ex.Texture("images/treasure.png"),

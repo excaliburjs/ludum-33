@@ -36,6 +36,7 @@ class HeroSpawner {
 class Hero extends ex.Actor {   
    public Health: number = Config.HeroHealth;
    
+   private _lootIndicator: ex.Actor;
    private _treasure: number = 0;
    private _fsm: TypeState.FiniteStateMachine<HeroStates>;
    private _attackCooldown: number = Config.HeroAttackCooldown;
@@ -59,6 +60,11 @@ class Hero extends ex.Actor {
    onInitialize(engine: ex.Engine) {
       this.setZIndex(1);
       
+      this._lootIndicator = new ex.Actor(5, -24, 24, 24);
+      this._lootIndicator.addDrawing(Resources.TextureHeroLootIndicator);
+      this._lootIndicator.scale.setTo(1.5, 1.5);
+      this._lootIndicator.moveBy(0, -10, 500).moveBy(0, 10, 500).repeatForever();
+      
       var spriteSheet = new ex.SpriteSheet(Resources.TextureHero, 3, 1, 28, 28);
       var idleAnim = spriteSheet.getAnimationForAll(engine, 300);
       idleAnim.loop = true;
@@ -79,10 +85,10 @@ class Hero extends ex.Actor {
                var monster = <Monster>e.other;
                monster.health--;
                this._attackCooldown = Config.HeroAttackCooldown;
-            }
+         }
          }
       });
-
+     
       this.onSearching();
 
    }
@@ -112,6 +118,12 @@ class Hero extends ex.Actor {
             this._fsm.go(HeroStates.Searching);
             // console.log('stopping attack');
          break;
+      }
+
+      if (this._treasure > 0) {
+         this.addChild(this._lootIndicator);
+      } else {
+         this.removeChild(this._lootIndicator);
       }
    }
 
