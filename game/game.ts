@@ -29,6 +29,7 @@ var gameOver = new GameOver(game);
 game.start(loader).then(() => {
    
    game.backgroundColor = ex.Color.Black;
+   // Resources.AxeSwing.setVolume(1);
    
    // load map
    game.add('map', map);

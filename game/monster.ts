@@ -198,11 +198,18 @@ class Monster extends ex.Actor {
    }
    
    private _attack() {
+      var hitHero = false;
       _.forIn(this._attackable, (hero: Hero) => {
          // hero.blink(500, 500, 5); //can't because moving already (no parallel actions support)
          game.currentScene.camera.shake(2, 2, 200);
          hero.Health--;
+         hitHero = true;
       });
+      if (hitHero) {
+         Resources.AxeSwingHit.play();
+      } else {
+         Resources.AxeSwing.play();
+      }
    }
   
    public debugDraw(ctx: CanvasRenderingContext2D): void {
