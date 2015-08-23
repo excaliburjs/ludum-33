@@ -8,6 +8,7 @@ enum HeroStates {
 class HeroSpawner {
    private static _spawned: number = 0;
    private static _heroes: Hero[] = [];
+   private static _tombstones: ex.Actor[] = [];
    
    public static spawnHero() {
       HeroSpawner._spawned++;
@@ -25,7 +26,7 @@ class HeroSpawner {
    
    public static getHeroes(): Array<Hero> {
       return this._heroes;
-}
+   }
 
    public static despawn(h: Hero, blood: boolean = false) {
       
@@ -38,10 +39,23 @@ class HeroSpawner {
          sprite.scale.setTo(2, 2);
          tombstone.addDrawing("default", sprite);
          game.add(tombstone);
+         HeroSpawner._tombstones.push(tombstone);
       }
       
       h.kill();
       _.remove(this._heroes, h);
+   }
+   
+   public static cleanupTombstones() {
+      _.forIn(HeroSpawner._tombstones, (tombstone: ex.Actor) => {
+         tombstone.kill();
+      });
+   }
+   
+   public static toggleTombstones(bool: boolean) {
+      _.forIn(HeroSpawner._tombstones, (tombstone: ex.Actor) => {
+         tombstone.visible = bool;
+      });
    }
    
    public static reset() {

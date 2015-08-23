@@ -246,24 +246,28 @@ class Monster extends ex.Actor {
       if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.S) ||
          engine.input.keyboard.isKeyPressed(ex.Input.Keys.Down)) {
             if(!this._isAttacking) {
-         this.dy = Config.MonsterSpeed;
+               this.dy = Config.MonsterSpeed;
                this.setDrawing("walkDown");
-            }         
+            }
       }
       
       if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.A) ||
          engine.input.keyboard.isKeyPressed(ex.Input.Keys.Left)) {
          if(!this._isAttacking) {
-         this.dx = -Config.MonsterSpeed;
-            this.setDrawing("walkLeft");
+            this.dx = -Config.MonsterSpeed;
+            if(this.dy === 0) {
+               this.setDrawing("walkLeft");
+            }
          }
       }
       
-      if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.D) ||
-         engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right)) {
+      if((engine.input.keyboard.isKeyPressed(ex.Input.Keys.D) ||
+         engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right))) {
          if(!this._isAttacking) {
-         this.dx = Config.MonsterSpeed;
-            this.setDrawing("walkRight");
+            this.dx = Config.MonsterSpeed;
+            if(this.dy === 0) {
+               this.setDrawing("walkRight");
+            }
          }
       }
 

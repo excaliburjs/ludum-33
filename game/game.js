@@ -592,14 +592,18 @@ var Monster = (function (_super) {
             engine.input.keyboard.isKeyPressed(ex.Input.Keys.Left)) {
             if (!this._isAttacking) {
                 this.dx = -Config.MonsterSpeed;
-                this.setDrawing("walkLeft");
+                if (this.dy === 0) {
+                    this.setDrawing("walkLeft");
+                }
             }
         }
-        if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.D) ||
-            engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right)) {
+        if ((engine.input.keyboard.isKeyPressed(ex.Input.Keys.D) ||
+            engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right))) {
             if (!this._isAttacking) {
                 this.dx = Config.MonsterSpeed;
-                this.setDrawing("walkRight");
+                if (this.dy === 0) {
+                    this.setDrawing("walkRight");
+                }
             }
         }
         if (this.dx == 0 && this.dy == 0 && !this._isAttacking) {
@@ -751,9 +755,20 @@ var HeroSpawner = (function () {
             sprite.scale.setTo(2, 2);
             tombstone.addDrawing("default", sprite);
             game.add(tombstone);
+            HeroSpawner._tombstones.push(tombstone);
         }
         h.kill();
         _.remove(this._heroes, h);
+    };
+    HeroSpawner.cleanupTombstones = function () {
+        _.forIn(HeroSpawner._tombstones, function (tombstone) {
+            tombstone.kill();
+        });
+    };
+    HeroSpawner.toggleTombstones = function (bool) {
+        _.forIn(HeroSpawner._tombstones, function (tombstone) {
+            tombstone.visible = bool;
+        });
     };
     HeroSpawner.reset = function () {
         HeroSpawner._spawned = 0;
@@ -763,6 +778,7 @@ var HeroSpawner = (function () {
     };
     HeroSpawner._spawned = 0;
     HeroSpawner._heroes = [];
+    HeroSpawner._tombstones = [];
     return HeroSpawner;
 })();
 var Hero = (function (_super) {
@@ -1020,6 +1036,9 @@ var Settings = (function (_super) {
             }
         });
     };
+    Settings.prototype.onDeactivate = function () {
+        HeroSpawner.toggleTombstones(Options.blood);
+    };
     return Settings;
 })(ex.Scene);
 var GameOverType;
@@ -1081,6 +1100,7 @@ var GameOver = (function (_super) {
             for (var i = HeroSpawner.getHeroes().length - 1; i >= 0; i--) {
                 HeroSpawner.despawn(HeroSpawner.getHeroes()[i], false);
             }
+            HeroSpawner.cleanupTombstones();
             game.goToScene('map');
         });
     };
