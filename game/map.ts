@@ -112,6 +112,8 @@ class Map extends ex.Scene {
             
             if (cell == 58) { // wall tile
                wall = new ex.Actor(x * Map.CellSize, y * Map.CellSize, 24, 24);
+               wall.traits.length = 0;
+               wall.traits.push(new ex.Traits.OffscreenCulling());
                wall.anchor.setTo(0, 0);
                wall.addDrawing(Resources.TextureWall);
                wall.collisionType = ex.CollisionType.Fixed;

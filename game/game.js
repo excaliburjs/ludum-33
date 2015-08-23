@@ -61,7 +61,9 @@ var Resources = {
     TextureTextDefend: new ex.Texture("images/text-defend.png"),
     TextureBloodPixel: new ex.Texture("images/blood-pixel.png"),
     TextureBloodPixelGreen: new ex.Texture("images/blood-pixel-green.png"),
-    TextureHeroDead: new ex.Texture("images/hero-dead.png")
+    TextureHeroDead: new ex.Texture("images/hero-dead.png"),
+    TextureHeroDead2: new ex.Texture("images/hero-dead-2.png"),
+    TextureHeroDead3: new ex.Texture("images/hero-dead-3.png")
 };
 var Util = (function () {
     function Util() {
@@ -160,6 +162,8 @@ var Map = (function (_super) {
                 cell = data[x + y * 40];
                 if (cell == 58) {
                     wall = new ex.Actor(x * Map.CellSize, y * Map.CellSize, 24, 24);
+                    wall.traits.length = 0;
+                    wall.traits.push(new ex.Traits.OffscreenCulling());
                     wall.anchor.setTo(0, 0);
                     wall.addDrawing(Resources.TextureWall);
                     wall.collisionType = ex.CollisionType.Fixed;
@@ -591,9 +595,10 @@ var HeroSpawner = (function () {
         if (blood === void 0) { blood = false; }
         if (blood) {
             var tombstone = new ex.Actor(h.x, h.y, 24, 24);
-            //tombstone.traits.length = 0;      
+            var sprites = [Resources.TextureHeroDead, Resources.TextureHeroDead2, Resources.TextureHeroDead3];
+            tombstone.traits.length = 0;
             // todo bug with actor scaling
-            var sprite = Resources.TextureHeroDead.asSprite();
+            var sprite = Util.pickRandom(sprites).asSprite();
             sprite.scale.setTo(2, 2);
             tombstone.addDrawing("default", sprite);
             game.add(tombstone);
@@ -863,6 +868,7 @@ var SoundManager = (function () {
         Resources.AxeSwingHit.setVolume(0.2);
         Resources.SoundMusic.setVolume(0.05);
         Resources.SoundMusic.play();
+        Resources.SoundMusic.setLoop(true);
     };
     SoundManager.stop = function () {
         // make sure volume is set for sounds

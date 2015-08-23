@@ -11,6 +11,7 @@ class SoundManager {
       Resources.AxeSwingHit.setVolume(0.2);
       Resources.SoundMusic.setVolume(0.05);  
       Resources.SoundMusic.play();    
+      Resources.SoundMusic.setLoop(true);
    }
    
    public static stop() {

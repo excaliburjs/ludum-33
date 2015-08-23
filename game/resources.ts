@@ -21,5 +21,7 @@ var Resources = {
    TextureTextDefend: new ex.Texture("images/text-defend.png"),
    TextureBloodPixel: new ex.Texture("images/blood-pixel.png"),
    TextureBloodPixelGreen: new ex.Texture("images/blood-pixel-green.png"),
-   TextureHeroDead: new ex.Texture("images/hero-dead.png")
+   TextureHeroDead: new ex.Texture("images/hero-dead.png"),
+   TextureHeroDead2: new ex.Texture("images/hero-dead-2.png"),
+   TextureHeroDead3: new ex.Texture("images/hero-dead-3.png")
 };
