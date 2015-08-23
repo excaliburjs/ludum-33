@@ -971,7 +971,6 @@ var Settings = (function (_super) {
                 Options.music = true;
                 musicToggle.color = ex.Color.Red;
             }
-            SoundManager.toggleMusic();
         });
         var soundToggle = new ex.Actor(game.width / 2, -100 + game.height / 2, 50, 50, ex.Color.Red);
         this.add(soundToggle);
@@ -984,7 +983,6 @@ var Settings = (function (_super) {
                 Options.sound = true;
                 soundToggle.color = ex.Color.Red;
             }
-            SoundManager.toggleSoundEffects();
         });
     };
     return Settings;
@@ -1067,46 +1065,33 @@ var SoundManager = (function () {
     function SoundManager() {
     }
     SoundManager.start = function () {
-        // make sure volume is set for sounds
-        _.forIn(Resources, function (resource) {
-            if (resource instanceof ex.Sound) {
-                resource.setVolume(1);
-            }
-        });
-        SoundManager.setSoundEffectLevels();
-        Resources.SoundMusic.play();
-        Resources.SoundMusic.setLoop(true);
-    };
-    SoundManager.setSoundEffectLevels = function () {
-        Resources.AxeSwingHit.setVolume(0.2);
-        Resources.SoundMusic.setVolume(0.05);
-    };
-    SoundManager.toggleSoundEffects = function () {
-        var volume;
-        if (Options.music) {
-            volume = 0;
+        // set all sound effect volumes
+        if (Options.sound) {
+            SoundManager.setSoundEffectLevels(1);
         }
         else {
-            volume = 1;
+            SoundManager.setSoundEffectLevels(0);
         }
+        // set music volume
+        if (Options.music) {
+            Resources.SoundMusic.setVolume(0.05);
+            Resources.SoundMusic.play();
+            Resources.SoundMusic.setLoop(true);
+        }
+        else {
+            Resources.SoundMusic.setVolume(0);
+        }
+    };
+    SoundManager.setSoundEffectLevels = function (volume) {
         _.forIn(Resources, function (resource) {
             if (resource instanceof ex.Sound && (resource != Resources.SoundMusic)) {
                 resource.setVolume(volume);
             }
         });
-        if (volume == 1) {
-            SoundManager.setSoundEffectLevels();
+        // adjusting a few sound effect volume levels
+        if (volume != 0) {
+            Resources.AxeSwingHit.setVolume(0.2);
         }
-    };
-    SoundManager.toggleMusic = function () {
-        var volume;
-        if (Options.sound) {
-            volume = 0;
-        }
-        else {
-            volume = 1;
-        }
-        Resources.SoundMusic.setVolume(volume);
     };
     SoundManager.stop = function () {
         // make sure volume is set for sounds

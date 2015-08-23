@@ -30,7 +30,6 @@ class Settings extends ex.Scene {
             Options.music = true;
             musicToggle.color = ex.Color.Red;
          }
-         SoundManager.toggleMusic();
       });
       
       var soundToggle = new ex.Actor(game.width / 2, -100 + game.height / 2, 50, 50, ex.Color.Red)
@@ -43,7 +42,6 @@ class Settings extends ex.Scene {
             Options.sound = true;
             soundToggle.color = ex.Color.Red;
          }
-         SoundManager.toggleSoundEffects();
       });
    }
 }

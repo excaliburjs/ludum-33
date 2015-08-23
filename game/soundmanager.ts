@@ -1,47 +1,32 @@
 class SoundManager {
    
    public static start() {
-      // make sure volume is set for sounds
-      _.forIn(Resources, (resource) => {
-         if (resource instanceof ex.Sound) {
-            (<ex.Sound>resource).setVolume(1);
-         }
-      });
-      SoundManager.setSoundEffectLevels();
-      Resources.SoundMusic.play();    
-      Resources.SoundMusic.setLoop(true);
-   }
-   
-   public static setSoundEffectLevels() {
-      Resources.AxeSwingHit.setVolume(0.2);
-      Resources.SoundMusic.setVolume(0.05);
-   }
-   
-   public static toggleSoundEffects() {
-      var volume;
-      if (Options.music) {
-         volume = 0;
+      // set all sound effect volumes
+      if (Options.sound) {
+         SoundManager.setSoundEffectLevels(1);
       } else {
-         volume = 1;
+         SoundManager.setSoundEffectLevels(0);
       }
+      // set music volume
+      if (Options.music) {
+         Resources.SoundMusic.setVolume(0.05);
+         Resources.SoundMusic.play();    
+         Resources.SoundMusic.setLoop(true);
+      } else {
+         Resources.SoundMusic.setVolume(0);
+      }
+   }
+   
+   public static setSoundEffectLevels(volume: number) {
       _.forIn(Resources, (resource) => {
          if (resource instanceof ex.Sound && (resource != Resources.SoundMusic)) {
             (<ex.Sound>resource).setVolume(volume);
          }
       });
-      if (volume == 1) {
-         SoundManager.setSoundEffectLevels();
+      // adjusting a few sound effect volume levels
+      if (volume != 0) {
+         Resources.AxeSwingHit.setVolume(0.2);
       }
-   }
-   
-   public static toggleMusic() {
-      var volume;
-      if (Options.sound) {
-         volume = 0;
-      } else {
-         volume = 1;
-      }
-      Resources.SoundMusic.setVolume(volume);
    }
    
    public static stop() {
