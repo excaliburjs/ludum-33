@@ -446,12 +446,11 @@ var Hero = (function (_super) {
                 console.log('stopping attack');
                 break;
         }
-
         if (this._treasure > 0) {
-           this.addChild(this._lootIndicator);
+            this.addChild(this._lootIndicator);
         }
         else {
-           this.removeChild(this._lootIndicator);
+            this.removeChild(this._lootIndicator);
         }
     };
     Hero.prototype.getLootAmount = function () {
