@@ -11,6 +11,9 @@ class Monster extends ex.Actor {
    private _rays: ex.Ray[];
    private _attackable: Hero[]; // heroes that can be attacked during current update loop
    
+   private _isAttacking: boolean = false;
+   private _timeLeftAttacking: number = 0;
+   
    constructor(x, y){
       super(x, y, Config.MonsterWidth, Config.MonsterHeight);
       this.color = ex.Color.Red;
@@ -31,26 +34,26 @@ class Monster extends ex.Actor {
          this._mouseY = ev.y;
          
       });
-      var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 6, 1, 72, 72);
-      var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 6, 1, 72, 72);
-      var upSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterUp, 6, 1, 72, 72);
+      var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 6, 1, 96, 96);
+      var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 6, 1, 96, 96);
+      var upSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterUp, 6, 1, 96, 96);
       
-      var attackDownAnim = downSpriteSheet.getAnimationBetween(engine, 3, 6, 100);
+      var attackDownAnim = downSpriteSheet.getAnimationBetween(engine, 2, 6, Config.MonsterAttackTime/4);
       attackDownAnim.scale.setTo(2, 2);
       attackDownAnim.loop = true;
       this.addDrawing("attackDown", attackDownAnim);
       
-      var attackUpAnim = upSpriteSheet.getAnimationBetween(engine, 2, 6, 100);
+      var attackUpAnim = upSpriteSheet.getAnimationBetween(engine, 2, 6, Config.MonsterAttackTime/4);
       attackUpAnim.scale.setTo(2, 2);
       attackUpAnim.loop = true;
       this.addDrawing("attackUp", attackUpAnim);
       
-      var attackRightAnim = rightSpriteSheet.getAnimationBetween(engine, 3, 6, 100);
+      var attackRightAnim = rightSpriteSheet.getAnimationBetween(engine, 2, 6, Config.MonsterAttackTime/4);
       attackRightAnim.scale.setTo(2, 2);
       attackRightAnim.loop = true;
       this.addDrawing("attackRight", attackRightAnim);
       
-      var attackLeftAnim = rightSpriteSheet.getAnimationBetween(engine, 3, 6, 100);
+      var attackLeftAnim = rightSpriteSheet.getAnimationBetween(engine, 2, 6, Config.MonsterAttackTime/4);
       attackLeftAnim.flipHorizontal = true;
       attackLeftAnim.scale.setTo(2, 2);
       attackLeftAnim.loop = true;
@@ -94,7 +97,8 @@ class Monster extends ex.Actor {
       // attackda
       engine.input.pointers.primary.on("down", function (evt) {
          that._attack();
-         //that.setDrawing("attackDown");
+         that._isAttacking = true;
+         that._timeLeftAttacking = Config.MonsterAttackTime;
       });
    }
    
@@ -136,20 +140,30 @@ class Monster extends ex.Actor {
       var prevRotation = this._rotation;
       this._rotation = ex.Util.canonicalizeAngle(new ex.Vector(this._mouseX - this.x, this._mouseY - this.y).toAngle());
       
-      if(this._rotation < Math.PI/4 || this._rotation > Math.PI * (7/4)) {
-         this.setDrawing("attackRight");
-      }
-      
-      if(this._rotation > Math.PI/4 && this._rotation < Math.PI * (3/4)) {
-         this.setDrawing("attackDown");
-      }
-      
-      if(this._rotation > Math.PI * (3/4) && this._rotation < Math.PI * (5/4)){
-         this.setDrawing("attackLeft");
-      }
-      
-      if(this._rotation > Math.PI * (5/4) && this._rotation < Math.PI * (7/4)){
-         this.setDrawing("attackUp");
+      if(this._isAttacking && this._timeLeftAttacking > 0) {
+         if(this._rotation < Math.PI/4 || this._rotation > Math.PI * (7/4)) {
+            this.setDrawing("attackRight");
+         }
+         
+         if(this._rotation > Math.PI/4 && this._rotation < Math.PI * (3/4)) {
+            this.setDrawing("attackDown");
+         }
+         
+         if(this._rotation > Math.PI * (3/4) && this._rotation < Math.PI * (5/4)){
+            this.setDrawing("attackLeft");
+         }
+         
+         if(this._rotation > Math.PI * (5/4) && this._rotation < Math.PI * (7/4)){
+            this.setDrawing("attackUp");
+         }
+         this._timeLeftAttacking -= delta;
+         if(this._timeLeftAttacking < 0){
+            this._isAttacking = false;
+         }
+      }else {
+         this._isAttacking = false;
+         this._timeLeftAttacking = 0;
+         this.setDrawing("idleDown");
       }
       
       
