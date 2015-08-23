@@ -19,6 +19,11 @@ class Map extends ex.Scene {
       this._map.anchor.setTo(0, 0);
       this._map.addDrawing(Resources.TextureMap);
       this.add(this._map);
+      
+      // vignette
+      var vg = new ex.UIActor(0, 0, game.getWidth(), game.getHeight());
+      vg.addDrawing(Resources.TextureVignette);
+      this.add(vg);
 
       // Initialize blood
       this.add(blood);
