@@ -484,7 +484,7 @@ var Hero = (function (_super) {
                     if (hero._treasure === 0) {
                         hero._fsm.go(HeroStates.Searching);
                     }
-                    else {
+                    else if (hero._fsm.canGo(HeroStates.Looting)) {
                         hero._fsm.go(HeroStates.Looting);
                     }
                 }

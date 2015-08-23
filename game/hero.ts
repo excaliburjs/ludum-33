@@ -82,7 +82,7 @@ class Hero extends ex.Actor {
                hero._treasure = (<Treasure>e.other).steal();
                if (hero._treasure === 0) {
                   hero._fsm.go(HeroStates.Searching);
-               } else {
+               } else if (hero._fsm.canGo(HeroStates.Looting)) {
                   hero._fsm.go(HeroStates.Looting);
                }
                
