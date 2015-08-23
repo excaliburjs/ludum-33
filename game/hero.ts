@@ -97,6 +97,7 @@ class Hero extends ex.Actor {
       super.update(engine, delta);
       
       if (this.Health <= 0) {
+            Stats.numHeroesKilled++;
             map.getTreasures()[0].return(this._treasure);
             HeroSpawner.despawn(this);
       }
@@ -195,7 +196,8 @@ class Hero extends ex.Actor {
    
    private onExit() {     
       // play negative sound or something
-      
+      Stats.goldLost += this._treasure;
+      Stats.numHeroesEscaped++;
       HeroSpawner.despawn(this);
    }
 }

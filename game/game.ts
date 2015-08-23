@@ -6,6 +6,7 @@
 /// <reference path="resources.ts" />
 /// <reference path="hero.ts" />
 /// <reference path="treasure.ts" />
+/// <reference path="stats.ts" />
 /// <reference path="gameover.ts" />
 
 var game = new ex.Engine({
@@ -26,6 +27,8 @@ var map = new Map(game);
 var gameOver = new GameOver(game);
 
 game.start(loader).then(() => {
+   
+   game.backgroundColor = ex.Color.Black;
    
    // load map
    game.add('map', map);
