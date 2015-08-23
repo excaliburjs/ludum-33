@@ -55,6 +55,7 @@ var Resources = {
     TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
     TextureMonsterRight: new ex.Texture("images/minotaurv2right.png"),
     TextureMonsterUp: new ex.Texture("images/minotaurv2back.png"),
+    TextureMonsterAim: new ex.Texture("images/aiming.png"),
     TextureTreasure: new ex.Texture("images/treasure.png"),
     TextureTreasureEmpty: new ex.Texture("images/treasure-empty.png"),
     TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
@@ -388,6 +389,12 @@ var Monster = (function (_super) {
             _this._mouseX = ev.x;
             _this._mouseY = ev.y;
         });
+        this._aimSprite = Resources.TextureMonsterAim.asSprite();
+        this._aimSprite.scale.setTo(2, 2);
+        this._aimSprite.anchor = new ex.Point(.25, .25);
+        this._aimSprite.opacity(.7);
+        this._aimSprite.colorize(ex.Color.Green);
+        this._aimSprite.colorize(ex.Color.Green);
         var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 14, 1, 96, 96);
         var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 14, 1, 96, 96);
         var upSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterUp, 14, 1, 96, 96);
@@ -605,6 +612,11 @@ var Monster = (function (_super) {
         });
         this.setZIndex(this.y);
     };
+    Monster.prototype.draw = function (ctx, delta) {
+        _super.prototype.draw.call(this, ctx, delta);
+        this._aimSprite.rotation = this._rotation;
+        this._aimSprite.draw(ctx, this.x, this.y);
+    };
     Monster.prototype._detectAttackable = function () {
         var _this = this;
         _.forIn(HeroSpawner.getHeroes(), function (hero) {
@@ -773,6 +785,7 @@ var Hero = (function (_super) {
                 if (hero._attackCooldown == 0 && hero._hasHitMinotaur) {
                     var monster = e.other;
                     monster.health--;
+                    Stats.damageTaken++;
                     hero._attackCooldown = Config.HeroAttackCooldown;
                     var origin = new ex.Vector(hero.x, hero.y);
                     var dest = new ex.Vector(monster.x, monster.y);
