@@ -44,4 +44,8 @@ class Settings extends ex.Scene {
          }
       });
    }
+   
+   public onDeactivate() {
+      HeroSpawner.toggleTombstones(Options.blood);
+   }
 }

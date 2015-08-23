@@ -164,4 +164,6 @@ class SplatterEmitter implements IBloodEmitter {
       
    }
    
+   //TODO add a method to clean up the blood
+   
 }

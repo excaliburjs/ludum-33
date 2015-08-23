@@ -70,6 +70,7 @@ class GameOver extends ex.Scene {
          for (var i = HeroSpawner.getHeroes().length-1; i >= 0 ; i--) {
             HeroSpawner.despawn(HeroSpawner.getHeroes()[i], false);
          }
+         HeroSpawner.cleanupTombstones();
          
          game.goToScene('map');
       });
