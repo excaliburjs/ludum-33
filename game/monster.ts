@@ -15,6 +15,7 @@ class Monster extends ex.Actor {
    private _isAttacking: boolean = false;
    private _timeLeftAttacking: number = 0;
    private _direction: string = "none";
+   private _aimSprite: ex.Sprite;
    
    constructor(x, y){
       super(x, y, Config.MonsterWidth, Config.MonsterHeight);
@@ -37,6 +38,15 @@ class Monster extends ex.Actor {
          this._mouseY = ev.y;
          
       });
+      
+      this._aimSprite = Resources.TextureMonsterAim.asSprite();
+      this._aimSprite.scale.setTo(2,2);
+      this._aimSprite.anchor = new ex.Point(.25, .25);
+      this._aimSprite.opacity(.7);
+      this._aimSprite.colorize(ex.Color.Green);
+      this._aimSprite.colorize(ex.Color.Green);
+      
+      
       var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 14, 1, 96, 96);
       var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 14, 1, 96, 96);
       var upSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterUp, 14, 1, 96, 96);
@@ -298,6 +308,14 @@ class Monster extends ex.Actor {
       });
       
       this.setZIndex(this.y);
+   }
+   
+   public draw(ctx: CanvasRenderingContext2D, delta: number): void{
+      super.draw(ctx, delta);
+      
+      this._aimSprite.rotation = this._rotation;
+      
+      this._aimSprite.draw(ctx, this.x, this.y);
    }
    
    private _detectAttackable() {

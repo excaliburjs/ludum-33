@@ -32,7 +32,7 @@ class Settings extends ex.Scene {
          }
       });
       
-      var soundToggle = new ex.Actor(game.width / 2, game.height / 2, 50, 50, ex.Color.Red)
+      var soundToggle = new ex.Actor(game.width / 2, -100 + game.height / 2, 50, 50, ex.Color.Red)
       this.add(soundToggle);
       soundToggle.on('pointerdown', (e?: ex.Input.PointerEvent) => {
          if (Options.sound) {

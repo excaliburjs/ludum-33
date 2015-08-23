@@ -56,6 +56,7 @@ var Resources = {
     TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
     TextureMonsterRight: new ex.Texture("images/minotaurv2right.png"),
     TextureMonsterUp: new ex.Texture("images/minotaurv2back.png"),
+    TextureMonsterAim: new ex.Texture("images/aiming.png"),
     TextureTreasure: new ex.Texture("images/treasure.png"),
     TextureTreasureEmpty: new ex.Texture("images/treasure-empty.png"),
     TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
@@ -410,6 +411,12 @@ var Monster = (function (_super) {
             _this._mouseX = ev.x;
             _this._mouseY = ev.y;
         });
+        this._aimSprite = Resources.TextureMonsterAim.asSprite();
+        this._aimSprite.scale.setTo(2, 2);
+        this._aimSprite.anchor = new ex.Point(.25, .25);
+        this._aimSprite.opacity(.7);
+        this._aimSprite.colorize(ex.Color.Green);
+        this._aimSprite.colorize(ex.Color.Green);
         var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 14, 1, 96, 96);
         var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 14, 1, 96, 96);
         var upSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterUp, 14, 1, 96, 96);
@@ -626,6 +633,11 @@ var Monster = (function (_super) {
             ray.dir = ray.dir.rotate(rotationAmt, new ex.Point(0, 0));
         });
         this.setZIndex(this.y);
+    };
+    Monster.prototype.draw = function (ctx, delta) {
+        _super.prototype.draw.call(this, ctx, delta);
+        this._aimSprite.rotation = this._rotation;
+        this._aimSprite.draw(ctx, this.x, this.y);
     };
     Monster.prototype._detectAttackable = function () {
         var _this = this;
@@ -989,7 +1001,7 @@ var Settings = (function (_super) {
                 musicToggle.color = ex.Color.Red;
             }
         });
-        var soundToggle = new ex.Actor(game.width / 2, game.height / 2, 50, 50, ex.Color.Red);
+        var soundToggle = new ex.Actor(game.width / 2, -100 + game.height / 2, 50, 50, ex.Color.Red);
         this.add(soundToggle);
         soundToggle.on('pointerdown', function (e) {
             if (Options.sound) {
@@ -1083,16 +1095,33 @@ var SoundManager = (function () {
     function SoundManager() {
     }
     SoundManager.start = function () {
-        // make sure volume is set for sounds
+        // set all sound effect volumes
+        if (Options.sound) {
+            SoundManager.setSoundEffectLevels(1);
+        }
+        else {
+            SoundManager.setSoundEffectLevels(0);
+        }
+        // set music volume
+        if (Options.music) {
+            Resources.SoundMusic.setVolume(0.05);
+            Resources.SoundMusic.play();
+            Resources.SoundMusic.setLoop(true);
+        }
+        else {
+            Resources.SoundMusic.setVolume(0);
+        }
+    };
+    SoundManager.setSoundEffectLevels = function (volume) {
         _.forIn(Resources, function (resource) {
-            if (resource instanceof ex.Sound) {
-                resource.setVolume(1);
+            if (resource instanceof ex.Sound && (resource != Resources.SoundMusic)) {
+                resource.setVolume(volume);
             }
         });
-        Resources.AxeSwingHit.setVolume(0.2);
-        Resources.SoundMusic.setVolume(0.05);
-        Resources.SoundMusic.play();
-        Resources.SoundMusic.setLoop(true);
+        // adjusting a few sound effect volume levels
+        if (volume != 0) {
+            Resources.AxeSwingHit.setVolume(0.2);
+        }
     };
     SoundManager.stop = function () {
         // make sure volume is set for sounds
@@ -1132,6 +1161,7 @@ _.forIn(Resources, function (resource) {
 game.input.gamepads.enabled = true;
 var blood = new Blood();
 var map = new Map(game);
+var settings = new Settings(game);
 var gameOver = new GameOver(game);
 var isGameOver = false;
 var heroTimer;
@@ -1141,6 +1171,7 @@ game.start(loader).then(function () {
     // load map   
     game.add('map', map);
     game.goToScene('map');
+    game.add('settings', settings);
     game.add('gameover', gameOver);
     // set zoom
     game.currentScene.camera.zoom(1.5);
