@@ -10937,14 +10937,16 @@ var ex;
                             continue;
                         }
                         buttonIndex = Buttons[b];
-                        value = gamepads[i].buttons[buttonIndex].value;
-                        if (value !== this._oldPads[i].getButton(buttonIndex)) {
-                            if (gamepads[i].buttons[buttonIndex].pressed) {
-                                this.at(i).updateButton(buttonIndex, value);
-                                this.at(i).eventDispatcher.publish('button', new GamepadButtonEvent(buttonIndex, value));
-                            }
-                            else {
-                                this.at(i).updateButton(buttonIndex, 0);
+                        if (gamepads[i].buttons[buttonIndex]) {
+                            value = gamepads[i].buttons[buttonIndex].value;
+                            if (value !== this._oldPads[i].getButton(buttonIndex)) {
+                                if (gamepads[i].buttons[buttonIndex].pressed) {
+                                    this.at(i).updateButton(buttonIndex, value);
+                                    this.at(i).eventDispatcher.publish('button', new GamepadButtonEvent(buttonIndex, value));
+                                }
+                                else {
+                                    this.at(i).updateButton(buttonIndex, 0);
+                                }
                             }
                         }
                     }

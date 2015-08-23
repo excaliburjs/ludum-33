@@ -25,6 +25,9 @@ _.forIn(Resources, (resource) => {
    loader.addResource(resource);
 });
 
+// enable game pad input
+game.input.gamepads.enabled = true;
+
 var blood = new Blood();
 var map = new Map(game);
 var gameOver = new GameOver(game);
