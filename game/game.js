@@ -572,14 +572,18 @@ var Monster = (function (_super) {
             engine.input.keyboard.isKeyPressed(ex.Input.Keys.Left)) {
             if (!this._isAttacking) {
                 this.dx = -Config.MonsterSpeed;
-                this.setDrawing("walkLeft");
+                if (this.dy === 0) {
+                    this.setDrawing("walkLeft");
+                }
             }
         }
-        if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.D) ||
-            engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right)) {
+        if ((engine.input.keyboard.isKeyPressed(ex.Input.Keys.D) ||
+            engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right))) {
             if (!this._isAttacking) {
                 this.dx = Config.MonsterSpeed;
-                this.setDrawing("walkRight");
+                if (this.dy === 0) {
+                    this.setDrawing("walkRight");
+                }
             }
         }
         if (this.dx == 0 && this.dy == 0 && !this._isAttacking) {
