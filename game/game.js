@@ -674,6 +674,13 @@ var Stats = (function () {
     Stats.damageTaken = 0;
     return Stats;
 })();
+var Options = (function (_super) {
+    __extends(Options, _super);
+    function Options() {
+        _super.apply(this, arguments);
+    }
+    return Options;
+})(ex.Scene);
 var GameOver = (function (_super) {
     __extends(GameOver, _super);
     function GameOver() {
@@ -699,6 +706,7 @@ var GameOver = (function (_super) {
 /// <reference path="hero.ts" />
 /// <reference path="treasure.ts" />
 /// <reference path="stats.ts" />
+/// <reference path="options.ts" />
 /// <reference path="gameover.ts" />
 var game = new ex.Engine({
     canvasElementId: "game",

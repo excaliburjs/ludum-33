@@ -8,6 +8,6 @@ class GameOver extends ex.Scene {
       retryButton.on('pointerdown', (e?: ex.Input.PointerEvent) => {
          isGameOver = false;
          //TODO reset game
-});
+      });
    }
 }
