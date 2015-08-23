@@ -339,7 +339,7 @@ class Monster extends ex.Actor {
          var origin = new ex.Vector(hero.x, hero.y);
          var dest = new ex.Vector(this.x, this.y);
          var a = origin.subtract(dest).toAngle();
-         blood.splatter(hero.x, hero.y, Blood.BloodPixel, 0.7, 0.8, a);
+         blood.splatter(hero.x, hero.y, Blood.BloodPixel, hero.Health <= 0 ? 0.7 : 0.4, hero.Health <= 0 ? 0.8 : 0.3, a);
       });
       if (hitHero) {
          Resources.AxeSwingHit.play();

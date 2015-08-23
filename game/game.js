@@ -13,9 +13,10 @@ var Config = {
     BloodMinFriction: 0.15,
     BloodMaxFriction: 0.40,
     BloodXYVariation: 6,
-    BloodSplatterMinAngle: ex.Util.toRadians(20),
-    BloodSplatterMaxAngle: ex.Util.toRadians(20),
-    BloodSplatterAngleVariation: ex.Util.toRadians(15),
+    BloodSplatterAngleVariation: ex.Util.toRadians(40),
+    BloodSplatterAngleModOverTime: 0.05,
+    BloodSplatterBackSplashAmount: 0.15,
+    BloodSplatterBackSplashVelocityModifier: 0.6,
     BloodVelocityMin: 10,
     BloodVelocityMax: 40,
     CameraElasticity: 0.1,
@@ -260,7 +261,7 @@ var Blood = (function (_super) {
         if (amount === void 0) { amount = 0.4; }
         if (force === void 0) { force = 0.5; }
         if (angle === void 0) { angle = 0; }
-        this._emitters.push(new SplatterEmitter(x, y, sprite, amount, force, angle - ex.Util.toRadians(15), angle + ex.Util.toRadians(15)));
+        this._emitters.push(new SplatterEmitter(x, y, sprite, amount, force, angle - Config.BloodSplatterAngleVariation, angle + Config.BloodSplatterAngleVariation));
     };
     Blood.prototype.pop = function (x, y, sprite, amount, force) {
         if (amount === void 0) { amount = 0.4; }
@@ -315,14 +316,13 @@ var SplatterEmitter = (function () {
         this._stopTimer = 200;
         this.done = false;
         var pixelAmount = amount * Config.BloodMaxAmount;
+        var backsplashAmount = pixelAmount * Config.BloodSplatterBackSplashAmount;
         var vMin = Config.BloodVelocityMin;
         var vMax = force * Config.BloodVelocityMax;
         var xMin = x - Config.BloodXYVariation;
         var yMin = y - Config.BloodXYVariation;
         var xMax = x + Config.BloodXYVariation;
         var yMax = y + Config.BloodXYVariation;
-        // curve in direction
-        var av = ex.Util.randomInRange(-Config.BloodSplatterAngleVariation, Config.BloodSplatterAngleVariation);
         for (var i = 0; i < pixelAmount; i++) {
             this._particles.push({
                 x: ex.Util.randomIntInRange(xMin, xMax),
@@ -330,7 +330,18 @@ var SplatterEmitter = (function () {
                 f: ex.Util.randomInRange(Config.BloodMinFriction, Config.BloodMaxFriction),
                 d: ex.Vector.fromAngle(ex.Util.randomInRange(minAngle, maxAngle)),
                 v: ex.Util.randomIntInRange(vMin, vMax),
-                av: av,
+                av: 0,
+                s: ex.Util.randomInRange(1, 2)
+            });
+        }
+        for (var i = 0; i < backsplashAmount; i++) {
+            this._particles.push({
+                x: ex.Util.randomIntInRange(xMin, xMax),
+                y: ex.Util.randomIntInRange(yMin, yMax),
+                f: ex.Util.randomInRange(Config.BloodMinFriction, Config.BloodMaxFriction),
+                d: ex.Vector.fromAngle(ex.Util.randomInRange(minAngle, maxAngle)).scale(-1),
+                v: Config.BloodSplatterBackSplashVelocityModifier * ex.Util.randomIntInRange(vMin, vMax),
+                av: 0,
                 s: ex.Util.randomInRange(1, 2)
             });
         }
@@ -344,6 +355,12 @@ var SplatterEmitter = (function () {
         }
         for (i = 0; i < this._particles.length; i++) {
             particle = this._particles[i];
+            if (particle.d.y > 0) {
+                particle.av -= Config.BloodSplatterAngleModOverTime;
+            }
+            else if (particle.d.y < 0) {
+                particle.av += Config.BloodSplatterAngleModOverTime;
+            }
             currPos = new ex.Vector(particle.x, particle.y);
             d = particle.d.rotate(particle.av, ex.Vector.Zero);
             vel = d.scale(particle.v);
@@ -648,7 +665,7 @@ var Monster = (function (_super) {
             var origin = new ex.Vector(hero.x, hero.y);
             var dest = new ex.Vector(_this.x, _this.y);
             var a = origin.subtract(dest).toAngle();
-            blood.splatter(hero.x, hero.y, Blood.BloodPixel, 0.7, 0.8, a);
+            blood.splatter(hero.x, hero.y, Blood.BloodPixel, hero.Health <= 0 ? 0.7 : 0.4, hero.Health <= 0 ? 0.8 : 0.3, a);
         });
         if (hitHero) {
             Resources.AxeSwingHit.play();

@@ -29,7 +29,7 @@ class Blood extends ex.Actor {
    
    public splatter(x: number, y: number, sprite: ex.Sprite, amount: number = 0.4, force: number = 0.5, angle: number = 0) {
       
-      this._emitters.push(new SplatterEmitter(x, y, sprite, amount, force, angle - ex.Util.toRadians(15), angle + ex.Util.toRadians(15)));            
+      this._emitters.push(new SplatterEmitter(x, y, sprite, amount, force, angle - Config.BloodSplatterAngleVariation, angle + Config.BloodSplatterAngleVariation));            
    }
    
    public pop(x: number, y: number, sprite: ex.Sprite, amount: number = 0.4, force: number = 0.5) {
@@ -102,16 +102,14 @@ class SplatterEmitter implements IBloodEmitter {
    constructor(public x: number, public y: number, public sprite: ex.Sprite, public amount: number, public force: number, public minAngle: number, public maxAngle: number) {      
       
       var pixelAmount = amount * Config.BloodMaxAmount;
+      var backsplashAmount = pixelAmount * Config.BloodSplatterBackSplashAmount;
       var vMin = Config.BloodVelocityMin;
       var vMax = force * Config.BloodVelocityMax;
       var xMin = x - Config.BloodXYVariation;
       var yMin = y - Config.BloodXYVariation;
       var xMax = x + Config.BloodXYVariation;
       var yMax = y + Config.BloodXYVariation;
-      
-      // curve in direction
-      var av = ex.Util.randomInRange(-Config.BloodSplatterAngleVariation, Config.BloodSplatterAngleVariation);
-      
+            
       for (var i = 0; i < pixelAmount; i++) {
          this._particles.push({
             x: ex.Util.randomIntInRange(xMin, xMax),
@@ -119,7 +117,19 @@ class SplatterEmitter implements IBloodEmitter {
             f: ex.Util.randomInRange(Config.BloodMinFriction, Config.BloodMaxFriction),
             d: ex.Vector.fromAngle(ex.Util.randomInRange(minAngle, maxAngle)),
             v: ex.Util.randomIntInRange(vMin, vMax),
-            av: av,
+            av: 0,
+            s: ex.Util.randomInRange(1, 2)
+         });
+      }
+      
+      for (var i = 0; i < backsplashAmount; i++) {
+         this._particles.push({
+            x: ex.Util.randomIntInRange(xMin, xMax),
+            y: ex.Util.randomIntInRange(yMin, yMax),
+            f: ex.Util.randomInRange(Config.BloodMinFriction, Config.BloodMaxFriction),
+            d: ex.Vector.fromAngle(ex.Util.randomInRange(minAngle, maxAngle)).scale(-1),
+            v: Config.BloodSplatterBackSplashVelocityModifier * ex.Util.randomIntInRange(vMin, vMax),
+            av: 0,
             s: ex.Util.randomInRange(1, 2)
          });
       }
@@ -137,6 +147,12 @@ class SplatterEmitter implements IBloodEmitter {
       
       for (i = 0; i < this._particles.length; i++) {
          particle = this._particles[i];
+         
+         if (particle.d.y > 0) {
+            particle.av -= Config.BloodSplatterAngleModOverTime;
+         } else if (particle.d.y < 0) {
+            particle.av += Config.BloodSplatterAngleModOverTime;
+         }
          
          currPos = new ex.Vector(particle.x, particle.y);
          d = particle.d.rotate(particle.av, ex.Vector.Zero);

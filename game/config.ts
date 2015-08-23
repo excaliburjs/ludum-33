@@ -17,9 +17,10 @@ var Config = {
    BloodMinFriction: 0.15,
    BloodMaxFriction: 0.40,
    BloodXYVariation: 6,
-   BloodSplatterMinAngle: ex.Util.toRadians(20),
-   BloodSplatterMaxAngle: ex.Util.toRadians(20),
-   BloodSplatterAngleVariation: ex.Util.toRadians(15),
+   BloodSplatterAngleVariation: ex.Util.toRadians(40),
+   BloodSplatterAngleModOverTime: 0.05,
+   BloodSplatterBackSplashAmount: 0.15,
+   BloodSplatterBackSplashVelocityModifier: 0.6,
    BloodVelocityMin: 10,
    BloodVelocityMax: 40,
    
