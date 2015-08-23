@@ -736,6 +736,9 @@ var HeroSpawner = (function () {
             var hero = new Hero(spawnPoint.x, spawnPoint.y);
             game.add(hero);
             this._heroes.push(hero);
+            if (HeroSpawner._spawned > 1) {
+                heroTimer.interval = 1000;
+            }
         }
     };
     HeroSpawner.getHeroes = function () {
@@ -949,8 +952,9 @@ var Treasure = (function (_super) {
     };
     Treasure.prototype.steal = function () {
         if (this._hoard > 0) {
-            this._hoard -= Config.TreasureStealAmount;
-            return Config.TreasureStealAmount;
+            var amount = Math.max(this._hoard - Config.TreasureStealAmount, this._hoard);
+            this._hoard -= amount;
+            return amount;
         }
         else {
             return 0;

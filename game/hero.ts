@@ -21,6 +21,10 @@ class HeroSpawner {
          var hero  = new Hero(spawnPoint.x, spawnPoint.y);
          game.add(hero);
          this._heroes.push(hero);
+         
+         if (HeroSpawner._spawned > 1) {
+            heroTimer.interval = 1000;
+         }
       }
    }
    
@@ -33,7 +37,7 @@ class HeroSpawner {
       if (blood) {
          var tombstone = new ex.Actor(h.x, h.y, 24, 24);
          var sprites = [Resources.TextureHeroDead, Resources.TextureHeroDead2, Resources.TextureHeroDead3];         
-         tombstone.traits.length = 0;      
+         tombstone.traits.length = 0;
          // todo bug with actor scaling
          var sprite = Util.pickRandom(sprites).asSprite();
          sprite.scale.setTo(2, 2);
