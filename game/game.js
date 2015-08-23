@@ -386,6 +386,7 @@ var Resources = {
     TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
     TextureMonsterRight: new ex.Texture("images/minotaurv2right.png"),
     TextureTreasure: new ex.Texture("images/treasure.png"),
+    TextureTreasureEmpty: new ex.Texture("images/treasure-empty.png"),
     TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
     TextureMonsterIndicator: new ex.Texture("images/mino-indicator.png"),
     TextureMap: new ex.Texture("images/map.png"),
@@ -566,19 +567,33 @@ var Treasure = (function (_super) {
         this.anchor.setTo(0, 0);
     }
     Treasure.prototype.onInitialize = function (engine) {
-        var treasure = Resources.TextureTreasure.asSprite().clone();
-        this.addDrawing(treasure);
+        this.addDrawing("notempty", Resources.TextureTreasure.asSprite());
+        this.addDrawing("empty", Resources.TextureTreasureEmpty.asSprite());
         this.collisionType = ex.CollisionType.Passive;
     };
     Treasure.prototype.getAmount = function () {
         return this._hoard;
     };
     Treasure.prototype.steal = function () {
-        this._hoard -= Config.TreasureStealAmount;
-        return Config.TreasureStealAmount;
+        if (this._hoard > 0) {
+            this._hoard -= Config.TreasureStealAmount;
+            return Config.TreasureStealAmount;
+        }
+        else {
+            return 0;
+        }
     };
     Treasure.prototype.return = function (amount) {
         this._hoard += amount;
+    };
+    Treasure.prototype.update = function (engine, delta) {
+        _super.prototype.update.call(this, engine, delta);
+        if (this._hoard <= 0) {
+            this.setDrawing("empty");
+        }
+        else {
+            this.setDrawing("notempty");
+        }
     };
     return Treasure;
 })(ex.Actor);
