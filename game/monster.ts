@@ -15,6 +15,7 @@ class Monster extends ex.Actor {
    private _isAttacking: boolean = false;
    private _timeLeftAttacking: number = 0;
    private _direction: string = "none";
+   private _aimSprite: ex.Sprite;
    
    constructor(x, y){
       super(x, y, Config.MonsterWidth, Config.MonsterHeight);
@@ -37,6 +38,15 @@ class Monster extends ex.Actor {
          this._mouseY = ev.y;
          
       });
+      
+      this._aimSprite = Resources.TextureMonsterAim.asSprite();
+      this._aimSprite.scale.setTo(2,2);
+      this._aimSprite.anchor = new ex.Point(.25, .25);
+      this._aimSprite.opacity(.7);
+      this._aimSprite.colorize(ex.Color.Green);
+      this._aimSprite.colorize(ex.Color.Green);
+      
+      
       var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 14, 1, 96, 96);
       var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 14, 1, 96, 96);
       var upSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterUp, 14, 1, 96, 96);
@@ -300,6 +310,14 @@ class Monster extends ex.Actor {
       this.setZIndex(this.y);
    }
    
+   public draw(ctx: CanvasRenderingContext2D, delta: number): void{
+      super.draw(ctx, delta);
+      
+      this._aimSprite.rotation = this._rotation;
+      
+      this._aimSprite.draw(ctx, this.x, this.y);
+   }
+   
    private _detectAttackable() {
       _.forIn(HeroSpawner.getHeroes(), (hero: Hero) => {
          if (this._isHeroAttackable(hero)) {
@@ -339,7 +357,7 @@ class Monster extends ex.Actor {
          var origin = new ex.Vector(hero.x, hero.y);
          var dest = new ex.Vector(this.x, this.y);
          var a = origin.subtract(dest).toAngle();
-         blood.splatter(hero.x, hero.y, Blood.BloodPixel, 0.7, 0.8, a);
+         blood.splatter(hero.x, hero.y, Blood.BloodPixel, hero.Health <= 0 ? 0.7 : 0.4, hero.Health <= 0 ? 0.8 : 0.3, a);
       });
       if (hitHero) {
          Resources.AxeSwingHit.play();
