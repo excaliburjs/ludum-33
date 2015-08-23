@@ -110,13 +110,13 @@ class Hero extends ex.Actor {
          case HeroStates.Searching:
          if (heroVector.distance(monsterVector) < Config.HeroAggroDistance) {
             this._fsm.go(HeroStates.Attacking);
-            console.log('switching to attack');
+            // console.log('switching to attack');
          }
          break;
          case HeroStates.Attacking:
          if (heroVector.distance(monsterVector) > Config.HeroAggroDistance)
             this._fsm.go(HeroStates.Searching);
-            console.log('stopping attack');
+            // console.log('stopping attack');
          break;
       }
 
