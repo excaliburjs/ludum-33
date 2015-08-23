@@ -6,6 +6,7 @@
 /// <reference path="resources.ts" />
 /// <reference path="hero.ts" />
 /// <reference path="treasure.ts" />
+/// <reference path="gameover.ts" />
 
 var game = new ex.Engine({
    canvasElementId: "game",
@@ -22,12 +23,14 @@ _.forIn(Resources, (resource) => {
 });
 
 var map = new Map(game);
+var gameOver = new GameOver(game);
 
 game.start(loader).then(() => {
    
    // load map
-   game.add("map", map);
-   game.goToScene("map");
+   game.add('map', map);
+   game.goToScene('map');
+   game.add('gameover', gameOver);
    
    // set zoom
    game.currentScene.camera.zoom(1.5);

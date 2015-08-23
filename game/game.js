@@ -155,6 +155,7 @@ var Map = (function (_super) {
     Map.prototype._gameOver = function () {
         //TODO
         console.log('game over');
+        game.goToScene('gameover');
     };
     Map.CellSize = 24;
     return Map;
@@ -432,13 +433,12 @@ var Hero = (function (_super) {
             case HeroStates.Searching:
                 if (heroVector.distance(monsterVector) < Config.HeroAggroDistance) {
                     this._fsm.go(HeroStates.Attacking);
-                    console.log('switching to attack');
                 }
                 break;
             case HeroStates.Attacking:
                 if (heroVector.distance(monsterVector) > Config.HeroAggroDistance)
                     this._fsm.go(HeroStates.Searching);
-                console.log('stopping attack');
+                // console.log('stopping attack');
                 break;
         }
     };
@@ -521,6 +521,16 @@ var Treasure = (function (_super) {
     };
     return Treasure;
 })(ex.Actor);
+var GameOver = (function (_super) {
+    __extends(GameOver, _super);
+    function GameOver() {
+        _super.apply(this, arguments);
+    }
+    GameOver.prototype.onInitialize = function (engine) {
+        game.backgroundColor = ex.Color.Black;
+    };
+    return GameOver;
+})(ex.Scene);
 /// <reference path="config.ts" />
 /// <reference path="util.ts" />
 /// <reference path="map.ts" />
@@ -529,6 +539,7 @@ var Treasure = (function (_super) {
 /// <reference path="resources.ts" />
 /// <reference path="hero.ts" />
 /// <reference path="treasure.ts" />
+/// <reference path="gameover.ts" />
 var game = new ex.Engine({
     canvasElementId: "game",
     width: 960,
@@ -541,10 +552,12 @@ _.forIn(Resources, function (resource) {
     loader.addResource(resource);
 });
 var map = new Map(game);
+var gameOver = new GameOver(game);
 game.start(loader).then(function () {
     // load map
-    game.add("map", map);
-    game.goToScene("map");
+    game.add('map', map);
+    game.goToScene('map');
+    game.add('gameover', gameOver);
     // set zoom
     game.currentScene.camera.zoom(1.5);
     // defend intro
