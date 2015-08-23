@@ -28,8 +28,16 @@ class HeroSpawner {
 }
 
    public static despawn(h: Hero) {
+      var tombstone = new ex.Actor(h.x, h.y, 24, 24);
+      //tombstone.traits.length = 0;      
+      // todo bug with actor scaling
+      var sprite = Resources.TextureHeroDead.asSprite();
+      sprite.scale.setTo(2, 2);
+      tombstone.addDrawing("default", sprite);
+      game.add(tombstone);
+            
       h.kill();
-      _.remove(this._heroes, h);
+      _.remove(this._heroes, h);      
    }
 }
 
@@ -97,7 +105,7 @@ class Hero extends ex.Actor {
                var origin = new ex.Vector(hero.x, hero.y);
                var dest = new ex.Vector(monster.x, monster.y);
                var a = dest.subtract(origin).toAngle();
-               blood.splatter(monster.x, monster.y, 0.5, 0.5, a);
+               blood.splatter(monster.x, monster.y, Blood.BloodPixelGreen, 0.2, 0.2, a);
             }
          }
       });

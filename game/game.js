@@ -5,6 +5,15 @@ var Config = {
     MonsterSpeed: 200,
     MonsterAttackRange: 80,
     MonsterProgressSize: 200,
+    BloodMaxAmount: 300,
+    BloodMinFriction: 0.15,
+    BloodMaxFriction: 0.40,
+    BloodXYVariation: 6,
+    BloodSplatterMinAngle: ex.Util.toRadians(20),
+    BloodSplatterMaxAngle: ex.Util.toRadians(20),
+    BloodSplatterAngleVariation: ex.Util.toRadians(15),
+    BloodVelocityMin: 10,
+    BloodVelocityMax: 40,
     CameraElasticity: 0.1,
     CameraFriction: 0.5,
     CameraShake: 0,
@@ -41,8 +50,11 @@ var Resources = {
     TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
     TextureMonsterIndicator: new ex.Texture("images/mino-indicator.png"),
     TextureMap: new ex.Texture("images/map.png"),
+    TextureWall: new ex.Texture("images/wall.png"),
     TextureTextDefend: new ex.Texture("images/text-defend.png"),
-    TextureBloodPixel: new ex.Texture("images/blood-pixel.png")
+    TextureBloodPixel: new ex.Texture("images/blood-pixel.png"),
+    TextureBloodPixelGreen: new ex.Texture("images/blood-pixel-green.png"),
+    TextureHeroDead: new ex.Texture("images/hero-dead.png")
 };
 var Util = (function () {
     function Util() {
@@ -70,6 +82,8 @@ var Map = (function (_super) {
         this._map.anchor.setTo(0, 0);
         this._map.addDrawing(Resources.TextureMap);
         this.add(this._map);
+        // Initialize blood
+        this.add(blood);
         this.buildWalls();
         // show GUI
         var progressBack = new ex.UIActor(60, 23, Config.TreasureProgressSize + 4, 40);
@@ -135,9 +149,10 @@ var Map = (function (_super) {
         for (x = 0; x < 40; x++) {
             for (y = 0; y < 40; y++) {
                 cell = data[x + y * 40];
-                if (cell !== 0 && cell !== 199) {
-                    wall = new ex.Actor(x * Map.CellSize, y * Map.CellSize, 24, 24 /*, ex.Color.Red*/);
+                if (cell == 58) {
+                    wall = new ex.Actor(x * Map.CellSize, y * Map.CellSize, 24, 24);
                     wall.anchor.setTo(0, 0);
+                    wall.addDrawing(Resources.TextureWall);
                     wall.collisionType = ex.CollisionType.Fixed;
                     this.add(wall);
                 }
@@ -196,31 +211,27 @@ var Blood = (function (_super) {
         _super.call(this, 0, 0);
         this._bleedTimer = 0;
         this._emitters = [];
-        this.opacity = 0;
         this._scvs = document.createElement('canvas');
-        this._scvs.width = game.getWidth();
-        this._scvs.height = game.getHeight();
+        this._scvs.width = 960;
+        this._scvs.height = 960;
         this._sctx = this._scvs.getContext('2d');
         this._sctx.globalCompositeOperation = 'source-over';
-        this._sctx.fillStyle = 'transparent';
-        this._sctx.fillRect(0, 0, this._scvs.width, this._scvs.height);
-        this._sctx.fillStyle = 'red';
-        this._sctx.fillRect(200, 200, 200, 200);
+        this.traits.length = 0;
     }
-    Blood.prototype.onInitialize = function (engine) {
-        _super.prototype.onInitialize.call(this, engine);
+    Blood.prototype.onInitialize = function () {
         Blood.BloodPixel = Resources.TextureBloodPixel.asSprite();
+        Blood.BloodPixelGreen = Resources.TextureBloodPixelGreen.asSprite();
     };
-    Blood.prototype.splatter = function (x, y, amount, force, angle) {
+    Blood.prototype.splatter = function (x, y, sprite, amount, force, angle) {
         if (amount === void 0) { amount = 0.4; }
         if (force === void 0) { force = 0.5; }
         if (angle === void 0) { angle = 0; }
-        this._emitters.push(new SplatterEmitter(x, y, amount, force, angle - Math.PI / 4, angle + Math.PI / 4));
+        this._emitters.push(new SplatterEmitter(x, y, sprite, amount, force, angle - ex.Util.toRadians(15), angle + ex.Util.toRadians(15)));
     };
-    Blood.prototype.pop = function (x, y, amount, force) {
+    Blood.prototype.pop = function (x, y, sprite, amount, force) {
         if (amount === void 0) { amount = 0.4; }
         if (force === void 0) { force = 0.5; }
-        this._emitters.push(new SplatterEmitter(x, y, amount, force, 0, Math.PI * 2));
+        this._emitters.push(new SplatterEmitter(x, y, sprite, amount, force, 0, Math.PI * 2));
     };
     Blood.prototype.bleed = function (duration) {
         this._bleedTimer = duration;
@@ -240,55 +251,78 @@ var Blood = (function (_super) {
         this._bleedTimer = Math.max(0, this._bleedTimer - delta);
         // update particle positions
         var emitter, i;
-        for (i = 0; i < this._emitters.length; i++) {
-            this._emitters[i].update(engine, delta);
+        for (i = this._emitters.length - 1; i >= 0; i--) {
+            emitter = this._emitters[i];
+            emitter.update(engine, delta);
+            if (emitter.done) {
+                this._emitters.splice(i, 1);
+            }
         }
     };
     return Blood;
-})(ex.UIActor);
+})(ex.Actor);
 var SplatterEmitter = (function () {
     /**
      *
      */
-    function SplatterEmitter(x, y, amount, force, minAngle, maxAngle) {
+    function SplatterEmitter(x, y, sprite, amount, force, minAngle, maxAngle) {
         this.x = x;
         this.y = y;
+        this.sprite = sprite;
         this.amount = amount;
         this.force = force;
         this.minAngle = minAngle;
         this.maxAngle = maxAngle;
         this._particles = [];
-        var pixelAmount = amount * 100;
-        var vMin = 5;
-        var vMax = force * 100;
+        this._stopTimer = 200;
+        this.done = false;
+        var pixelAmount = amount * Config.BloodMaxAmount;
+        var vMin = Config.BloodVelocityMin;
+        var vMax = force * Config.BloodVelocityMax;
+        var xMin = x - Config.BloodXYVariation;
+        var yMin = y - Config.BloodXYVariation;
+        var xMax = x + Config.BloodXYVariation;
+        var yMax = y + Config.BloodXYVariation;
+        // curve in direction
+        var av = ex.Util.randomInRange(-Config.BloodSplatterAngleVariation, Config.BloodSplatterAngleVariation);
         for (var i = 0; i < pixelAmount; i++) {
             this._particles.push({
-                x: x,
-                y: y,
-                f: 0.8,
+                x: ex.Util.randomIntInRange(xMin, xMax),
+                y: ex.Util.randomIntInRange(yMin, yMax),
+                f: ex.Util.randomInRange(Config.BloodMinFriction, Config.BloodMaxFriction),
                 d: ex.Vector.fromAngle(ex.Util.randomInRange(minAngle, maxAngle)),
-                v: ex.Util.randomIntInRange(vMin, vMax)
+                v: ex.Util.randomIntInRange(vMin, vMax),
+                av: av,
+                s: ex.Util.randomInRange(1, 2)
             });
         }
     }
     SplatterEmitter.prototype.update = function (engine, delta) {
-        var i, particle, currPos, vel, f;
+        var i, particle, currPos, d, vel, f;
+        this._stopTimer -= delta;
+        if (this._stopTimer < 0) {
+            this.done = true;
+            return;
+        }
         for (i = 0; i < this._particles.length; i++) {
             particle = this._particles[i];
             currPos = new ex.Vector(particle.x, particle.y);
-            vel = particle.d.scale(particle.v);
+            d = particle.d.rotate(particle.av, ex.Vector.Zero);
+            vel = d.scale(particle.v);
             f = vel.scale(-1).scale(particle.f);
             vel = vel.plus(f);
             currPos = currPos.plus(vel);
             particle.x = currPos.x;
             particle.y = currPos.y;
+            particle.v = vel.distance();
         }
     };
     SplatterEmitter.prototype.draw = function (ctx, delta) {
         var i, particle;
         for (i = 0; i < this._particles.length; i++) {
             particle = this._particles[i];
-            Blood.BloodPixel.draw(ctx, particle.x, particle.y);
+            this.sprite.scale.setTo(particle.s, particle.s);
+            this.sprite.draw(ctx, particle.x, particle.y);
         }
     };
     return SplatterEmitter;
@@ -437,7 +471,7 @@ var Monster = (function (_super) {
             var origin = new ex.Vector(hero.x, hero.y);
             var dest = new ex.Vector(_this.x, _this.y);
             var a = origin.subtract(dest).toAngle();
-            blood.splatter(hero.x, hero.y, 0.5, 0.5, a);
+            blood.splatter(hero.x, hero.y, Blood.BloodPixel, 0.7, 0.8, a);
         });
     };
     Monster.prototype.getRotation = function () {
@@ -483,6 +517,13 @@ var HeroSpawner = (function () {
         return this._heroes;
     };
     HeroSpawner.despawn = function (h) {
+        var tombstone = new ex.Actor(h.x, h.y, 24, 24);
+        //tombstone.traits.length = 0;      
+        // todo bug with actor scaling
+        var sprite = Resources.TextureHeroDead.asSprite();
+        sprite.scale.setTo(2, 2);
+        tombstone.addDrawing("default", sprite);
+        game.add(tombstone);
         h.kill();
         _.remove(this._heroes, h);
     };
@@ -541,7 +582,7 @@ var Hero = (function (_super) {
                     var origin = new ex.Vector(hero.x, hero.y);
                     var dest = new ex.Vector(monster.x, monster.y);
                     var a = dest.subtract(origin).toAngle();
-                    blood.splatter(monster.x, monster.y, 0.5, 0.5, a);
+                    blood.splatter(monster.x, monster.y, Blood.BloodPixelGreen, 0.2, 0.2, a);
                 }
             }
         });
@@ -724,8 +765,6 @@ game.start(loader).then(function () {
     game.add('map', map);
     game.goToScene('map');
     game.add('gameover', gameOver);
-    game.add(blood);
-    //blood.setZIndex(10);
     // set zoom
     game.currentScene.camera.zoom(1.5);
     // defend intro

@@ -20,7 +20,10 @@ class Map extends ex.Scene {
       this._map.addDrawing(Resources.TextureMap);
       this.add(this._map);
       
-      this.buildWalls();
+      // Initialize blood
+      this.add(blood);
+      
+      this.buildWalls();           
       
       // show GUI
       var progressBack = new ex.UIActor(60, 23, Config.TreasureProgressSize + 4, 40);
@@ -105,9 +108,10 @@ class Map extends ex.Scene {
          for (y = 0; y < 40; y++) {
             cell = data[x + y * 40];
             
-            if (cell !== 0 && cell !== 199) { // ground or doors
-               wall = new ex.Actor(x * Map.CellSize, y * Map.CellSize, 24, 24/*, ex.Color.Red*/);
+            if (cell == 58) { // wall tile
+               wall = new ex.Actor(x * Map.CellSize, y * Map.CellSize, 24, 24);
                wall.anchor.setTo(0, 0);
+               wall.addDrawing(Resources.TextureWall);
                wall.collisionType = ex.CollisionType.Fixed;
                
                this.add(wall);

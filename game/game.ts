@@ -35,9 +35,6 @@ game.start(loader).then(() => {
    game.add('map', map);
    game.goToScene('map');
    game.add('gameover', gameOver);
-   game.add(blood);
-   
-   //blood.setZIndex(10);
    
    // set zoom
    game.currentScene.camera.zoom(1.5);

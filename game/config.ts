@@ -8,6 +8,16 @@ var Config = {
    MonsterAttackRange: 80,
    MonsterProgressSize: 200,
    
+   BloodMaxAmount: 300,
+   BloodMinFriction: 0.15,
+   BloodMaxFriction: 0.40,
+   BloodXYVariation: 6,
+   BloodSplatterMinAngle: ex.Util.toRadians(20),
+   BloodSplatterMaxAngle: ex.Util.toRadians(20),
+   BloodSplatterAngleVariation: ex.Util.toRadians(15),
+   BloodVelocityMin: 10,
+   BloodVelocityMax: 40,
+   
    CameraElasticity: 0.1,//.01,
 	CameraFriction: 0.5,//0.21,
 	CameraShake: 0,//7,
