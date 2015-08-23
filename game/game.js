@@ -250,7 +250,7 @@ var Monster = (function (_super) {
             _this._mouseY = ev.y;
         });
         var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 7, 1, 96, 96);
-        var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 7, 1, 96, 96);
+        var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 14, 1, 96, 96);
         var upSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterUp, 7, 1, 96, 96);
         var attackDownAnim = downSpriteSheet.getAnimationBetween(engine, 2, 7, Config.MonsterAttackTime / 4);
         attackDownAnim.scale.setTo(2, 2);
@@ -260,15 +260,24 @@ var Monster = (function (_super) {
         attackUpAnim.scale.setTo(2, 2);
         attackUpAnim.loop = true;
         this.addDrawing("attackUp", attackUpAnim);
-        var attackRightAnim = rightSpriteSheet.getAnimationBetween(engine, 2, 7, Config.MonsterAttackTime / 4);
+        var attackRightAnim = rightSpriteSheet.getAnimationBetween(engine, 9, 13, Config.MonsterAttackTime / 4);
         attackRightAnim.scale.setTo(2, 2);
         attackRightAnim.loop = true;
         this.addDrawing("attackRight", attackRightAnim);
-        var attackLeftAnim = rightSpriteSheet.getAnimationBetween(engine, 2, 7, Config.MonsterAttackTime / 4);
+        var walkRightAnim = rightSpriteSheet.getAnimationByIndices(engine, [2, 3, 4, 5, 6, 7], 150);
+        walkRightAnim.scale.setTo(2, 2);
+        walkRightAnim.loop = true;
+        this.addDrawing("walkRight", walkRightAnim);
+        var attackLeftAnim = rightSpriteSheet.getAnimationBetween(engine, 9, 13, Config.MonsterAttackTime / 4);
         attackLeftAnim.flipHorizontal = true;
         attackLeftAnim.scale.setTo(2, 2);
         attackLeftAnim.loop = true;
         this.addDrawing("attackLeft", attackLeftAnim);
+        var walkLeftAnim = rightSpriteSheet.getAnimationByIndices(engine, [2, 3, 4, 5, 6, 7], 150);
+        walkLeftAnim.flipHorizontal = true;
+        walkLeftAnim.scale.setTo(2, 2);
+        walkLeftAnim.loop = true;
+        this.addDrawing("walkLeft", walkLeftAnim);
         var idleAnim = downSpriteSheet.getAnimationBetween(engine, 0, 2, 500);
         idleAnim.loop = true;
         idleAnim.scale.setTo(2, 2);
@@ -318,23 +327,38 @@ var Monster = (function (_super) {
         // WASD
         if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.W) ||
             engine.input.keyboard.isKeyPressed(ex.Input.Keys.Up)) {
-            this.dy = -Config.MonsterSpeed;
+            if (!this._isAttacking) {
+                this.dy = -Config.MonsterSpeed;
+                this.setDrawing("idleUp");
+            }
         }
         if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.S) ||
             engine.input.keyboard.isKeyPressed(ex.Input.Keys.Down)) {
-            this.dy = Config.MonsterSpeed;
+            if (!this._isAttacking) {
+                this.dy = Config.MonsterSpeed;
+                this.setDrawing("idleDown");
+            }
         }
         if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.A) ||
             engine.input.keyboard.isKeyPressed(ex.Input.Keys.Left)) {
-            this.dx = -Config.MonsterSpeed;
+            if (!this._isAttacking) {
+                this.dx = -Config.MonsterSpeed;
+                this.setDrawing("walkLeft");
+            }
         }
         if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.D) ||
             engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right)) {
-            this.dx = Config.MonsterSpeed;
+            if (!this._isAttacking) {
+                this.dx = Config.MonsterSpeed;
+                this.setDrawing("walkRight");
+            }
+        }
+        if (this.dx == 0 && this.dy == 0 && !this._isAttacking) {
+            this.setDrawing("idleDown");
         }
         var prevRotation = this._rotation;
         this._rotation = ex.Util.canonicalizeAngle(new ex.Vector(this._mouseX - this.x, this._mouseY - this.y).toAngle());
-        if (this._isAttacking && this._timeLeftAttacking > 0) {
+        if (this._isAttacking) {
             if (this._rotation < Math.PI / 4 || this._rotation > Math.PI * (7 / 4)) {
                 this.setDrawing("attackRight");
             }
@@ -351,11 +375,6 @@ var Monster = (function (_super) {
             if (this._timeLeftAttacking < 0) {
                 this._isAttacking = false;
             }
-        }
-        else {
-            this._isAttacking = false;
-            this._timeLeftAttacking = 0;
-            this.setDrawing("idleDown");
         }
         // updating attack rays
         _.forIn(this._rays, function (ray) {
