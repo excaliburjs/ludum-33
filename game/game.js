@@ -57,6 +57,12 @@ var Map = (function (_super) {
         this._map.anchor.setTo(0, 0);
         this._map.addDrawing(Resources.TextureMap);
         this.add(this._map);
+        // make sure volume is set for sounds
+        _.forIn(Resources, function (resource) {
+            if (resource instanceof ex.Sound) {
+                resource.setVolume(1);
+            }
+        });
         this.buildWalls();
         // show GUI
         var progressBack = new ex.UIActor(60, 23, Config.TreasureProgressSize + 4, 40);
@@ -173,6 +179,14 @@ var Map = (function (_super) {
         //TODO
         console.log('game over');
         game.goToScene('gameover');
+    };
+    Map.prototype.onDeactivate = function () {
+        _.forIn(Resources, function (resource) {
+            if (resource instanceof ex.Sound) {
+                resource.setVolume(0);
+            }
+        });
+        //TODO clean up hero generation
     };
     Map.CellSize = 24;
     return Map;

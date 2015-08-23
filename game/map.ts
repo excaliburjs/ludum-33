@@ -20,6 +20,13 @@ class Map extends ex.Scene {
       this._map.addDrawing(Resources.TextureMap);
       this.add(this._map);
       
+      // make sure volume is set for sounds
+      _.forIn(Resources, (resource) => {
+         if (resource instanceof ex.Sound) {
+            resource.setVolume(1);
+         }
+      });
+      
       this.buildWalls();
       
       // show GUI
@@ -172,5 +179,14 @@ class Map extends ex.Scene {
       //TODO
       console.log('game over');
       game.goToScene('gameover');
+   }
+   
+   public onDeactivate() {
+      _.forIn(Resources, (resource) => {
+         if (resource instanceof ex.Sound) {
+            resource.setVolume(0);
+         }
+      });
+      //TODO clean up hero generation
    }
 }
