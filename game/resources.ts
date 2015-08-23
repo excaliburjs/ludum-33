@@ -3,6 +3,9 @@ var Resources = {
    AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
    AxeSwingHit: new ex.Sound('sounds/axe-swing-hit.wav'),
    BloodSpatter: new ex.Sound('sounds/blood-splatter-1.wav'),
+   AnnouncerDefend: new ex.Sound('sounds/defend.wav'),
+   
+   SoundMusic: new ex.Sound('sounds/music.mp3'),
    
    TextureHero: new ex.Texture("images/hero.png"),
    TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
