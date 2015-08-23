@@ -27,6 +27,7 @@ _.forIn(Resources, (resource) => {
 
 var blood = new Blood();
 var map = new Map(game);
+var settings = new Settings(game);
 var gameOver = new GameOver(game);
 var isGameOver = false;
 var heroTimer: ex.Timer;
@@ -39,6 +40,7 @@ game.start(loader).then(() => {
    // load map   
    game.add('map', map);
    game.goToScene('map');
+   game.add('settings', settings);
    game.add('gameover', gameOver);
    
    // set zoom

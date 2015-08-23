@@ -713,6 +713,7 @@ var Hero = (function (_super) {
                 if (hero._attackCooldown == 0 && hero._hasHitMinotaur) {
                     var monster = e.other;
                     monster.health--;
+                    Stats.damageTaken++;
                     hero._attackCooldown = Config.HeroAttackCooldown;
                     var origin = new ex.Vector(hero.x, hero.y);
                     var dest = new ex.Vector(monster.x, monster.y);
@@ -905,8 +906,9 @@ var Settings = (function (_super) {
                 Options.music = true;
                 musicToggle.color = ex.Color.Red;
             }
+            SoundManager.toggleMusic();
         });
-        var soundToggle = new ex.Actor(game.width / 2, game.height / 2, 50, 50, ex.Color.Red);
+        var soundToggle = new ex.Actor(game.width / 2, -100 + game.height / 2, 50, 50, ex.Color.Red);
         this.add(soundToggle);
         soundToggle.on('pointerdown', function (e) {
             if (Options.sound) {
@@ -917,6 +919,7 @@ var Settings = (function (_super) {
                 Options.sound = true;
                 soundToggle.color = ex.Color.Red;
             }
+            SoundManager.toggleSoundEffects();
         });
     };
     return Settings;
@@ -964,10 +967,40 @@ var SoundManager = (function () {
                 resource.setVolume(1);
             }
         });
-        Resources.AxeSwingHit.setVolume(0.2);
-        Resources.SoundMusic.setVolume(0.05);
+        SoundManager.setSoundEffectLevels();
         Resources.SoundMusic.play();
         Resources.SoundMusic.setLoop(true);
+    };
+    SoundManager.setSoundEffectLevels = function () {
+        Resources.AxeSwingHit.setVolume(0.2);
+        Resources.SoundMusic.setVolume(0.05);
+    };
+    SoundManager.toggleSoundEffects = function () {
+        var volume;
+        if (Options.music) {
+            volume = 0;
+        }
+        else {
+            volume = 1;
+        }
+        _.forIn(Resources, function (resource) {
+            if (resource instanceof ex.Sound && (resource != Resources.SoundMusic)) {
+                resource.setVolume(volume);
+            }
+        });
+        if (volume == 1) {
+            SoundManager.setSoundEffectLevels();
+        }
+    };
+    SoundManager.toggleMusic = function () {
+        var volume;
+        if (Options.sound) {
+            volume = 0;
+        }
+        else {
+            volume = 1;
+        }
+        Resources.SoundMusic.setVolume(volume);
     };
     SoundManager.stop = function () {
         // make sure volume is set for sounds
@@ -1005,6 +1038,7 @@ _.forIn(Resources, function (resource) {
 });
 var blood = new Blood();
 var map = new Map(game);
+var settings = new Settings(game);
 var gameOver = new GameOver(game);
 var isGameOver = false;
 var heroTimer;
@@ -1014,6 +1048,7 @@ game.start(loader).then(function () {
     // load map   
     game.add('map', map);
     game.goToScene('map');
+    game.add('settings', settings);
     game.add('gameover', gameOver);
     // set zoom
     game.currentScene.camera.zoom(1.5);
