@@ -29,6 +29,7 @@ var blood = new Blood();
 var map = new Map(game);
 var gameOver = new GameOver(game);
 var isGameOver = false;
+var heroTimer: ex.Timer;
 
 game.start(loader).then(() => {
    
@@ -58,7 +59,7 @@ game.start(loader).then(() => {
    }).delay(2000).callMethod(() => defendIntro.kill());
    
       
-   var heroTimer = new ex.Timer(() => HeroSpawner.spawnHero(), Config.HeroSpawnInterval, true);
+   heroTimer = new ex.Timer(() => HeroSpawner.spawnHero(), Config.HeroSpawnInterval, true);
    game.add(heroTimer);
    
    HeroSpawner.spawnHero();  

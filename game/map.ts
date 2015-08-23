@@ -74,7 +74,7 @@ class Map extends ex.Scene {
          this.addTreasure(treasure);
       }
       
-      var playerSpawn = this.getCellPos(19, 19);
+      var playerSpawn = this.getCellPos(Config.PlayerCellSpawnX, Config.PlayerCellSpawnY);
       this._player = new Monster(playerSpawn.x, playerSpawn.y);
       
       this.add(this._player);
@@ -87,6 +87,13 @@ class Map extends ex.Scene {
    
    public getPlayer(): Monster {
       return this._player;
+   }
+   
+   public resetPlayer() {
+      this._player.health = Config.MonsterHealth;
+      var playerSpawn = this.getCellPos(Config.PlayerCellSpawnX, Config.PlayerCellSpawnY);
+      this._player.x = playerSpawn.x;
+      this._player.y = playerSpawn.y;
    }
    
    public getTreasures(): Treasure[] {

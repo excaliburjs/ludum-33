@@ -1,4 +1,6 @@
 var Config = {
+    PlayerCellSpawnX: 19,
+    PlayerCellSpawnY: 19,
     MonsterHealth: 30,
     MonsterWidth: 48,
     MonsterHeight: 48,
@@ -135,7 +137,7 @@ var Map = (function (_super) {
             var treasure = new Treasure(treasures[i].x, treasures[i].y);
             this.addTreasure(treasure);
         }
-        var playerSpawn = this.getCellPos(19, 19);
+        var playerSpawn = this.getCellPos(Config.PlayerCellSpawnX, Config.PlayerCellSpawnY);
         this._player = new Monster(playerSpawn.x, playerSpawn.y);
         this.add(this._player);
     };
@@ -145,6 +147,12 @@ var Map = (function (_super) {
     };
     Map.prototype.getPlayer = function () {
         return this._player;
+    };
+    Map.prototype.resetPlayer = function () {
+        this._player.health = Config.MonsterHealth;
+        var playerSpawn = this.getCellPos(Config.PlayerCellSpawnX, Config.PlayerCellSpawnY);
+        this._player.x = playerSpawn.x;
+        this._player.y = playerSpawn.y;
     };
     Map.prototype.getTreasures = function () {
         return this._treasures;
@@ -837,6 +845,9 @@ var Treasure = (function (_super) {
     Treasure.prototype.return = function (amount) {
         this._hoard += amount;
     };
+    Treasure.prototype.reset = function () {
+        this._hoard = Config.TreasureHoardSize;
+    };
     Treasure.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
         if (this._hoard <= 0) {
@@ -916,9 +927,25 @@ var GameOver = (function (_super) {
         game.backgroundColor = ex.Color.Black;
         var retryButton = new ex.Actor(game.width / 2, game.height / 2, 300, 60, ex.Color.DarkGray);
         this.add(retryButton);
+        // reset the game
         retryButton.on('pointerdown', function (e) {
             isGameOver = false;
-            //TODO reset game
+            Stats.numHeroesKilled = 0;
+            Stats.numHeroesEscaped = 0;
+            Stats.goldLost = 0;
+            Stats.damageTaken = 0;
+            map.resetPlayer();
+            heroTimer.cancel();
+            game.remove(heroTimer);
+            heroTimer = new ex.Timer(function () { return HeroSpawner.spawnHero(); }, Config.HeroSpawnInterval, true);
+            game.add(heroTimer);
+            _.forEach(map.getTreasures(), function (treasure) {
+                treasure.reset();
+            });
+            for (var i = HeroSpawner.getHeroes().length - 1; i >= 0; i--) {
+                HeroSpawner.despawn(HeroSpawner.getHeroes()[i], false);
+            }
+            game.goToScene('map');
         });
     };
     return GameOver;
@@ -943,6 +970,7 @@ var SoundManager = (function () {
         _.forIn(Resources, function (resource) {
             if (resource instanceof ex.Sound) {
                 resource.setVolume(0);
+                resource.stop();
             }
         });
     };
@@ -975,6 +1003,7 @@ var blood = new Blood();
 var map = new Map(game);
 var gameOver = new GameOver(game);
 var isGameOver = false;
+var heroTimer;
 game.start(loader).then(function () {
     game.backgroundColor = ex.Color.Black;
     // Resources.AxeSwing.setVolume(1);
@@ -997,7 +1026,7 @@ game.start(loader).then(function () {
         defendIntro.opacity = 1;
         Resources.AnnouncerDefend.play();
     }).delay(2000).callMethod(function () { return defendIntro.kill(); });
-    var heroTimer = new ex.Timer(function () { return HeroSpawner.spawnHero(); }, Config.HeroSpawnInterval, true);
+    heroTimer = new ex.Timer(function () { return HeroSpawner.spawnHero(); }, Config.HeroSpawnInterval, true);
     game.add(heroTimer);
     HeroSpawner.spawnHero();
 });

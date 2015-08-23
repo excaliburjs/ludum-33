@@ -1,6 +1,9 @@
 
 
 var Config = {
+   PlayerCellSpawnX: 19,
+   PlayerCellSpawnY: 19,
+   
    MonsterHealth: 30,
    MonsterWidth: 48,
    MonsterHeight: 48,
