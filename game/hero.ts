@@ -11,17 +11,32 @@ class HeroSpawner {
    private static _tombstones: ex.Actor[] = [];
    
    public static spawnHero() {
-      HeroSpawner._spawned++;
+      var i, spawnPoints, spawnPoint, hero;           
       
       // todo better spawning logic
-      for (var i = 0; i < Math.min(Config.HeroSpawnPoolMax, HeroSpawner._spawned); i++) {
-         var spawnPoints = map.getSpawnPoints();
-         var spawnPoint = Util.pickRandom(spawnPoints);
+      for (i = 0; i < Math.min(Config.HeroSpawnPoolMax, HeroSpawner._spawned); i++) {
+         spawnPoints = map.getSpawnPoints();
+         spawnPoint = Util.pickRandom(spawnPoints);
          
-         var hero  = new Hero(spawnPoint.x, spawnPoint.y);
-         game.add(hero);
-         this._heroes.push(hero);
+         // if (Stats.numHeroesKilled > 20) {
+         //    heroTimer.interval = heroTimer.interval / 2;
+         // }
+         HeroSpawner._spawn(spawnPoint);
+         HeroSpawner._spawned++;
       }
+      
+      // rig first spawn
+      if (HeroSpawner._spawned === 0) {
+         spawnPoint = map.getSpawnPoints()[0];
+         HeroSpawner._spawn(spawnPoint);
+         HeroSpawner._spawned++;
+      }
+   }
+   
+   private static _spawn(point: ex.Point) {
+      var hero  = new Hero(point.x, point.y);
+      game.add(hero);
+      this._heroes.push(hero);
    }
    
    public static getHeroes(): Array<Hero> {
@@ -33,7 +48,7 @@ class HeroSpawner {
       if (blood) {
          var tombstone = new ex.Actor(h.x, h.y, 24, 24);
          var sprites = [Resources.TextureHeroDead, Resources.TextureHeroDead2, Resources.TextureHeroDead3];         
-         tombstone.traits.length = 0;      
+         tombstone.traits.length = 0;
          // todo bug with actor scaling
          var sprite = Util.pickRandom(sprites).asSprite();
          sprite.scale.setTo(2, 2);
@@ -60,6 +75,10 @@ class HeroSpawner {
    
    public static reset() {
       HeroSpawner._spawned = 0;
+   }
+   
+   public static getSpawnCount() {
+      return HeroSpawner._spawned;
    }
 }
 
@@ -229,6 +248,9 @@ class Hero extends ex.Actor {
                this.clearActions();
                this._fsm.go(HeroStates.Searching);
                // console.log('stopping attack');
+            } else if (heroVector.distance(monsterVector) <= Config.HeroAggroDistance) {
+               this.clearActions();
+               this.meet(map._player, Config.HeroSpeed); 
             } else if (heroVector.distance(monsterVector) < Config.HeroMeleeRange) {
                this.clearActions();
                console.log("do nothing");

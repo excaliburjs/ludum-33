@@ -60,12 +60,12 @@ game.start(loader).then(() => {
    // fade don't work
    defendIntro.delay(1000).callMethod(() => {
       defendIntro.opacity = 1; 
-      Resources.AnnouncerDefend.play();
-   }).delay(2000).callMethod(() => defendIntro.kill());
-   
-      
+      Resources.AnnouncerDefend.play();      
+   }).delay(2000).callMethod(() => {
+      defendIntro.kill(); 
+      HeroSpawner.spawnHero(); 
+   });
+         
    heroTimer = new ex.Timer(() => HeroSpawner.spawnHero(), Config.HeroSpawnInterval, true);
-   game.add(heroTimer);
-   
-   HeroSpawner.spawnHero();  
+   game.add(heroTimer);    
 });

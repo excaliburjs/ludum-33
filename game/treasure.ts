@@ -21,9 +21,9 @@ class Treasure extends ex.Actor {
    
    public steal(): number {
       if (this._hoard > 0) {
-         this._hoard -= Config.TreasureStealAmount;
-         
-         return Config.TreasureStealAmount; 
+         var amount = Math.max(this._hoard - Config.TreasureStealAmount, this._hoard);
+         this._hoard -= amount;
+         return amount;
       } else {
          return 0;
       }
