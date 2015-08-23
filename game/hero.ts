@@ -11,17 +11,29 @@ class HeroSpawner {
    private static _tombstones: ex.Actor[] = [];
    
    public static spawnHero() {
-            
+      var i, spawnPoints, spawnPoint, hero;           
+      
       // todo better spawning logic
-      for (var i = 0; i < Math.min(Config.HeroSpawnPoolMax, HeroSpawner._spawned); i++) {
-         var spawnPoints = map.getSpawnPoints();
-         var spawnPoint = Util.pickRandom(spawnPoints);
+      for (i = 0; i < Math.min(Config.HeroSpawnPoolMax, HeroSpawner._spawned); i++) {
+         spawnPoints = map.getSpawnPoints();
+         spawnPoint = Util.pickRandom(spawnPoints);
          
-         var hero  = new Hero(spawnPoint.x, spawnPoint.y);
-         game.add(hero);
-         this._heroes.push(hero);
+         HeroSpawner._spawn(spawnPoint);
          HeroSpawner._spawned++;
       }
+      
+      // rig first spawn
+      if (HeroSpawner._spawned === 0) {
+         spawnPoint = map.getSpawnPoints()[0];
+         HeroSpawner._spawn(spawnPoint);
+         HeroSpawner._spawned++;
+      }
+   }
+   
+   private static _spawn(point: ex.Point) {
+      var hero  = new Hero(point.x, point.y);
+      game.add(hero);
+      this._heroes.push(hero);
    }
    
    public static getHeroes(): Array<Hero> {

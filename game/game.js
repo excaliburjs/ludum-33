@@ -1,5 +1,5 @@
 var Config = {
-    PlayerCellSpawnX: 19,
+    PlayerCellSpawnX: 10,
     PlayerCellSpawnY: 19,
     MonsterHealth: 30,
     MonsterWidth: 48,
@@ -731,15 +731,25 @@ var HeroSpawner = (function () {
     function HeroSpawner() {
     }
     HeroSpawner.spawnHero = function () {
+        var i, spawnPoints, spawnPoint, hero;
         // todo better spawning logic
-        for (var i = 0; i < Math.min(Config.HeroSpawnPoolMax, HeroSpawner._spawned); i++) {
-            var spawnPoints = map.getSpawnPoints();
-            var spawnPoint = Util.pickRandom(spawnPoints);
-            var hero = new Hero(spawnPoint.x, spawnPoint.y);
-            game.add(hero);
-            this._heroes.push(hero);
+        for (i = 0; i < Math.min(Config.HeroSpawnPoolMax, HeroSpawner._spawned); i++) {
+            spawnPoints = map.getSpawnPoints();
+            spawnPoint = Util.pickRandom(spawnPoints);
+            HeroSpawner._spawn(spawnPoint);
             HeroSpawner._spawned++;
         }
+        // rig first spawn
+        if (HeroSpawner._spawned === 0) {
+            spawnPoint = map.getSpawnPoints()[0];
+            HeroSpawner._spawn(spawnPoint);
+            HeroSpawner._spawned++;
+        }
+    };
+    HeroSpawner._spawn = function (point) {
+        var hero = new Hero(point.x, point.y);
+        game.add(hero);
+        this._heroes.push(hero);
     };
     HeroSpawner.getHeroes = function () {
         return this._heroes;
@@ -1213,8 +1223,10 @@ game.start(loader).then(function () {
     defendIntro.delay(1000).callMethod(function () {
         defendIntro.opacity = 1;
         Resources.AnnouncerDefend.play();
-    }).delay(2000).callMethod(function () { return defendIntro.kill(); });
+    }).delay(2000).callMethod(function () {
+        defendIntro.kill();
+        HeroSpawner.spawnHero();
+    });
     heroTimer = new ex.Timer(function () { return HeroSpawner.spawnHero(); }, Config.HeroSpawnInterval, true);
     game.add(heroTimer);
-    HeroSpawner.spawnHero();
 });
