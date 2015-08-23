@@ -658,6 +658,9 @@ var HeroSpawner = (function () {
         h.kill();
         _.remove(this._heroes, h);
     };
+    HeroSpawner.reset = function () {
+        HeroSpawner._spawned = 0;
+    };
     HeroSpawner._spawned = 0;
     HeroSpawner._heroes = [];
     return HeroSpawner;
@@ -935,13 +938,14 @@ var GameOver = (function (_super) {
             Stats.goldLost = 0;
             Stats.damageTaken = 0;
             map.resetPlayer();
-            heroTimer.cancel();
-            game.remove(heroTimer);
-            heroTimer = new ex.Timer(function () { return HeroSpawner.spawnHero(); }, Config.HeroSpawnInterval, true);
-            game.add(heroTimer);
+            // heroTimer.cancel();
+            // game.remove(heroTimer);
+            // heroTimer = new ex.Timer(() => HeroSpawner.spawnHero(), Config.HeroSpawnInterval, true);
+            // game.add(heroTimer);
             _.forEach(map.getTreasures(), function (treasure) {
                 treasure.reset();
             });
+            HeroSpawner.reset();
             for (var i = HeroSpawner.getHeroes().length - 1; i >= 0; i--) {
                 HeroSpawner.despawn(HeroSpawner.getHeroes()[i], false);
             }

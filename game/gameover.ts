@@ -16,14 +16,16 @@ class GameOver extends ex.Scene {
          
          map.resetPlayer();
          
-         heroTimer.cancel();
-         game.remove(heroTimer);
-         heroTimer = new ex.Timer(() => HeroSpawner.spawnHero(), Config.HeroSpawnInterval, true);
-         game.add(heroTimer)
+         // heroTimer.cancel();
+         // game.remove(heroTimer);
+         // heroTimer = new ex.Timer(() => HeroSpawner.spawnHero(), Config.HeroSpawnInterval, true);
+         // game.add(heroTimer);
          
          _.forEach(map.getTreasures(), (treasure) => {
             treasure.reset();
          });
+         
+         HeroSpawner.reset();
          for (var i = HeroSpawner.getHeroes().length-1; i >= 0 ; i--) {
             HeroSpawner.despawn(HeroSpawner.getHeroes()[i], false);
          }

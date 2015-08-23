@@ -43,6 +43,10 @@ class HeroSpawner {
       h.kill();
       _.remove(this._heroes, h);
    }
+   
+   public static reset() {
+      HeroSpawner._spawned = 0;
+   }
 }
 
 class Hero extends ex.Actor {   
@@ -106,6 +110,7 @@ class Hero extends ex.Actor {
             if (hero._attackCooldown == 0 && hero._hasHitMinotaur) {
                var monster = <Monster>e.other;
                monster.health--;
+               Stats.damageTaken++;
                hero._attackCooldown = Config.HeroAttackCooldown;
                
                var origin = new ex.Vector(hero.x, hero.y);
