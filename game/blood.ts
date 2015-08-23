@@ -42,31 +42,34 @@ class Blood extends ex.Actor {
    }
    
    public draw(ctx: CanvasRenderingContext2D, delta: number) {
-      super.draw(ctx, delta);
-      
-      // update particle positions
-      var emitter: IBloodEmitter, i;
-      for (i = 0; i < this._emitters.length; i++) {         
-         this._emitters[i].draw(this._sctx, delta);
+      if (Options.blood) {
+         super.draw(ctx, delta);
+         
+         // update particle positions
+         var emitter: IBloodEmitter, i;
+         for (i = 0; i < this._emitters.length; i++) {         
+            this._emitters[i].draw(this._sctx, delta);
+         }
+         
+         // draw shadow ctx
+         ctx.drawImage(this._scvs, 0, 0);
       }
-      
-      // draw shadow ctx
-      ctx.drawImage(this._scvs, 0, 0);
    }
    
    public update(engine: ex.Engine, delta: number) {
       super.update(engine, delta);
-      
-      this._bleedTimer = Math.max(0, this._bleedTimer - delta);
-      
-      // update particle positions
-      var emitter: IBloodEmitter, i;
-      for (i = this._emitters.length -1; i >= 0; i--) {
-         emitter = this._emitters[i];
-         emitter.update(engine, delta);
+      if (Options.blood) {
+         this._bleedTimer = Math.max(0, this._bleedTimer - delta);
          
-         if (emitter.done) {
-            this._emitters.splice(i, 1);
+         // update particle positions
+         var emitter: IBloodEmitter, i;
+         for (i = this._emitters.length -1; i >= 0; i--) {
+            emitter = this._emitters[i];
+            emitter.update(engine, delta);
+            
+            if (emitter.done) {
+               this._emitters.splice(i, 1);
+            }
          }
       }
    }

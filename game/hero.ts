@@ -132,7 +132,7 @@ class Hero extends ex.Actor {
             Stats.numHeroesKilled++;
             // map.getTreasures()[0].return(this._treasure);
             this._chestLooted.return(this._treasure);
-            HeroSpawner.despawn(this, true);
+            HeroSpawner.despawn(this, Options.blood);
       }
       this.setZIndex(this.y);
       this._attackCooldown = Math.max(this._attackCooldown - delta, 0);

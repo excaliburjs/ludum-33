@@ -256,25 +256,29 @@ var Blood = (function (_super) {
         this._bleedTimer = duration;
     };
     Blood.prototype.draw = function (ctx, delta) {
-        _super.prototype.draw.call(this, ctx, delta);
-        // update particle positions
-        var emitter, i;
-        for (i = 0; i < this._emitters.length; i++) {
-            this._emitters[i].draw(this._sctx, delta);
+        if (Options.blood) {
+            _super.prototype.draw.call(this, ctx, delta);
+            // update particle positions
+            var emitter, i;
+            for (i = 0; i < this._emitters.length; i++) {
+                this._emitters[i].draw(this._sctx, delta);
+            }
+            // draw shadow ctx
+            ctx.drawImage(this._scvs, 0, 0);
         }
-        // draw shadow ctx
-        ctx.drawImage(this._scvs, 0, 0);
     };
     Blood.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
-        this._bleedTimer = Math.max(0, this._bleedTimer - delta);
-        // update particle positions
-        var emitter, i;
-        for (i = this._emitters.length - 1; i >= 0; i--) {
-            emitter = this._emitters[i];
-            emitter.update(engine, delta);
-            if (emitter.done) {
-                this._emitters.splice(i, 1);
+        if (Options.blood) {
+            this._bleedTimer = Math.max(0, this._bleedTimer - delta);
+            // update particle positions
+            var emitter, i;
+            for (i = this._emitters.length - 1; i >= 0; i--) {
+                emitter = this._emitters[i];
+                emitter.update(engine, delta);
+                if (emitter.done) {
+                    this._emitters.splice(i, 1);
+                }
             }
         }
     };
@@ -717,7 +721,7 @@ var Hero = (function (_super) {
             Stats.numHeroesKilled++;
             // map.getTreasures()[0].return(this._treasure);
             this._chestLooted.return(this._treasure);
-            HeroSpawner.despawn(this, true);
+            HeroSpawner.despawn(this, Options.blood);
         }
         this.setZIndex(this.y);
         this._attackCooldown = Math.max(this._attackCooldown - delta, 0);
