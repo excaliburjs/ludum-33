@@ -6,6 +6,7 @@ class Blood extends ex.Actor {
    private _emitters: IBloodEmitter[] = [];
    public static BloodPixel: ex.Sprite;
    public static BloodPixelGreen: ex.Sprite;
+   private _sprayEmitter: ex.ParticleEmitter;
    
    constructor() {
       super(0, 0);
@@ -17,6 +18,8 @@ class Blood extends ex.Actor {
       this._sctx.globalCompositeOperation = 'source-over';     
       
       this.traits.length = 0;
+      this._sprayEmitter = new ex.ParticleEmitter(0, 0, 100, 100);
+            
    }
    
    public onInitialize() {

@@ -9,6 +9,7 @@
 /// <reference path="stats.ts" />
 /// <reference path="options.ts" />
 /// <reference path="gameover.ts" />
+/// <reference path="soundmanager.ts" />
 
 var game = new ex.Engine({
    canvasElementId: "game",
@@ -51,7 +52,11 @@ game.start(loader).then(() => {
    defendIntro.previousOpacity = 0;
    game.add(defendIntro);
    // fade don't work
-   defendIntro.delay(1000).callMethod(() => defendIntro.opacity = 1).delay(2000).callMethod(() => defendIntro.kill());
+   defendIntro.delay(1000).callMethod(() => {
+      defendIntro.opacity = 1; 
+      Resources.AnnouncerDefend.play();
+   }).delay(2000).callMethod(() => defendIntro.kill());
+   
       
    var heroTimer = new ex.Timer(() => HeroSpawner.spawnHero(), Config.HeroSpawnInterval, true);
    game.add(heroTimer);

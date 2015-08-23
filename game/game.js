@@ -46,6 +46,8 @@ var Resources = {
     AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
     AxeSwingHit: new ex.Sound('sounds/axe-swing-hit-2.wav'),
     BloodSpatter: new ex.Sound('sounds/blood-splatter-1.wav'),
+    AnnouncerDefend: new ex.Sound('sounds/defend.wav'),
+    SoundMusic: new ex.Sound('sounds/music.mp3'),
     TextureHero: new ex.Texture("images/hero.png"),
     TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
     TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
@@ -60,7 +62,9 @@ var Resources = {
     TextureTextDefend: new ex.Texture("images/text-defend.png"),
     TextureBloodPixel: new ex.Texture("images/blood-pixel.png"),
     TextureBloodPixelGreen: new ex.Texture("images/blood-pixel-green.png"),
-    TextureHeroDead: new ex.Texture("images/hero-dead.png")
+    TextureHeroDead: new ex.Texture("images/hero-dead.png"),
+    TextureHeroDead2: new ex.Texture("images/hero-dead-2.png"),
+    TextureHeroDead3: new ex.Texture("images/hero-dead-3.png")
 };
 var Util = (function () {
     function Util() {
@@ -88,13 +92,8 @@ var Map = (function (_super) {
         this._map.anchor.setTo(0, 0);
         this._map.addDrawing(Resources.TextureMap);
         this.add(this._map);
-        // make sure volume is set for sounds
-        _.forIn(Resources, function (resource) {
-            if (resource instanceof ex.Sound) {
-                resource.setVolume(1);
-            }
-        });
-        Resources.AxeSwingHit.setVolume(0.2);
+        // start sounds
+        SoundManager.start();
         // Initialize blood
         this.add(blood);
         this.buildWalls();
@@ -164,6 +163,8 @@ var Map = (function (_super) {
                 cell = data[x + y * 40];
                 if (cell == 58) {
                     wall = new ex.Actor(x * Map.CellSize, y * Map.CellSize, 24, 24);
+                    wall.traits.length = 0;
+                    wall.traits.push(new ex.Traits.OffscreenCulling());
                     wall.anchor.setTo(0, 0);
                     wall.addDrawing(Resources.TextureWall);
                     wall.collisionType = ex.CollisionType.Fixed;
@@ -217,12 +218,7 @@ var Map = (function (_super) {
         game.goToScene('gameover');
     };
     Map.prototype.onDeactivate = function () {
-        _.forIn(Resources, function (resource) {
-            if (resource instanceof ex.Sound) {
-                resource.setVolume(0);
-            }
-        });
-        //TODO clean up hero generation
+        SoundManager.stop();
     };
     Map.CellSize = 24;
     return Map;
@@ -239,6 +235,7 @@ var Blood = (function (_super) {
         this._sctx = this._scvs.getContext('2d');
         this._sctx.globalCompositeOperation = 'source-over';
         this.traits.length = 0;
+        this._sprayEmitter = new ex.ParticleEmitter(0, 0, 100, 100);
     }
     Blood.prototype.onInitialize = function () {
         Blood.BloodPixel = Resources.TextureBloodPixel.asSprite();
@@ -378,7 +375,7 @@ var Monster = (function (_super) {
         });
         var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 14, 1, 96, 96);
         var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 14, 1, 96, 96);
-        var upSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterUp, 7, 1, 96, 96);
+        var upSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterUp, 14, 1, 96, 96);
         var attackDownAnim = downSpriteSheet.getAnimationBetween(engine, 9, 13, Config.MonsterAttackTime / 4);
         attackDownAnim.scale.setTo(2, 2);
         attackDownAnim.loop = true;
@@ -387,10 +384,14 @@ var Monster = (function (_super) {
         walkDownAnim.scale.setTo(2, 2);
         walkDownAnim.loop = true;
         this.addDrawing("walkDown", walkDownAnim);
-        var attackUpAnim = upSpriteSheet.getAnimationBetween(engine, 2, 7, Config.MonsterAttackTime / 4);
+        var attackUpAnim = upSpriteSheet.getAnimationBetween(engine, 9, 13, Config.MonsterAttackTime / 4);
         attackUpAnim.scale.setTo(2, 2);
         attackUpAnim.loop = true;
         this.addDrawing("attackUp", attackUpAnim);
+        var walkUpAnim = upSpriteSheet.getAnimationByIndices(engine, [2, 3, 4, 5, 6, 7], 150);
+        walkUpAnim.scale.setTo(2, 2);
+        walkUpAnim.loop = true;
+        this.addDrawing("walkUp", walkUpAnim);
         var attackRightAnim = rightSpriteSheet.getAnimationBetween(engine, 9, 13, Config.MonsterAttackTime / 4);
         attackRightAnim.scale.setTo(2, 2);
         attackRightAnim.loop = true;
@@ -470,7 +471,7 @@ var Monster = (function (_super) {
             engine.input.keyboard.isKeyPressed(ex.Input.Keys.Up)) {
             if (!this._isAttacking) {
                 this.dy = -Config.MonsterSpeed;
-                this.setDrawing("idleUp");
+                this.setDrawing("walkUp");
             }
         }
         if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.S) ||
@@ -632,9 +633,10 @@ var HeroSpawner = (function () {
         if (blood === void 0) { blood = false; }
         if (blood) {
             var tombstone = new ex.Actor(h.x, h.y, 24, 24);
-            //tombstone.traits.length = 0;      
+            var sprites = [Resources.TextureHeroDead, Resources.TextureHeroDead2, Resources.TextureHeroDead3];
+            tombstone.traits.length = 0;
             // todo bug with actor scaling
-            var sprite = Resources.TextureHeroDead.asSprite();
+            var sprite = Util.pickRandom(sprites).asSprite();
             sprite.scale.setTo(2, 2);
             tombstone.addDrawing("default", sprite);
             game.add(tombstone);
@@ -891,6 +893,31 @@ var GameOver = (function (_super) {
     };
     return GameOver;
 })(ex.Scene);
+var SoundManager = (function () {
+    function SoundManager() {
+    }
+    SoundManager.start = function () {
+        // make sure volume is set for sounds
+        _.forIn(Resources, function (resource) {
+            if (resource instanceof ex.Sound) {
+                resource.setVolume(1);
+            }
+        });
+        Resources.AxeSwingHit.setVolume(0.2);
+        Resources.SoundMusic.setVolume(0.05);
+        Resources.SoundMusic.play();
+        Resources.SoundMusic.setLoop(true);
+    };
+    SoundManager.stop = function () {
+        // make sure volume is set for sounds
+        _.forIn(Resources, function (resource) {
+            if (resource instanceof ex.Sound) {
+                resource.setVolume(0);
+            }
+        });
+    };
+    return SoundManager;
+})();
 /// <reference path="config.ts" />
 /// <reference path="resources.ts" />
 /// <reference path="util.ts" />
@@ -902,6 +929,7 @@ var GameOver = (function (_super) {
 /// <reference path="stats.ts" />
 /// <reference path="options.ts" />
 /// <reference path="gameover.ts" />
+/// <reference path="soundmanager.ts" />
 var game = new ex.Engine({
     canvasElementId: "game",
     width: 960,
@@ -935,7 +963,10 @@ game.start(loader).then(function () {
     defendIntro.previousOpacity = 0;
     game.add(defendIntro);
     // fade don't work
-    defendIntro.delay(1000).callMethod(function () { return defendIntro.opacity = 1; }).delay(2000).callMethod(function () { return defendIntro.kill(); });
+    defendIntro.delay(1000).callMethod(function () {
+        defendIntro.opacity = 1;
+        Resources.AnnouncerDefend.play();
+    }).delay(2000).callMethod(function () { return defendIntro.kill(); });
     var heroTimer = new ex.Timer(function () { return HeroSpawner.spawnHero(); }, Config.HeroSpawnInterval, true);
     game.add(heroTimer);
     HeroSpawner.spawnHero();

@@ -20,13 +20,8 @@ class Map extends ex.Scene {
       this._map.addDrawing(Resources.TextureMap);
       this.add(this._map);
       
-      // make sure volume is set for sounds
-      _.forIn(Resources, (resource) => {
-         if (resource instanceof ex.Sound) {
-            resource.setVolume(1);
-         }
-      });
-      Resources.AxeSwingHit.setVolume(0.2);
+      // start sounds
+      SoundManager.start();
 
       // Initialize blood
       this.add(blood);
@@ -117,6 +112,8 @@ class Map extends ex.Scene {
             
             if (cell == 58) { // wall tile
                wall = new ex.Actor(x * Map.CellSize, y * Map.CellSize, 24, 24);
+               wall.traits.length = 0;
+               wall.traits.push(new ex.Traits.OffscreenCulling());
                wall.anchor.setTo(0, 0);
                wall.addDrawing(Resources.TextureWall);
                wall.collisionType = ex.CollisionType.Fixed;
@@ -187,11 +184,6 @@ class Map extends ex.Scene {
    }
    
    public onDeactivate() {
-      _.forIn(Resources, (resource) => {
-         if (resource instanceof ex.Sound) {
-            resource.setVolume(0);
-         }
-      });
-      //TODO clean up hero generation
+      SoundManager.stop();
    }
 }

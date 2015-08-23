@@ -31,9 +31,10 @@ class HeroSpawner {
       
       if (blood) {
          var tombstone = new ex.Actor(h.x, h.y, 24, 24);
-         //tombstone.traits.length = 0;      
+         var sprites = [Resources.TextureHeroDead, Resources.TextureHeroDead2, Resources.TextureHeroDead3];         
+         tombstone.traits.length = 0;      
          // todo bug with actor scaling
-         var sprite = Resources.TextureHeroDead.asSprite();
+         var sprite = Util.pickRandom(sprites).asSprite();
          sprite.scale.setTo(2, 2);
          tombstone.addDrawing("default", sprite);
          game.add(tombstone);
