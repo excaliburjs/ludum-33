@@ -33,6 +33,10 @@ class Treasure extends ex.Actor {
       this._hoard += amount;
    }
    
+   public reset() {
+      this._hoard = Config.TreasureHoardSize;
+   }
+   
    public update(engine: ex.Engine, delta: number) {
       super.update(engine, delta);
       

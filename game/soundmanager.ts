@@ -19,6 +19,7 @@ class SoundManager {
       _.forIn(Resources, (resource) => {
          if (resource instanceof ex.Sound) {
             (<ex.Sound>resource).setVolume(0);
+            (<ex.Sound>resource).stop();
          }
       });
    }
