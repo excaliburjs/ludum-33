@@ -18,9 +18,13 @@ class HeroSpawner {
          spawnPoints = map.getSpawnPoints();
          spawnPoint = Util.pickRandom(spawnPoints);
          
-         // if (Stats.numHeroesKilled > 20) {
-         //    heroTimer.interval = heroTimer.interval / 2;
-         // }
+         if (Stats.numHeroesKilled > 75) {
+            heroTimer.interval = 4000;
+         } else if (Stats.numHeroesKilled > 50) {
+            heroTimer.interval = 6000;
+         } else if (Stats.numHeroesKilled > 25) {
+            heroTimer.interval = 7500;
+         }
          HeroSpawner._spawn(spawnPoint);
          HeroSpawner._spawned++;
       }
