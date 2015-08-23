@@ -63,7 +63,7 @@ class Hero extends ex.Actor {
       this._lootIndicator = new ex.Actor(5, -24, 24, 24);
       this._lootIndicator.addDrawing(Resources.TextureHeroLootIndicator);
       this._lootIndicator.scale.setTo(1.5, 1.5);
-      this._lootIndicator.moveBy(0, -10, 500).moveBy(0, 10, 500).repeatForever();
+      this._lootIndicator.moveBy(5, -32, 200).moveBy(5, -24, 200).repeatForever();
       
       var spriteSheet = new ex.SpriteSheet(Resources.TextureHero, 3, 1, 28, 28);
       var idleAnim = spriteSheet.getAnimationForAll(engine, 300);
