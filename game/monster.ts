@@ -173,7 +173,15 @@ class Monster extends ex.Actor {
          // hero.blink(500, 500, 5); //can't because moving already (no parallel actions support)
          game.currentScene.camera.shake(2, 2, 200);
          hero.Health--;
+         var origin = new ex.Vector(hero.x, hero.y);
+         var dest = new ex.Vector(this.x, this.y);
+         var a = origin.subtract(dest).toAngle();
+         blood.splatter(hero.x, hero.y, 0.5, 0.5, a);
       });
+   }
+   
+   public getRotation(): number {
+      return this._rotation;
    }
   
    public debugDraw(ctx: CanvasRenderingContext2D): void {

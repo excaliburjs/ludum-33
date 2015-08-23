@@ -88,11 +88,17 @@ class Hero extends ex.Actor {
                
             }
          } else if (e.other instanceof Monster) {
-            if (this._attackCooldown == 0) {
+            var hero = <Hero>e.actor;
+            if (hero._attackCooldown == 0) {
                var monster = <Monster>e.other;
                monster.health--;
-               this._attackCooldown = Config.HeroAttackCooldown;
-         }
+               hero._attackCooldown = Config.HeroAttackCooldown;
+               
+               var origin = new ex.Vector(hero.x, hero.y);
+               var dest = new ex.Vector(monster.x, monster.y);
+               var a = dest.subtract(origin).toAngle();
+               blood.splatter(monster.x, monster.y, 0.5, 0.5, a);
+            }
          }
       });
      

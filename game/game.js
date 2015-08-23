@@ -30,6 +30,20 @@ var Config = {
     // Treasure progress indicator width (in px)
     TreasureProgressSize: 600
 };
+var Resources = {
+    // SomeSound: new ex.Sound('../sounds/foo.mp3')
+    TextureHero: new ex.Texture("images/hero.png"),
+    TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
+    TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
+    TextureMonsterRight: new ex.Texture("images/minotaurv2right.png"),
+    TextureTreasure: new ex.Texture("images/treasure.png"),
+    TextureTreasureEmpty: new ex.Texture("images/treasure-empty.png"),
+    TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
+    TextureMonsterIndicator: new ex.Texture("images/mino-indicator.png"),
+    TextureMap: new ex.Texture("images/map.png"),
+    TextureTextDefend: new ex.Texture("images/text-defend.png"),
+    TextureBloodPixel: new ex.Texture("images/blood-pixel.png")
+};
 var Util = (function () {
     function Util() {
     }
@@ -176,52 +190,109 @@ var Map = (function (_super) {
     Map.CellSize = 24;
     return Map;
 })(ex.Scene);
-var BloodEmitter = (function (_super) {
-    __extends(BloodEmitter, _super);
-    function BloodEmitter(x, y) {
-        _super.call(this, x, y);
-        this.amount = 0.5;
-        this.force = 0.5;
-        this.angle = 0;
+var Blood = (function (_super) {
+    __extends(Blood, _super);
+    function Blood() {
+        _super.call(this, 0, 0);
         this._bleedTimer = 0;
-        this._splatterTimer = 0;
-        this._particles = [];
+        this._emitters = [];
+        this.opacity = 0;
+        this._scvs = document.createElement('canvas');
+        this._scvs.width = game.getWidth();
+        this._scvs.height = game.getHeight();
+        this._sctx = this._scvs.getContext('2d');
+        this._sctx.globalCompositeOperation = 'source-over';
+        this._sctx.fillStyle = 'transparent';
+        this._sctx.fillRect(0, 0, this._scvs.width, this._scvs.height);
+        this._sctx.fillStyle = 'red';
+        this._sctx.fillRect(200, 200, 200, 200);
     }
-    BloodEmitter.prototype.splatter = function () {
-        this._splatterTimer = 200;
-        this._particles.length = 0;
-        var pixelAmount = this.amount * 500;
+    Blood.prototype.onInitialize = function (engine) {
+        _super.prototype.onInitialize.call(this, engine);
+        Blood.BloodPixel = Resources.TextureBloodPixel.asSprite();
+    };
+    Blood.prototype.splatter = function (x, y, amount, force, angle) {
+        if (amount === void 0) { amount = 0.4; }
+        if (force === void 0) { force = 0.5; }
+        if (angle === void 0) { angle = 0; }
+        this._emitters.push(new SplatterEmitter(x, y, amount, force, angle - Math.PI / 4, angle + Math.PI / 4));
+    };
+    Blood.prototype.pop = function (x, y, amount, force) {
+        if (amount === void 0) { amount = 0.4; }
+        if (force === void 0) { force = 0.5; }
+        this._emitters.push(new SplatterEmitter(x, y, amount, force, 0, Math.PI * 2));
+    };
+    Blood.prototype.bleed = function (duration) {
+        this._bleedTimer = duration;
+    };
+    Blood.prototype.draw = function (ctx, delta) {
+        _super.prototype.draw.call(this, ctx, delta);
+        // update particle positions
+        var emitter, i;
+        for (i = 0; i < this._emitters.length; i++) {
+            this._emitters[i].draw(this._sctx, delta);
+        }
+        // draw shadow ctx
+        ctx.drawImage(this._scvs, 0, 0);
+    };
+    Blood.prototype.update = function (engine, delta) {
+        _super.prototype.update.call(this, engine, delta);
+        this._bleedTimer = Math.max(0, this._bleedTimer - delta);
+        // update particle positions
+        var emitter, i;
+        for (i = 0; i < this._emitters.length; i++) {
+            this._emitters[i].update(engine, delta);
+        }
+    };
+    return Blood;
+})(ex.UIActor);
+var SplatterEmitter = (function () {
+    /**
+     *
+     */
+    function SplatterEmitter(x, y, amount, force, minAngle, maxAngle) {
+        this.x = x;
+        this.y = y;
+        this.amount = amount;
+        this.force = force;
+        this.minAngle = minAngle;
+        this.maxAngle = maxAngle;
+        this._particles = [];
+        var pixelAmount = amount * 100;
         var vMin = 5;
-        var vMax = 100;
+        var vMax = force * 100;
         for (var i = 0; i < pixelAmount; i++) {
             this._particles.push({
-                x: this.x,
-                y: this.y,
-                d: ex.Vector.fromAngle(this.angle + ex.Util.randomInRange(-Math.PI / 4, Math.PI / 4)),
+                x: x,
+                y: y,
+                f: 0.8,
+                d: ex.Vector.fromAngle(ex.Util.randomInRange(minAngle, maxAngle)),
                 v: ex.Util.randomIntInRange(vMin, vMax)
             });
         }
-    };
-    BloodEmitter.prototype.bleed = function (duration) {
-        this._bleedTimer = duration;
-    };
-    BloodEmitter.prototype.draw = function (ctx, delta) {
-        _super.prototype.draw.call(this, ctx, delta);
-        // todo
-    };
-    BloodEmitter.prototype.update = function (engine, delta) {
-        this._bleedTimer = Math.max(0, this._bleedTimer - delta);
-        this._splatterTimer = Math.max(0, this._splatterTimer - delta);
-        // update particle positions
-        var particle, i, ray;
+    }
+    SplatterEmitter.prototype.update = function (engine, delta) {
+        var i, particle, currPos, vel, f;
         for (i = 0; i < this._particles.length; i++) {
             particle = this._particles[i];
-            ray = new ex.Ray(new ex.Point(particle.x, particle.y), ex.Vector.fromAngle(particle.d));
-            particle.x = (this.force * (this._splatterTimer * particle.v));
+            currPos = new ex.Vector(particle.x, particle.y);
+            vel = particle.d.scale(particle.v);
+            f = vel.scale(-1).scale(particle.f);
+            vel = vel.plus(f);
+            currPos = currPos.plus(vel);
+            particle.x = currPos.x;
+            particle.y = currPos.y;
         }
     };
-    return BloodEmitter;
-})(ex.Actor);
+    SplatterEmitter.prototype.draw = function (ctx, delta) {
+        var i, particle;
+        for (i = 0; i < this._particles.length; i++) {
+            particle = this._particles[i];
+            Blood.BloodPixel.draw(ctx, particle.x, particle.y);
+        }
+    };
+    return SplatterEmitter;
+})();
 /// <reference path="game.ts" />
 /// <reference path="config.ts" />
 var Monster = (function (_super) {
@@ -358,11 +429,19 @@ var Monster = (function (_super) {
         }
     };
     Monster.prototype._attack = function () {
+        var _this = this;
         _.forIn(this._attackable, function (hero) {
             // hero.blink(500, 500, 5); //can't because moving already (no parallel actions support)
             game.currentScene.camera.shake(2, 2, 200);
             hero.Health--;
+            var origin = new ex.Vector(hero.x, hero.y);
+            var dest = new ex.Vector(_this.x, _this.y);
+            var a = origin.subtract(dest).toAngle();
+            blood.splatter(hero.x, hero.y, 0.5, 0.5, a);
         });
+    };
+    Monster.prototype.getRotation = function () {
+        return this._rotation;
     };
     Monster.prototype.debugDraw = function (ctx) {
         _super.prototype.debugDraw.call(this, ctx);
@@ -379,19 +458,6 @@ var Monster = (function (_super) {
     };
     return Monster;
 })(ex.Actor);
-var Resources = {
-    // SomeSound: new ex.Sound('../sounds/foo.mp3')
-    TextureHero: new ex.Texture("images/hero.png"),
-    TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
-    TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
-    TextureMonsterRight: new ex.Texture("images/minotaurv2right.png"),
-    TextureTreasure: new ex.Texture("images/treasure.png"),
-    TextureTreasureEmpty: new ex.Texture("images/treasure-empty.png"),
-    TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
-    TextureMonsterIndicator: new ex.Texture("images/mino-indicator.png"),
-    TextureMap: new ex.Texture("images/map.png"),
-    TextureTextDefend: new ex.Texture("images/text-defend.png")
-};
 var HeroStates;
 (function (HeroStates) {
     HeroStates[HeroStates["Searching"] = 0] = "Searching";
@@ -442,7 +508,6 @@ var Hero = (function (_super) {
         this._fsm.on(HeroStates.Attacking, this.onAttacking.bind(this));
     }
     Hero.prototype.onInitialize = function (engine) {
-        var _this = this;
         this.setZIndex(1);
         this._lootIndicator = new ex.Actor(5, -24, 24, 24);
         this._lootIndicator.addDrawing(Resources.TextureHeroLootIndicator);
@@ -468,10 +533,15 @@ var Hero = (function (_super) {
                 }
             }
             else if (e.other instanceof Monster) {
-                if (_this._attackCooldown == 0) {
+                var hero = e.actor;
+                if (hero._attackCooldown == 0) {
                     var monster = e.other;
                     monster.health--;
-                    _this._attackCooldown = Config.HeroAttackCooldown;
+                    hero._attackCooldown = Config.HeroAttackCooldown;
+                    var origin = new ex.Vector(hero.x, hero.y);
+                    var dest = new ex.Vector(monster.x, monster.y);
+                    var a = dest.subtract(origin).toAngle();
+                    blood.splatter(monster.x, monster.y, 0.5, 0.5, a);
                 }
             }
         });
@@ -625,11 +695,11 @@ var GameOver = (function (_super) {
     return GameOver;
 })(ex.Scene);
 /// <reference path="config.ts" />
+/// <reference path="resources.ts" />
 /// <reference path="util.ts" />
 /// <reference path="map.ts" />
 /// <reference path="blood.ts" />
 /// <reference path="monster.ts" />
-/// <reference path="resources.ts" />
 /// <reference path="hero.ts" />
 /// <reference path="treasure.ts" />
 /// <reference path="stats.ts" />
@@ -645,14 +715,17 @@ var loader = new ex.Loader();
 _.forIn(Resources, function (resource) {
     loader.addResource(resource);
 });
+var blood = new Blood();
 var map = new Map(game);
 var gameOver = new GameOver(game);
 game.start(loader).then(function () {
     game.backgroundColor = ex.Color.Black;
-    // load map
+    // load map   
     game.add('map', map);
     game.goToScene('map');
     game.add('gameover', gameOver);
+    game.add(blood);
+    //blood.setZIndex(10);
     // set zoom
     game.currentScene.camera.zoom(1.5);
     // defend intro

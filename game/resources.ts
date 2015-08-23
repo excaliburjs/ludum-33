@@ -11,5 +11,6 @@ var Resources = {
    TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
    TextureMonsterIndicator: new ex.Texture("images/mino-indicator.png"),
    TextureMap: new ex.Texture("images/map.png"),
-   TextureTextDefend: new ex.Texture("images/text-defend.png")
+   TextureTextDefend: new ex.Texture("images/text-defend.png"),
+   TextureBloodPixel: new ex.Texture("images/blood-pixel.png")
 };
