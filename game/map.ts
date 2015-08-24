@@ -120,7 +120,7 @@ class Map extends ex.Scene {
       // start sounds
       SoundManager.start();
       
-      game.canvas.className = "playing";
+      Analytics.trackGameStart();
       
       this._survivalTimer = 0;
    }

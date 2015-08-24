@@ -62,6 +62,44 @@ var Config = {
     // Treasure progress indicator width (in px)
     TreasureProgressSize: 600
 };
+var Analytics = (function () {
+    function Analytics() {
+    }
+    Analytics.trackGameOver = function () {
+        Analytics._trackEvent('GameOver', {
+            SurvivalTime: map.getSurvivalTime(),
+            HeroesKilled: Stats.numHeroesKilled,
+            HeroesEscaped: Stats.numHeroesEscaped,
+            TotalHeroes: HeroSpawner.getSpawnCount(),
+            GoldLost: (Stats.goldLost / map.getHoardAmount()),
+            TotalGold: map.getHoardAmount(),
+            DamageTaken: (Stats.damageTaken / Config.MonsterHealth),
+            GoreEnabled: Options.blood,
+            MusicEnabled: Options.music,
+            SoundEnabled: Options.sound
+        });
+    };
+    Analytics.trackGameStart = function () {
+        Analytics._trackEvent('GameStart', {});
+    };
+    Analytics._trackEvent = function (name, data) {
+        try {
+            var ga = window.ga;
+            var ai = window.appInsights;
+            // google
+            if (ga) {
+            }
+            // appinsights
+            if (ai) {
+                ai.trackEvent(name, data);
+            }
+        }
+        catch (ex) {
+            ex.Logger.getInstance().error("Error while sending analytics", ex);
+        }
+    };
+    return Analytics;
+})();
 var Resources = {
     AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
     AxeSwingHit: new ex.Sound('sounds/axe-swing-hit-2.wav'),
@@ -1466,6 +1504,7 @@ var SoundManager = (function () {
     return SoundManager;
 })();
 /// <reference path="config.ts" />
+/// <reference path="analytics.ts" />
 /// <reference path="resources.ts" />
 /// <reference path="util.ts" />
 /// <reference path="map.ts" />
