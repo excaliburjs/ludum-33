@@ -2,7 +2,8 @@ enum HeroStates {
    Searching,
    Looting,
    Attacking,
-   Fleeing
+   Fleeing,
+   Stunned
 }
 
 class HeroSpawner {
@@ -98,10 +99,11 @@ class Hero extends ex.Actor {
    private _chestLooted: Treasure;
    private _fsm: TypeState.FiniteStateMachine<HeroStates>;
    private _attackCooldown: number = Config.HeroAttackCooldown;
-   private _hasHitMinotaur: boolean = false; 
+   private _hasHitMinotaur: boolean = true; 
    private _isAttacking: boolean = false;
    private _timeLeftAttacking: number = 0;
    private _direction: string;
+   private _stunnedTime: number= 0;
 
    constructor(x: number, y: number) {
       super(x, y, 24, 24);
@@ -112,7 +114,10 @@ class Hero extends ex.Actor {
       this._fsm.from(HeroStates.Searching).to(HeroStates.Attacking, HeroStates.Looting);
       this._fsm.from(HeroStates.Attacking).to(HeroStates.Searching);
       this._fsm.from(HeroStates.Looting).to(HeroStates.Fleeing);
+      this._fsm.fromAny(HeroStates).to(HeroStates.Stunned);
+      this._fsm.from(HeroStates.Stunned).toAny(HeroStates);
       
+      this._fsm.on(HeroStates.Stunned, this.onStunned.bind(this));
       this._fsm.on(HeroStates.Searching, this.onSearching.bind(this)); 
       this._fsm.on(HeroStates.Looting, this.onLooting.bind(this));     
       this._fsm.on(HeroStates.Fleeing, this.onFleeing.bind(this));
@@ -250,6 +255,17 @@ class Hero extends ex.Actor {
       }
       
       switch (this._fsm.currentState) {
+         case HeroStates.Stunned:
+            this._stunnedTime -= delta;
+            if(this._stunnedTime <= 0){
+               if(this._treasure > 0){
+                  this._fsm.go(HeroStates.Fleeing);
+               }else{
+                  this._fsm.go(HeroStates.Searching);   
+               }
+               
+            }
+         break;
          case HeroStates.Searching:
             if (heroVector.distance(monsterVector) <= Config.HeroAggroDistance) {
                this._fsm.go(HeroStates.Attacking);
@@ -309,6 +325,13 @@ class Hero extends ex.Actor {
 
    }
    
+   public stun(direction: ex.Vector){      
+      this._fsm.go(HeroStates.Stunned);
+      var dir = direction.normalize().scale(Config.KnockBackForce);
+      this.dx = dir.x;
+      this.dy = dir.y;
+   }
+   
    private onSearching(from?: HeroStates) {
        // find treasures
       var treasures = map.getTreasures();
@@ -342,6 +365,12 @@ class Hero extends ex.Actor {
       
       // TODO attack monster
       this.meet(map._player, Config.HeroSpeed);
+   }
+   
+   private onStunned(from?: HeroStates) {
+      this.clearActions();
+      this._stunnedTime = Config.HeroStunnedTime;
+      
    }
    
    private onExit() {     

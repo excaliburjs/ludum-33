@@ -12,6 +12,8 @@ var Config = {
    CloseMonsterAttackRange: 50,
    MonsterProgressSize: 200,
    MonsterAttackTime: 300,
+   MonsterAttackCooldown: 500,
+   KnockBackForce: 200,
    
    BloodMaxAmount: 300,
    BloodMinFriction: 0.15,
@@ -42,9 +44,11 @@ var Config = {
    // The cooldown amount for a hero's attack
    HeroAttackCooldown: 1500,
    // The maximum distance a hero will aggro to the monster
-   HeroAggroDistance: 100,
+   HeroAggroDistance: 150,
 
-   HeroMeleeRange: 20,
+   HeroMeleeRange: 30,
+   
+   HeroStunnedTime: 100,
    
    // Amount of gold heroes can carry
    TreasureStealAmount: 1,   

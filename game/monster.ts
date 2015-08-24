@@ -16,6 +16,7 @@ class Monster extends ex.Actor {
    private _timeLeftAttacking: number = 0;
    private _direction: string = "none";
    private _aimSprite: ex.Sprite;
+   private _lastSwing: number = 0;
    
    constructor(x, y){
       super(x, y, Config.MonsterWidth, Config.MonsterHeight);
@@ -140,9 +141,13 @@ class Monster extends ex.Actor {
       
       // attack
       engine.input.pointers.primary.on("down", function (evt) {
-         that._attack();
-         that._isAttacking = true;
-         that._timeLeftAttacking = Config.MonsterAttackTime;
+         var currentTime = Date.now();
+         if(currentTime - that._lastSwing > Config.MonsterAttackCooldown){
+            that._attack();
+            that._isAttacking = true;
+            that._timeLeftAttacking = Config.MonsterAttackTime;
+            that._lastSwing = currentTime;
+         }
       });
       
       
@@ -360,8 +365,11 @@ class Monster extends ex.Actor {
 
          var origin = new ex.Vector(hero.x, hero.y);
          var dest = new ex.Vector(this.x, this.y);
-         var a = origin.subtract(dest).toAngle();
-         blood.splatter(hero.x, hero.y, Blood.BloodPixel, hero.Health <= 0 ? 0.7 : 0.4, hero.Health <= 0 ? 0.8 : 0.3, a);
+         var vectorBetween = origin.subtract(dest);
+         
+         hero.stun(vectorBetween);
+         
+         blood.splatter(hero.x, hero.y, Blood.BloodPixel, hero.Health <= 0 ? 0.7 : 0.4, hero.Health <= 0 ? 0.8 : 0.3, vectorBetween.toAngle());
       });
       if (hitHero) {
          Resources.AxeSwingHit.play();
