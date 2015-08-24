@@ -23,10 +23,6 @@ class SoundManager {
             (<ex.Sound>resource).setVolume(volume);
          }
       });
-      // adjusting a few sound effect volume levels
-      if (volume != 0) {
-         Resources.AxeSwingHit.setVolume(0.2);
-      }
    }
    
    public static stop() {

@@ -249,8 +249,6 @@ class Map extends ex.Scene {
    }
    
    public _gameOver(type: GameOverType) {
-      //TODO
-      console.log('game over');
       isGameOver = true;
       game.goToScene('gameover');
       gameOver.setType(type);

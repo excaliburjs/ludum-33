@@ -21,13 +21,10 @@ class HeroSpawner {
          
          // increasing difficulty
          if (Stats.numHeroesKilled > 30) {
-            // console.log('difficulty increase: 4 seconds');
             heroTimer.interval = 4000;
          } else if (Stats.numHeroesKilled > 20) {
-            // console.log('difficulty increase: 6 seconds');
             heroTimer.interval = 6000;
          } else if (Stats.numHeroesKilled > 10) {
-            // console.log('difficulty increase: 7.5 seconds');
             heroTimer.interval = 7500;
          }
          HeroSpawner._spawn(spawnPoint);

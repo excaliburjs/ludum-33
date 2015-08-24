@@ -293,8 +293,6 @@ var Map = (function (_super) {
         return this._treasures.length * Config.TreasureHoardSize;
     };
     Map.prototype._gameOver = function (type) {
-        //TODO
-        console.log('game over');
         isGameOver = true;
         game.goToScene('gameover');
         gameOver.setType(type);
@@ -852,15 +850,12 @@ var HeroSpawner = (function () {
             spawnPoint = Util.pickRandom(spawnPoints);
             // increasing difficulty
             if (Stats.numHeroesKilled > 30) {
-                // console.log('difficulty increase: 4 seconds');
                 heroTimer.interval = 4000;
             }
             else if (Stats.numHeroesKilled > 20) {
-                // console.log('difficulty increase: 6 seconds');
                 heroTimer.interval = 6000;
             }
             else if (Stats.numHeroesKilled > 10) {
-                // console.log('difficulty increase: 7.5 seconds');
                 heroTimer.interval = 7500;
             }
             HeroSpawner._spawn(spawnPoint);
@@ -1422,10 +1417,6 @@ var SoundManager = (function () {
                 resource.setVolume(volume);
             }
         });
-        // adjusting a few sound effect volume levels
-        if (volume != 0) {
-            Resources.AxeSwingHit.setVolume(0.2);
-        }
     };
     SoundManager.stop = function () {
         // make sure volume is set for sounds
