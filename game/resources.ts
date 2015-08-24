@@ -28,6 +28,7 @@ var Resources = {
    TextureHeroDead: new ex.Texture("images/hero-dead.png"),
    TextureHeroDead2: new ex.Texture("images/hero-dead-2.png"),
    TextureHeroDead3: new ex.Texture("images/hero-dead-3.png"),
+   TextureHeroDead4: new ex.Texture("images/hero-dead-4.png"),
    
    TextureGameOverBg: new ex.Texture("images/game-over-bg.png"),
    TextureGameOverSlain: new ex.Texture("images/game-over-slain.png"),
