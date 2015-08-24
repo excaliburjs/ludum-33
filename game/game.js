@@ -32,6 +32,9 @@ var Config = {
     CameraShakeDuration: 0,
     // Spawn interval
     HeroSpawnInterval: 10000,
+    HeroSpawnIntervalEasy: 7500,
+    HeroSpawnIntervalMed: 6000,
+    HeroSpawnIntervalHard: 4000,
     // Max heroes to spawn at once
     HeroSpawnPoolMax: 5,
     // How much health a hero has
@@ -827,13 +830,13 @@ var HeroSpawner = (function () {
             spawnPoint = Util.pickRandom(spawnPoints);
             // increasing difficulty
             if (Stats.numHeroesKilled > 30) {
-                heroTimer.interval = 4000;
+                heroTimer.interval = Config.HeroSpawnIntervalHard;
             }
             else if (Stats.numHeroesKilled > 20) {
-                heroTimer.interval = 6000;
+                heroTimer.interval = Config.HeroSpawnIntervalMed;
             }
             else if (Stats.numHeroesKilled > 10) {
-                heroTimer.interval = 7500;
+                heroTimer.interval = Config.HeroSpawnIntervalEasy;
             }
             HeroSpawner._spawn(spawnPoint);
             HeroSpawner._spawned++;

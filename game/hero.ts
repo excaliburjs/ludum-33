@@ -21,11 +21,11 @@ class HeroSpawner {
          
          // increasing difficulty
          if (Stats.numHeroesKilled > 30) {
-            heroTimer.interval = 4000;
+            heroTimer.interval = Config.HeroSpawnIntervalHard;
          } else if (Stats.numHeroesKilled > 20) {
-            heroTimer.interval = 6000;
+            heroTimer.interval = Config.HeroSpawnIntervalMed;
          } else if (Stats.numHeroesKilled > 10) {
-            heroTimer.interval = 7500;
+            heroTimer.interval = Config.HeroSpawnIntervalEasy;
          }
          HeroSpawner._spawn(spawnPoint);
          HeroSpawner._spawned++;
