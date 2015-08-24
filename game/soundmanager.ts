@@ -26,6 +26,7 @@ class SoundManager {
          if (resource instanceof ex.Sound && (resource != Resources.SoundMusic) && (resource != Resources.GameOver)) {
             (<ex.Sound>resource).setVolume(volume);
          }
+         Resources.Fireball.setVolume(0.5);
       });
    }
    
