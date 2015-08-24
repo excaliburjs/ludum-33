@@ -12,6 +12,7 @@ class Map extends ex.Scene {
    private _vg: ex.UIActor;
    private _damageEffectTimeLeft: number = 0;
    private _takingDamage: boolean = false;
+   private _survivalTimer = 0;
    
    constructor(engine: ex.Engine) {
       super(engine);
@@ -120,6 +121,8 @@ class Map extends ex.Scene {
       SoundManager.start();
       
       game.canvas.className = "playing";
+      
+      this._survivalTimer = 0;
    }
    
    public onDeactivate() {
@@ -186,10 +189,16 @@ class Map extends ex.Scene {
       return new ex.Point(Map.CellSize * x, Map.CellSize * y);
    }
    
+   public getSurvivalTime() {
+      return this._survivalTimer;
+   }
+   
    private _cameraVel = new ex.Vector(0, 0);
    
    public update(engine: ex.Engine, delta: number) {
       super.update(engine, delta);
+      
+      this._survivalTimer += delta;
       
       if(this._takingDamage){
          this._damageEffectTimeLeft -= delta;
