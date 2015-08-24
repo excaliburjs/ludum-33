@@ -5,6 +5,7 @@ var Resources = {
    BloodSpatter: new ex.Sound('sounds/hero-slain.wav'),
    HeroSwing: new ex.Sound('sounds/hero-swing.wav'),
    AnnouncerDefend: new ex.Sound('sounds/defend.wav'),
+   Fireball: new ex.Sound('sounds/fireball.wav'),
    
    SoundMusic: new ex.Sound('sounds/music.mp3'),
    GameOver: new ex.Sound('sounds/fail.mp3'),

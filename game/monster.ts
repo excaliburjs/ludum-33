@@ -200,6 +200,7 @@ class Monster extends ex.Actor {
          this.setDrawing("charge");
          //this.currentDrawing.anchor = new ex.Point(.35, .35);
          this.rotation = this._rotation;
+         Resources.Fireball.play();
       }
    }
    

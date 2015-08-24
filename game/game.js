@@ -68,6 +68,7 @@ var Resources = {
     BloodSpatter: new ex.Sound('sounds/hero-slain.wav'),
     HeroSwing: new ex.Sound('sounds/hero-swing.wav'),
     AnnouncerDefend: new ex.Sound('sounds/defend.wav'),
+    Fireball: new ex.Sound('sounds/fireball.wav'),
     SoundMusic: new ex.Sound('sounds/music.mp3'),
     GameOver: new ex.Sound('sounds/fail.mp3'),
     TextureShift: new ex.Texture("images/shift.png"),
@@ -623,6 +624,7 @@ var Monster = (function (_super) {
             this.setDrawing("charge");
             //this.currentDrawing.anchor = new ex.Point(.35, .35);
             this.rotation = this._rotation;
+            Resources.Fireball.play();
         }
     };
     Monster.prototype.update = function (engine, delta) {
