@@ -9,7 +9,7 @@ var Config = {
     MonsterAttackRange: 90,
     MonsterDashSpeed: 700,
     MonsterDashDuration: 700,
-    MonsterDashCooldown: 200,
+    MonsterDashCooldown: 10000,
     CloseMonsterAttackRange: 50,
     MonsterProgressSize: 200,
     MonsterSpecialProgressSize: 125,
