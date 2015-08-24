@@ -197,7 +197,7 @@ class Map extends ex.Scene {
       
       this._monsterProgress.setWidth(Math.floor(progress * Config.MonsterProgressSize));
       // todo set special
-      this._monsterSpecialProgress.setWidth(Config.MonsterSpecialProgressSize);
+      this._monsterSpecialProgress.setWidth((this._player.dashLevel/ Config.MonsterDashCooldown) * Config.MonsterSpecialProgressSize);
             
       if ((curr + looting) <= 0) {
          this._gameOver(GameOverType.Hoard);
@@ -223,8 +223,6 @@ class Map extends ex.Scene {
    }
    
    public _gameOver(type: GameOverType) {
-      //TODO
-      console.log('game over');
       isGameOver = true;
       game.goToScene('gameover');
       gameOver.setType(type);

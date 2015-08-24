@@ -9,6 +9,7 @@ var Resources = {
    SoundMusic: new ex.Sound('sounds/music.mp3'),
    GameOver: new ex.Sound('sounds/fail.mp3'),
    
+   TextureShift: new ex.Texture("images/shift.png"),
    TextureVignette: new ex.Texture("images/vignette.png"),
    TextureHero: new ex.Texture("images/hero.png"),
    TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),

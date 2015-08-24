@@ -21,13 +21,10 @@ class HeroSpawner {
          
          // increasing difficulty
          if (Stats.numHeroesKilled > 30) {
-            // console.log('difficulty increase: 4 seconds');
             heroTimer.interval = 4000;
          } else if (Stats.numHeroesKilled > 20) {
-            // console.log('difficulty increase: 6 seconds');
             heroTimer.interval = 6000;
          } else if (Stats.numHeroesKilled > 10) {
-            // console.log('difficulty increase: 7.5 seconds');
             heroTimer.interval = 7500;
          }
          HeroSpawner._spawn(spawnPoint);
@@ -118,6 +115,7 @@ class Hero extends ex.Actor {
       this._fsm.from(HeroStates.Stunned).toAny(HeroStates);
       
       this._fsm.on(HeroStates.Stunned, this.onStunned.bind(this));
+      this._fsm.onExit(HeroStates.Stunned, this.onExitStunned.bind(this));
       this._fsm.on(HeroStates.Searching, this.onSearching.bind(this)); 
       this._fsm.on(HeroStates.Looting, this.onLooting.bind(this));     
       this._fsm.on(HeroStates.Fleeing, this.onFleeing.bind(this));
@@ -137,6 +135,18 @@ class Hero extends ex.Actor {
       idleAnim.loop = true;
       idleAnim.scale.setTo(2, 2);      
       this.addDrawing("idleLeft", idleAnim);
+      
+      var rightDamange = spriteSheet.getSprite(0).clone();
+      rightDamange.flipHorizontal = true;
+      rightDamange.lighten(100);
+      rightDamange.scale.setTo(2, 2);
+      
+      this.addDrawing("damageRight", rightDamange);
+      
+      var leftDamage = rightDamange.clone();
+      leftDamage.flipHorizontal = true;
+      
+      this.addDrawing("damageLeft", leftDamage);
       
       var rightAnim = spriteSheet.getAnimationByIndices(engine, [0, 1, 2], 300);
       rightAnim.flipHorizontal = true;
@@ -233,10 +243,20 @@ class Hero extends ex.Actor {
             this.setDrawing("idleRight");
          }   
       }
+      
       if(this.dx < 0) {
          if(this._direction !== "left") {
             this._direction = "left";
             this.setDrawing("idleLeft");
+         }
+      }
+      
+      if(this._fsm.currentState === HeroStates.Stunned){
+         if(this._direction == "left"){
+            this.setDrawing("damageLeft");
+         }
+         if(this._direction == "right"){
+            this.setDrawing("damageRight");
          }
       }
       
@@ -375,7 +395,16 @@ class Hero extends ex.Actor {
    private onStunned(from?: HeroStates) {
       this.clearActions();
       this._stunnedTime = Config.HeroStunnedTime;
-      
+   }
+   
+   private onExitStunned(from?: HeroStates) {
+      if(this._direction === "left"){
+         this.setDrawing("idleLeft");   
+      }
+      if(this._direction === "right") {
+         this.setDrawing("idleRight");
+      }
+      return true;
    }
    
    private onExit() {     
