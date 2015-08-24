@@ -206,7 +206,6 @@ var Map = (function (_super) {
         this._survivalTimer = 0;
     };
     Map.prototype.onDeactivate = function () {
-        SoundManager.stop();
         game.canvas.className = "";
     };
     Map.prototype.getPlayer = function () {
@@ -1398,6 +1397,7 @@ var GameOver = (function (_super) {
     };
     GameOver.prototype.onActivate = function () {
         _super.prototype.onActivate.call(this);
+        Resources.SoundMusic.stop();
         Resources.GameOver.play();
     };
     GameOver.prototype.onDeactivate = function () {

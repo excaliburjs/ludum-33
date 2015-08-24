@@ -84,7 +84,7 @@ class GameOver extends ex.Scene {
    
    public onActivate(): void {
       super.onActivate();
-      
+      Resources.SoundMusic.stop();
       Resources.GameOver.play();
    }
    

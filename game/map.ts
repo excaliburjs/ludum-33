@@ -125,9 +125,7 @@ class Map extends ex.Scene {
       this._survivalTimer = 0;
    }
    
-   public onDeactivate() {
-      SoundManager.stop();
-      
+   public onDeactivate() {      
       game.canvas.className = "";
    }
    
