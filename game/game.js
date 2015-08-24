@@ -9,6 +9,7 @@ var Config = {
     CloseMonsterAttackRange: 50,
     MonsterProgressSize: 200,
     MonsterAttackTime: 300,
+    KnockBackForce: 200,
     BloodMaxAmount: 300,
     BloodMinFriction: 0.15,
     BloodMaxFriction: 0.40,
@@ -36,8 +37,9 @@ var Config = {
     // The cooldown amount for a hero's attack
     HeroAttackCooldown: 1500,
     // The maximum distance a hero will aggro to the monster
-    HeroAggroDistance: 100,
-    HeroMeleeRange: 20,
+    HeroAggroDistance: 150,
+    HeroMeleeRange: 30,
+    HeroStunnedTime: 100,
     // Amount of gold heroes can carry
     TreasureStealAmount: 1,
     // Amount of gold in each treasure stash
@@ -683,8 +685,9 @@ var Monster = (function (_super) {
             hitHero = true;
             var origin = new ex.Vector(hero.x, hero.y);
             var dest = new ex.Vector(_this.x, _this.y);
-            var a = origin.subtract(dest).toAngle();
-            blood.splatter(hero.x, hero.y, Blood.BloodPixel, hero.Health <= 0 ? 0.7 : 0.4, hero.Health <= 0 ? 0.8 : 0.3, a);
+            var vectorBetween = origin.subtract(dest);
+            hero.stun(vectorBetween);
+            blood.splatter(hero.x, hero.y, Blood.BloodPixel, hero.Health <= 0 ? 0.7 : 0.4, hero.Health <= 0 ? 0.8 : 0.3, vectorBetween.toAngle());
         });
         if (hitHero) {
             Resources.AxeSwingHit.play();
@@ -726,6 +729,7 @@ var HeroStates;
     HeroStates[HeroStates["Looting"] = 1] = "Looting";
     HeroStates[HeroStates["Attacking"] = 2] = "Attacking";
     HeroStates[HeroStates["Fleeing"] = 3] = "Fleeing";
+    HeroStates[HeroStates["Stunned"] = 4] = "Stunned";
 })(HeroStates || (HeroStates = {}));
 var HeroSpawner = (function () {
     function HeroSpawner() {
@@ -804,11 +808,15 @@ var Hero = (function (_super) {
         this._hasHitMinotaur = false;
         this._isAttacking = false;
         this._timeLeftAttacking = 0;
+        this._stunnedTime = 0;
         this._fsm = new TypeState.FiniteStateMachine(HeroStates.Searching);
         // declare valid state transitions
         this._fsm.from(HeroStates.Searching).to(HeroStates.Attacking, HeroStates.Looting);
         this._fsm.from(HeroStates.Attacking).to(HeroStates.Searching);
         this._fsm.from(HeroStates.Looting).to(HeroStates.Fleeing);
+        this._fsm.fromAny(HeroStates).to(HeroStates.Stunned);
+        this._fsm.from(HeroStates.Stunned).toAny(HeroStates);
+        this._fsm.on(HeroStates.Stunned, this.onStunned.bind(this));
         this._fsm.on(HeroStates.Searching, this.onSearching.bind(this));
         this._fsm.on(HeroStates.Looting, this.onLooting.bind(this));
         this._fsm.on(HeroStates.Fleeing, this.onFleeing.bind(this));
@@ -922,6 +930,17 @@ var Hero = (function (_super) {
             }
         }
         switch (this._fsm.currentState) {
+            case HeroStates.Stunned:
+                this._stunnedTime -= delta;
+                if (this._stunnedTime <= 0) {
+                    if (this._treasure > 0) {
+                        this._fsm.go(HeroStates.Fleeing);
+                    }
+                    else {
+                        this._fsm.go(HeroStates.Searching);
+                    }
+                }
+                break;
             case HeroStates.Searching:
                 if (heroVector.distance(monsterVector) <= Config.HeroAggroDistance) {
                     this._fsm.go(HeroStates.Attacking);
@@ -971,6 +990,12 @@ var Hero = (function (_super) {
         lines.push(newLine4);
         return lines;
     };
+    Hero.prototype.stun = function (direction) {
+        this._fsm.go(HeroStates.Stunned);
+        var dir = direction.normalize().scale(Config.KnockBackForce);
+        this.dx = dir.x;
+        this.dy = dir.y;
+    };
     Hero.prototype.onSearching = function (from) {
         // find treasures
         var treasures = map.getTreasures();
@@ -997,6 +1022,10 @@ var Hero = (function (_super) {
         this.clearActions();
         // TODO attack monster
         this.meet(map._player, Config.HeroSpeed);
+    };
+    Hero.prototype.onStunned = function (from) {
+        this.clearActions();
+        this._stunnedTime = Config.HeroStunnedTime;
     };
     Hero.prototype.onExit = function () {
         // play negative sound or something
