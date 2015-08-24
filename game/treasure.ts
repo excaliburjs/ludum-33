@@ -20,12 +20,28 @@ class Treasure extends ex.Actor {
    }
    
    public steal(): number {
+      var amount = 0;
       if (this._hoard > 0) {
-         var amount = Math.max(this._hoard - Config.TreasureStealAmount, this._hoard);
+         if (this._hoard >= Config.TreasureStealAmount) {
+            amount = Config.TreasureStealAmount;
+         } else {
+            amount = this._hoard;
+         }
          this._hoard -= amount;
          return amount;
       } else {
-         return 0;
+         //TODO steal from another non-empty chest
+         _.first(map.getTreasures(), (treasure: Treasure) => {
+            if (treasure != this) {
+               if (treasure.getAmount() > 0) {
+                  amount = treasure.steal();
+                  // console.log('stealing from another chest');
+                  return true;
+               }
+            }
+            return false;
+         });
+         return amount;
       }
    }
    

@@ -19,9 +19,17 @@ class HeroSpawner {
          spawnPoints = map.getSpawnPoints();
          spawnPoint = Util.pickRandom(spawnPoints);
          
-         // if (Stats.numHeroesKilled > 20) {
-         //    heroTimer.interval = heroTimer.interval / 2;
-         // }
+         // increasing difficulty
+         if (Stats.numHeroesKilled > 30) {
+            // console.log('difficulty increase: 4 seconds');
+            heroTimer.interval = 4000;
+         } else if (Stats.numHeroesKilled > 20) {
+            // console.log('difficulty increase: 6 seconds');
+            heroTimer.interval = 6000;
+         } else if (Stats.numHeroesKilled > 10) {
+            // console.log('difficulty increase: 7.5 seconds');
+            heroTimer.interval = 7500;
+         }
          HeroSpawner._spawn(spawnPoint);
          HeroSpawner._spawned++;
       }
@@ -171,6 +179,9 @@ class Hero extends ex.Actor {
                   hero._fsm.go(HeroStates.Searching);
                } else if (hero._fsm.canGo(HeroStates.Looting)) {
                   hero._fsm.go(HeroStates.Looting);
+                  // var logger = ex.Logger.getInstance(); 
+                  // logger.info('gold stolen: ' + hero._treasure);
+                  // logger.info('current hoard: ' + map.getHoardAmount());
                }
                
             }
@@ -178,6 +189,7 @@ class Hero extends ex.Actor {
             var hero = <Hero>e.actor;
             
             if (hero._attackCooldown == 0 && hero._hasHitMinotaur) {
+               Resources.HeroSwing.play();
                var monster = <Monster>e.other;
                monster.health--;
                Stats.damageTaken++;
@@ -218,6 +230,8 @@ class Hero extends ex.Actor {
             Stats.numHeroesKilled++;
             // map.getTreasures()[0].return(this._treasure);
             this._chestLooted.return(this._treasure);
+            // return the treasure stolen to a random chest to preven player camping
+            // Util.pickRandom(map.getTreasures()).return(this._treasure);
             HeroSpawner.despawn(this, Options.blood);
       }
       this.setZIndex(this.y);

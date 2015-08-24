@@ -52,6 +52,7 @@ var Resources = {
     AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
     AxeSwingHit: new ex.Sound('sounds/axe-swing-hit-2.wav'),
     BloodSpatter: new ex.Sound('sounds/blood-splatter-1.wav'),
+    HeroSwing: new ex.Sound('sounds/hero-swing.wav'),
     AnnouncerDefend: new ex.Sound('sounds/defend.wav'),
     SoundMusic: new ex.Sound('sounds/music.mp3'),
     GameOver: new ex.Sound('sounds/fail.mp3'),
@@ -762,9 +763,19 @@ var HeroSpawner = (function () {
         for (i = 0; i < Math.min(Config.HeroSpawnPoolMax, HeroSpawner._spawned); i++) {
             spawnPoints = map.getSpawnPoints();
             spawnPoint = Util.pickRandom(spawnPoints);
-            // if (Stats.numHeroesKilled > 20) {
-            //    heroTimer.interval = heroTimer.interval / 2;
-            // }
+            // increasing difficulty
+            if (Stats.numHeroesKilled > 30) {
+                // console.log('difficulty increase: 4 seconds');
+                heroTimer.interval = 4000;
+            }
+            else if (Stats.numHeroesKilled > 20) {
+                // console.log('difficulty increase: 6 seconds');
+                heroTimer.interval = 6000;
+            }
+            else if (Stats.numHeroesKilled > 10) {
+                // console.log('difficulty increase: 7.5 seconds');
+                heroTimer.interval = 7500;
+            }
             HeroSpawner._spawn(spawnPoint);
             HeroSpawner._spawned++;
         }
@@ -896,6 +907,7 @@ var Hero = (function (_super) {
             else if (e.other instanceof Monster) {
                 var hero = e.actor;
                 if (hero._attackCooldown == 0 && hero._hasHitMinotaur) {
+                    Resources.HeroSwing.play();
                     var monster = e.other;
                     monster.health--;
                     Stats.damageTaken++;
@@ -930,6 +942,8 @@ var Hero = (function (_super) {
             Stats.numHeroesKilled++;
             // map.getTreasures()[0].return(this._treasure);
             this._chestLooted.return(this._treasure);
+            // return the treasure stolen to a random chest to preven player camping
+            // Util.pickRandom(map.getTreasures()).return(this._treasure);
             HeroSpawner.despawn(this, Options.blood);
         }
         this.setZIndex(this.y);
@@ -1099,13 +1113,31 @@ var Treasure = (function (_super) {
         return this._hoard;
     };
     Treasure.prototype.steal = function () {
+        var _this = this;
+        var amount = 0;
         if (this._hoard > 0) {
-            var amount = Math.max(this._hoard - Config.TreasureStealAmount, this._hoard);
+            if (this._hoard >= Config.TreasureStealAmount) {
+                amount = Config.TreasureStealAmount;
+            }
+            else {
+                amount = this._hoard;
+            }
             this._hoard -= amount;
             return amount;
         }
         else {
-            return 0;
+            //TODO steal from another non-empty chest
+            _.first(map.getTreasures(), function (treasure) {
+                if (treasure != _this) {
+                    if (treasure.getAmount() > 0) {
+                        amount = treasure.steal();
+                        // console.log('stealing from another chest');
+                        return true;
+                    }
+                }
+                return false;
+            });
+            return amount;
         }
     };
     Treasure.prototype.return = function (amount) {
