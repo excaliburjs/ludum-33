@@ -40,7 +40,15 @@ var Config = {
 	CameraShakeDuration: 0,//200,//800,      
    
    // Spawn interval
-   HeroSpawnInterval: 10000, // in ms   
+   HeroSpawnInterval: 10000, // in ms
+   HeroSpawnIntervalEasy: 7500,
+   HeroSpawnIntervalMed: 6000,
+   HeroSpawnIntervalHard: 4000,
+   // the thresholds where we decrease the spawn interval
+   EasyThreshold: 10,
+   MedThreshold: 20,
+   HardThreshold: 30,
+   
    // Max heroes to spawn at once
    HeroSpawnPoolMax: 5,
    // How much health a hero has
