@@ -21,6 +21,7 @@ class Monster extends ex.Actor {
    private _isDashing: boolean = false;
    private _canDash: boolean = false;
    public dashLevel: number = 0;
+   private _shiftIndicator: ex.Actor;
    
    constructor(x, y){
       super(x, y, Config.MonsterWidth, Config.MonsterHeight);
@@ -50,6 +51,14 @@ class Monster extends ex.Actor {
       this._aimSprite.opacity(.7);
       this._aimSprite.colorize(ex.Color.Green);
       this._aimSprite.colorize(ex.Color.Green);
+      
+      
+      var shiftButton = new ex.SpriteSheet(Resources.TextureShift, 3, 1, 48, 48);
+      var shiftAnimation = shiftButton.getAnimationForAll(engine, 100);
+      shiftAnimation.loop = true;
+      shiftAnimation.scale.setTo(1,1);
+      this._shiftIndicator = new ex.Actor(7, 70, 24, 24);
+      this._shiftIndicator.addDrawing("shift", shiftAnimation);
       
       
       var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 14, 1, 96, 96);
@@ -175,6 +184,7 @@ class Monster extends ex.Actor {
    
    public dash(): void {
       if(this._canDash){
+         this.removeChild(this._shiftIndicator);
          this._canDash = false;
          this.dashLevel = 0;
          var dashVector = ex.Vector.fromAngle(this._rotation).scale(Config.MonsterDashSpeed);
@@ -224,6 +234,7 @@ class Monster extends ex.Actor {
          this.dashLevel = Math.min(this.dashLevel + delta, Config.MonsterDashCooldown);
          if(this.dashLevel >= Config.MonsterDashCooldown){
             this._canDash = true;
+            this.addChild(this._shiftIndicator);
          }
          
          // clear move

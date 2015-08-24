@@ -60,6 +60,7 @@ var Resources = {
     AnnouncerDefend: new ex.Sound('sounds/defend.wav'),
     SoundMusic: new ex.Sound('sounds/music.mp3'),
     GameOver: new ex.Sound('sounds/fail.mp3'),
+    TextureShift: new ex.Texture("images/shift.png"),
     TextureVignette: new ex.Texture("images/vignette.png"),
     TextureHero: new ex.Texture("images/hero.png"),
     TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
@@ -449,6 +450,12 @@ var Monster = (function (_super) {
         this._aimSprite.opacity(.7);
         this._aimSprite.colorize(ex.Color.Green);
         this._aimSprite.colorize(ex.Color.Green);
+        var shiftButton = new ex.SpriteSheet(Resources.TextureShift, 3, 1, 48, 48);
+        var shiftAnimation = shiftButton.getAnimationForAll(engine, 100);
+        shiftAnimation.loop = true;
+        shiftAnimation.scale.setTo(1, 1);
+        this._shiftIndicator = new ex.Actor(7, 70, 24, 24);
+        this._shiftIndicator.addDrawing("shift", shiftAnimation);
         var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 14, 1, 96, 96);
         var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 14, 1, 96, 96);
         var upSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterUp, 14, 1, 96, 96);
@@ -552,6 +559,7 @@ var Monster = (function (_super) {
     };
     Monster.prototype.dash = function () {
         if (this._canDash) {
+            this.removeChild(this._shiftIndicator);
             this._canDash = false;
             this.dashLevel = 0;
             var dashVector = ex.Vector.fromAngle(this._rotation).scale(Config.MonsterDashSpeed);
@@ -594,6 +602,7 @@ var Monster = (function (_super) {
             this.dashLevel = Math.min(this.dashLevel + delta, Config.MonsterDashCooldown);
             if (this.dashLevel >= Config.MonsterDashCooldown) {
                 this._canDash = true;
+                this.addChild(this._shiftIndicator);
             }
             // clear move
             this.dx = 0;
