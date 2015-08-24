@@ -176,6 +176,7 @@ class Hero extends ex.Actor {
             var hero = <Hero>e.actor;
             
             if (hero._attackCooldown == 0 && hero._hasHitMinotaur) {
+               Resources.HeroSwing.play();
                var monster = <Monster>e.other;
                monster.health--;
                Stats.damageTaken++;

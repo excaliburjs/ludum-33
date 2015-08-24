@@ -52,6 +52,7 @@ var Resources = {
     AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
     AxeSwingHit: new ex.Sound('sounds/axe-swing-hit-2.wav'),
     BloodSpatter: new ex.Sound('sounds/blood-splatter-1.wav'),
+    HeroSwing: new ex.Sound('sounds/hero-swing.wav'),
     AnnouncerDefend: new ex.Sound('sounds/defend.wav'),
     SoundMusic: new ex.Sound('sounds/music.mp3'),
     GameOver: new ex.Sound('sounds/fail.mp3'),
@@ -891,15 +892,13 @@ var Hero = (function (_super) {
                     }
                     else if (hero._fsm.canGo(HeroStates.Looting)) {
                         hero._fsm.go(HeroStates.Looting);
-                        var logger = ex.Logger.getInstance();
-                        logger.info('gold stolen: ' + hero._treasure);
-                        logger.info('current hoard: ' + map.getHoardAmount());
                     }
                 }
             }
             else if (e.other instanceof Monster) {
                 var hero = e.actor;
                 if (hero._attackCooldown == 0 && hero._hasHitMinotaur) {
+                    Resources.HeroSwing.play();
                     var monster = e.other;
                     monster.health--;
                     Stats.damageTaken++;
