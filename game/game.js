@@ -8,6 +8,7 @@ var Config = {
     MonsterAttackRange: 90,
     CloseMonsterAttackRange: 50,
     MonsterProgressSize: 200,
+    MonsterSpecialProgressSize: 125,
     MonsterAttackTime: 300,
     MonsterAttackCooldown: 500,
     KnockBackForce: 200,
@@ -140,6 +141,14 @@ var Map = (function (_super) {
         this._monsterProgress.anchor.setTo(1, 0);
         this._monsterProgress.color = ex.Color.fromHex("#ab2800");
         this.add(this._monsterProgress);
+        var specialProgressBack = new ex.UIActor(game.getWidth() - 50, 46, Config.MonsterSpecialProgressSize + 4, 24);
+        specialProgressBack.anchor.setTo(1, 0);
+        specialProgressBack.color = ex.Color.Black;
+        this.add(specialProgressBack);
+        this._monsterSpecialProgress = new ex.UIActor(game.getWidth() - 50, 50, Config.MonsterSpecialProgressSize, 16);
+        this._monsterSpecialProgress.anchor.setTo(1, 0);
+        this._monsterSpecialProgress.color = ex.Color.fromHex("#6b1191");
+        this.add(this._monsterSpecialProgress);
         var monsterIndicator = new ex.UIActor(game.getWidth() - 74, 10, 64, 64);
         monsterIndicator.addDrawing(Resources.TextureMonsterIndicator);
         this.add(monsterIndicator);
@@ -163,6 +172,11 @@ var Map = (function (_super) {
     Map.prototype.onActivate = function () {
         // start sounds
         SoundManager.start();
+        game.canvas.className = "playing";
+    };
+    Map.prototype.onDeactivate = function () {
+        SoundManager.stop();
+        game.canvas.className = "";
     };
     Map.prototype.getPlayer = function () {
         return this._player;
@@ -229,6 +243,8 @@ var Map = (function (_super) {
         var monsterHealth = this._player.health;
         var progress = monsterHealth / Config.MonsterHealth;
         this._monsterProgress.setWidth(Math.floor(progress * Config.MonsterProgressSize));
+        // todo set special
+        this._monsterSpecialProgress.setWidth(Config.MonsterSpecialProgressSize);
         if ((curr + looting) <= 0) {
             this._gameOver(GameOverType.Hoard);
         }
@@ -254,9 +270,6 @@ var Map = (function (_super) {
         isGameOver = true;
         game.goToScene('gameover');
         gameOver.setType(type);
-    };
-    Map.prototype.onDeactivate = function () {
-        SoundManager.stop();
     };
     Map.CellSize = 24;
     Map.MapSize = 40;
@@ -803,7 +816,7 @@ var HeroSpawner = (function () {
             tombstone.traits.length = 0;
             // todo bug with actor scaling
             var sprite = Util.pickRandom(sprites).asSprite();
-            sprite.scale.setTo(2, 2);
+            sprite.scale.setTo(1.5, 1.5);
             tombstone.addDrawing("default", sprite);
             game.add(tombstone);
             HeroSpawner._tombstones.push(tombstone);
@@ -1219,13 +1232,13 @@ var GameOver = (function (_super) {
         this._type.addDrawing("slain", Resources.TextureGameOverSlain.asSprite());
         this.add(this._type);
         // stats
-        this._labelHeroesKilled = new ex.Label(null, 219, 340, "36px Arial");
+        this._labelHeroesKilled = new ex.Label(null, 223, 340, "30px Arial");
         this._labelHeroesKilled.textAlign = ex.TextAlign.Center;
-        this._labelHeroesEscaped = new ex.Label(null, 402, 340, "36px Arial");
+        this._labelHeroesEscaped = new ex.Label(null, 408, 340, "30px Arial");
         this._labelHeroesEscaped.textAlign = ex.TextAlign.Center;
-        this._labelGoldLost = new ex.Label(null, 570, 340, "36px Arial");
+        this._labelGoldLost = new ex.Label(null, 575, 340, "30px Arial");
         this._labelGoldLost.textAlign = ex.TextAlign.Center;
-        this._labelDamageTaken = new ex.Label(null, 743, 340, "36px Arial");
+        this._labelDamageTaken = new ex.Label(null, 748, 340, "30px Arial");
         this._labelDamageTaken.textAlign = ex.TextAlign.Center;
         this._labelHeroesKilled.color = ex.Color.White;
         this._labelHeroesEscaped.color = ex.Color.White;
@@ -1271,8 +1284,8 @@ var GameOver = (function (_super) {
     };
     GameOver.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
-        this._labelHeroesKilled.text = Math.floor(100 * (Stats.numHeroesKilled / HeroSpawner.getSpawnCount())).toString() + '%';
-        this._labelHeroesEscaped.text = Math.floor(100 * (Stats.numHeroesEscaped / HeroSpawner.getSpawnCount())).toString() + '%';
+        this._labelHeroesKilled.text = Stats.numHeroesKilled.toString() + ' (' + Math.floor(100 * (Stats.numHeroesKilled / HeroSpawner.getSpawnCount())).toString() + '%)';
+        this._labelHeroesEscaped.text = Stats.numHeroesEscaped.toString() + ' (' + Math.floor(100 * (Stats.numHeroesEscaped / HeroSpawner.getSpawnCount())).toString() + '%)';
         this._labelGoldLost.text = Math.floor(100 * (Stats.goldLost / map.getHoardAmount())).toString() + '%';
         this._labelDamageTaken.text = Math.floor(100 * (Stats.damageTaken / Config.MonsterHealth)).toString() + '%';
         // center labels

@@ -4,8 +4,5 @@ body {
    text-align: center;
    font-family: 'Arial', sans-serif;
    font-size: 1.1em;
-}
-
-canvas {
-   margin: 0 auto;
+   cursor: url('images/cursor.png'), default;
 }
