@@ -741,13 +741,17 @@ var HeroSpawner = (function () {
         for (i = 0; i < Math.min(Config.HeroSpawnPoolMax, HeroSpawner._spawned); i++) {
             spawnPoints = map.getSpawnPoints();
             spawnPoint = Util.pickRandom(spawnPoints);
-            if (Stats.numHeroesKilled > 75) {
+            // increasing difficulty
+            if (Stats.numHeroesKilled > 30) {
+                // console.log('difficulty increase: 4 seconds');
                 heroTimer.interval = 4000;
             }
-            else if (Stats.numHeroesKilled > 50) {
+            else if (Stats.numHeroesKilled > 20) {
+                // console.log('difficulty increase: 6 seconds');
                 heroTimer.interval = 6000;
             }
-            else if (Stats.numHeroesKilled > 25) {
+            else if (Stats.numHeroesKilled > 10) {
+                // console.log('difficulty increase: 7.5 seconds');
                 heroTimer.interval = 7500;
             }
             HeroSpawner._spawn(spawnPoint);
@@ -862,6 +866,9 @@ var Hero = (function (_super) {
                     }
                     else if (hero._fsm.canGo(HeroStates.Looting)) {
                         hero._fsm.go(HeroStates.Looting);
+                        var logger = ex.Logger.getInstance();
+                        logger.info('gold stolen: ' + hero._treasure);
+                        logger.info('current hoard: ' + map.getHoardAmount());
                     }
                 }
             }
@@ -902,6 +909,8 @@ var Hero = (function (_super) {
             Stats.numHeroesKilled++;
             // map.getTreasures()[0].return(this._treasure);
             this._chestLooted.return(this._treasure);
+            // return the treasure stolen to a random chest to preven player camping
+            // Util.pickRandom(map.getTreasures()).return(this._treasure);
             HeroSpawner.despawn(this, Options.blood);
         }
         this.setZIndex(this.y);
@@ -1033,13 +1042,31 @@ var Treasure = (function (_super) {
         return this._hoard;
     };
     Treasure.prototype.steal = function () {
+        var _this = this;
+        var amount = 0;
         if (this._hoard > 0) {
-            var amount = Math.max(this._hoard - Config.TreasureStealAmount, this._hoard);
+            if (this._hoard >= Config.TreasureStealAmount) {
+                amount = Config.TreasureStealAmount;
+            }
+            else {
+                amount = this._hoard;
+            }
             this._hoard -= amount;
             return amount;
         }
         else {
-            return 0;
+            //TODO steal from another non-empty chest
+            _.first(map.getTreasures(), function (treasure) {
+                if (treasure != _this) {
+                    if (treasure.getAmount() > 0) {
+                        amount = treasure.steal();
+                        // console.log('stealing from another chest');
+                        return true;
+                    }
+                }
+                return false;
+            });
+            return amount;
         }
     };
     Treasure.prototype.return = function (amount) {
