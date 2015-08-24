@@ -9,7 +9,7 @@ var Config = {
     MonsterAttackRange: 90,
     MonsterDashSpeed: 700,
     MonsterDashDuration: 700,
-    MonsterDashCooldown: 10000,
+    MonsterDashCooldown: 200,
     CloseMonsterAttackRange: 50,
     MonsterProgressSize: 200,
     MonsterSpecialProgressSize: 125,
@@ -482,7 +482,7 @@ var Monster = (function (_super) {
         this._rays = new Array();
         this._closeRays = new Array();
         this._attackable = new Array();
-        this.anchor = new ex.Point(0.35, 0.35);
+        //this.anchor = new ex.Point(0.35, 0.35);
         this.collisionType = ex.CollisionType.Active;
     }
     Monster.prototype.onInitialize = function (engine) {
@@ -622,8 +622,8 @@ var Monster = (function (_super) {
             this.dx = dashVector.x;
             this.dy = dashVector.y;
             this.setDrawing("charge");
-            //this.currentDrawing.anchor = new ex.Point(.25, 25);
-            this.currentDrawing.rotation = this._rotation;
+            //this.currentDrawing.anchor = new ex.Point(.35, .35);
+            this.rotation = this._rotation;
         }
     };
     Monster.prototype.update = function (engine, delta) {
@@ -639,6 +639,7 @@ var Monster = (function (_super) {
             this._timeLeftDashing -= delta;
             if (this._timeLeftDashing <= 0) {
                 this._isDashing = false;
+                this.rotation = 0;
             }
         }
         var prevRotation = this._rotation;
