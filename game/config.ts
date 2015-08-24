@@ -44,7 +44,7 @@ var Config = {
    HeroSpawnIntervalEasy: 7500,
    HeroSpawnIntervalMed: 6000,
    HeroSpawnIntervalHard: 4000,
-   
+   // the thresholds where we decrease the spawn interval
    EasyThreshold: 10,
    MedThreshold: 20,
    HardThreshold: 30,
