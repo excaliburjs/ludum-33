@@ -1034,6 +1034,9 @@ var Hero = (function (_super) {
         this.dy = dir.y;
     };
     Hero.prototype.onSearching = function (from) {
+        if (from != null && from === HeroStates.Searching) {
+            return;
+        }
         // find treasures
         var treasures = map.getTreasures();
         // random treasure for now

@@ -334,6 +334,10 @@ class Hero extends ex.Actor {
    }
    
    private onSearching(from?: HeroStates) {
+      
+      if (from != null && from === HeroStates.Searching) {
+         return;
+      }
        // find treasures
       var treasures = map.getTreasures();
       
