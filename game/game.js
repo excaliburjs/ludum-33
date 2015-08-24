@@ -74,6 +74,7 @@ var Resources = {
     TextureHeroDead: new ex.Texture("images/hero-dead.png"),
     TextureHeroDead2: new ex.Texture("images/hero-dead-2.png"),
     TextureHeroDead3: new ex.Texture("images/hero-dead-3.png"),
+    TextureHeroDead4: new ex.Texture("images/hero-dead-4.png"),
     TextureGameOverBg: new ex.Texture("images/game-over-bg.png"),
     TextureGameOverSlain: new ex.Texture("images/game-over-slain.png"),
     TextureGameOverHoard: new ex.Texture("images/game-over-hoard.png"),
@@ -787,7 +788,7 @@ var HeroSpawner = (function () {
         if (blood === void 0) { blood = false; }
         if (blood) {
             var tombstone = new ex.Actor(h.x, h.y, 24, 24);
-            var sprites = [Resources.TextureHeroDead, Resources.TextureHeroDead2, Resources.TextureHeroDead3];
+            var sprites = [Resources.TextureHeroDead, Resources.TextureHeroDead2, Resources.TextureHeroDead3, Resources.TextureHeroDead4];
             tombstone.traits.length = 0;
             // todo bug with actor scaling
             var sprite = Util.pickRandom(sprites).asSprite();

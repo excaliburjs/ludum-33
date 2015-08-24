@@ -48,7 +48,7 @@ class HeroSpawner {
       
       if (blood) {
          var tombstone = new ex.Actor(h.x, h.y, 24, 24);
-         var sprites = [Resources.TextureHeroDead, Resources.TextureHeroDead2, Resources.TextureHeroDead3];         
+         var sprites = [Resources.TextureHeroDead, Resources.TextureHeroDead2, Resources.TextureHeroDead3, Resources.TextureHeroDead4];         
          tombstone.traits.length = 0;
          // todo bug with actor scaling
          var sprite = Util.pickRandom(sprites).asSprite();
