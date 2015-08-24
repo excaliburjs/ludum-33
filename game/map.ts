@@ -8,6 +8,7 @@ class Map extends ex.Scene {
    private _treasureProgress: ex.UIActor;
    private _lootProgress: ex.UIActor;
    private _monsterProgress: ex.UIActor;
+   private _monsterSpecialProgress: ex.UIActor;
    
    constructor(engine: ex.Engine) {
       super(engine);
@@ -59,6 +60,16 @@ class Map extends ex.Scene {
       this._monsterProgress.anchor.setTo(1, 0);
       this._monsterProgress.color = ex.Color.fromHex("#ab2800");
       this.add(this._monsterProgress);
+      
+      var specialProgressBack = new ex.UIActor(game.getWidth() - 50, 46, Config.MonsterSpecialProgressSize + 4, 24);
+      specialProgressBack.anchor.setTo(1, 0);
+      specialProgressBack.color = ex.Color.Black;
+      this.add(specialProgressBack);
+      
+      this._monsterSpecialProgress = new ex.UIActor(game.getWidth() - 50, 50, Config.MonsterSpecialProgressSize, 16);
+      this._monsterSpecialProgress.anchor.setTo(1, 0);
+      this._monsterSpecialProgress.color = ex.Color.fromHex("#6b1191");
+      this.add(this._monsterSpecialProgress);
       
       var monsterIndicator = new ex.UIActor(game.getWidth() - 74, 10, 64, 64);
       monsterIndicator.addDrawing(Resources.TextureMonsterIndicator);
@@ -185,6 +196,8 @@ class Map extends ex.Scene {
       var progress = monsterHealth / Config.MonsterHealth;
       
       this._monsterProgress.setWidth(Math.floor(progress * Config.MonsterProgressSize));
+      // todo set special
+      this._monsterSpecialProgress.setWidth(Config.MonsterSpecialProgressSize);
             
       if ((curr + looting) <= 0) {
          this._gameOver(GameOverType.Hoard);
