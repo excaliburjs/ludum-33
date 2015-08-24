@@ -53,6 +53,7 @@ var Resources = {
     BloodSpatter: new ex.Sound('sounds/blood-splatter-1.wav'),
     AnnouncerDefend: new ex.Sound('sounds/defend.wav'),
     SoundMusic: new ex.Sound('sounds/music.mp3'),
+    TextureVignette: new ex.Texture("images/vignette.png"),
     TextureHero: new ex.Texture("images/hero.png"),
     TextureHeroLootIndicator: new ex.Texture("images/loot-indicator.png"),
     TextureMonsterDown: new ex.Texture("images/minotaurv2.png"),
@@ -102,6 +103,10 @@ var Map = (function (_super) {
         this._map.anchor.setTo(0, 0);
         this._map.addDrawing(Resources.TextureMap);
         this.add(this._map);
+        // vignette
+        var vg = new ex.UIActor(0, 0, game.getWidth(), game.getHeight());
+        vg.addDrawing(Resources.TextureVignette);
+        this.add(vg);
         // Initialize blood
         this.add(blood);
         this.buildWalls();
