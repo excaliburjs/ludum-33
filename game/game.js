@@ -1490,23 +1490,22 @@ _.forIn(Resources, function (resource) {
 });
 // game settings
 var logger = ex.Logger.getInstance();
-//TODO update button text to {feature} ON/OFF
 document.getElementById("toggle-sounds").addEventListener("click", function () {
     SoundManager.stop();
     Options.sound = !Options.sound;
     SoundManager.start();
-    logger.info('toggling sounds to ' + Options.sound);
+    // logger.info('toggling sounds to '  + Options.sound);
 });
 document.getElementById("toggle-music").addEventListener("click", function () {
     SoundManager.stop();
     Options.music = !Options.music;
     SoundManager.start();
-    logger.info('toggling music to ' + Options.music);
+    // logger.info('toggling music to ' + Options.music);
 });
 document.getElementById("toggle-blood").addEventListener("click", function () {
     Options.blood = !Options.blood;
     HeroSpawner.toggleTombstones(Options.blood);
-    logger.info('toggling blood to ' + Options.blood);
+    // logger.info('toggling blood to ' + Options.blood);
 });
 // enable game pad input
 game.input.gamepads.enabled = true;
