@@ -2,7 +2,7 @@ var Resources = {
    
    AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
    AxeSwingHit: new ex.Sound('sounds/axe-swing-hit-2.wav'),
-   BloodSpatter: new ex.Sound('sounds/blood-splatter-1.wav'),
+   BloodSpatter: new ex.Sound('sounds/hero-slain.wav'),
    HeroSwing: new ex.Sound('sounds/hero-swing.wav'),
    AnnouncerDefend: new ex.Sound('sounds/defend.wav'),
    
@@ -29,6 +29,7 @@ var Resources = {
    TextureHeroDead: new ex.Texture("images/hero-dead.png"),
    TextureHeroDead2: new ex.Texture("images/hero-dead-2.png"),
    TextureHeroDead3: new ex.Texture("images/hero-dead-3.png"),
+   TextureHeroDead4: new ex.Texture("images/hero-dead-4.png"),
    
    TextureGameOverBg: new ex.Texture("images/game-over-bg.png"),
    TextureGameOverSlain: new ex.Texture("images/game-over-slain.png"),

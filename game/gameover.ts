@@ -24,13 +24,13 @@ class GameOver extends ex.Scene {
       this.add(this._type);
       
       // stats
-      this._labelHeroesKilled = new ex.Label(null, 219, 340, "36px Arial");
+      this._labelHeroesKilled = new ex.Label(null, 223, 340, "30px Arial");
       this._labelHeroesKilled.textAlign = ex.TextAlign.Center;
-      this._labelHeroesEscaped = new ex.Label(null, 402, 340, "36px Arial");
+      this._labelHeroesEscaped = new ex.Label(null, 408, 340, "30px Arial");
       this._labelHeroesEscaped.textAlign = ex.TextAlign.Center;
-      this._labelGoldLost = new ex.Label(null, 570, 340, "36px Arial");
+      this._labelGoldLost = new ex.Label(null, 575, 340, "30px Arial");
       this._labelGoldLost.textAlign = ex.TextAlign.Center;
-      this._labelDamageTaken = new ex.Label(null, 743, 340, "36px Arial");
+      this._labelDamageTaken = new ex.Label(null, 748, 340, "30px Arial");
       this._labelDamageTaken.textAlign = ex.TextAlign.Center;
       
       this._labelHeroesKilled.color = ex.Color.White;
@@ -92,8 +92,8 @@ class GameOver extends ex.Scene {
    public update(engine: ex.Engine, delta: number) {
       super.update(engine, delta);
       
-      this._labelHeroesKilled.text = Math.floor(100 * (Stats.numHeroesKilled / HeroSpawner.getSpawnCount())).toString() + '%';
-      this._labelHeroesEscaped.text = Math.floor(100 * (Stats.numHeroesEscaped / HeroSpawner.getSpawnCount())).toString() + '%';
+      this._labelHeroesKilled.text = Stats.numHeroesKilled.toString() + ' (' + Math.floor(100 * (Stats.numHeroesKilled / HeroSpawner.getSpawnCount())).toString() + '%)';
+      this._labelHeroesEscaped.text = Stats.numHeroesEscaped.toString() + ' (' + Math.floor(100 * (Stats.numHeroesEscaped / HeroSpawner.getSpawnCount())).toString() + '%)';
       this._labelGoldLost.text = Math.floor(100 * (Stats.goldLost / map.getHoardAmount())).toString() + '%';
       this._labelDamageTaken.text = Math.floor(100 * (Stats.damageTaken / Config.MonsterHealth)).toString() + '%';
       

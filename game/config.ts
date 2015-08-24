@@ -15,6 +15,7 @@ var Config = {
    MonsterDashCooldown: 10000,
    CloseMonsterAttackRange: 50,
    MonsterProgressSize: 200,
+   MonsterSpecialProgressSize: 125,
    MonsterAttackTime: 300,
    MonsterAttackCooldown: 500,
    KnockBackForce: 200,
