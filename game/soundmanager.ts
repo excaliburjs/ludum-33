@@ -10,16 +10,20 @@ class SoundManager {
       // set music volume
       if (Options.music) {
          Resources.SoundMusic.setVolume(0.05);
-         Resources.SoundMusic.play();    
-         Resources.SoundMusic.setLoop(true);
+         if (!Resources.SoundMusic.isPlaying()) {
+            Resources.SoundMusic.play();    
+            Resources.SoundMusic.setLoop(true);
+         }
+         Resources.GameOver.setVolume(0.1);
       } else {
          Resources.SoundMusic.setVolume(0);
+         Resources.GameOver.setVolume(0);
       }
    }
    
    public static setSoundEffectLevels(volume: number) {
       _.forIn(Resources, (resource) => {
-         if (resource instanceof ex.Sound && (resource != Resources.SoundMusic)) {
+         if (resource instanceof ex.Sound && (resource != Resources.SoundMusic) && (resource != Resources.GameOver)) {
             (<ex.Sound>resource).setVolume(volume);
          }
       });
@@ -30,7 +34,9 @@ class SoundManager {
       _.forIn(Resources, (resource) => {
          if (resource instanceof ex.Sound) {
             (<ex.Sound>resource).setVolume(0);
-            (<ex.Sound>resource).stop();
+            if (resource != Resources.SoundMusic) {
+               (<ex.Sound>resource).stop();
+            }
          }
       });
    }

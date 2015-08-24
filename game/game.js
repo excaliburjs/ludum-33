@@ -1398,7 +1398,6 @@ var GameOver = (function (_super) {
     };
     GameOver.prototype.onActivate = function () {
         _super.prototype.onActivate.call(this);
-        Resources.GameOver.setVolume(0.1);
         Resources.GameOver.play();
     };
     GameOver.prototype.onDeactivate = function () {
@@ -1435,16 +1434,20 @@ var SoundManager = (function () {
         // set music volume
         if (Options.music) {
             Resources.SoundMusic.setVolume(0.05);
-            Resources.SoundMusic.play();
-            Resources.SoundMusic.setLoop(true);
+            if (!Resources.SoundMusic.isPlaying()) {
+                Resources.SoundMusic.play();
+                Resources.SoundMusic.setLoop(true);
+            }
+            Resources.GameOver.setVolume(0.1);
         }
         else {
             Resources.SoundMusic.setVolume(0);
+            Resources.GameOver.setVolume(0);
         }
     };
     SoundManager.setSoundEffectLevels = function (volume) {
         _.forIn(Resources, function (resource) {
-            if (resource instanceof ex.Sound && (resource != Resources.SoundMusic)) {
+            if (resource instanceof ex.Sound && (resource != Resources.SoundMusic) && (resource != Resources.GameOver)) {
                 resource.setVolume(volume);
             }
         });
@@ -1454,7 +1457,9 @@ var SoundManager = (function () {
         _.forIn(Resources, function (resource) {
             if (resource instanceof ex.Sound) {
                 resource.setVolume(0);
-                resource.stop();
+                if (resource != Resources.SoundMusic) {
+                    resource.stop();
+                }
             }
         });
     };
@@ -1482,6 +1487,26 @@ var loader = new ex.Loader();
 // load up all resources in dictionary
 _.forIn(Resources, function (resource) {
     loader.addResource(resource);
+});
+// game settings
+var logger = ex.Logger.getInstance();
+//TODO update button text to {feature} ON/OFF
+document.getElementById("toggle-sounds").addEventListener("click", function () {
+    SoundManager.stop();
+    Options.sound = !Options.sound;
+    SoundManager.start();
+    logger.info('toggling sounds to ' + Options.sound);
+});
+document.getElementById("toggle-music").addEventListener("click", function () {
+    SoundManager.stop();
+    Options.music = !Options.music;
+    SoundManager.start();
+    logger.info('toggling music to ' + Options.music);
+});
+document.getElementById("toggle-blood").addEventListener("click", function () {
+    Options.blood = !Options.blood;
+    HeroSpawner.toggleTombstones(Options.blood);
+    logger.info('toggling blood to ' + Options.blood);
 });
 // enable game pad input
 game.input.gamepads.enabled = true;
