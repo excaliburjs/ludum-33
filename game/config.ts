@@ -31,6 +31,9 @@ var Config = {
    BloodVelocityMin: 10,
    BloodVelocityMax: 40,
    
+   RedVignetteDuration: 500,
+   MonsterDamageCameraShakeDuration: 300,
+   
    CameraElasticity: 0.1,//.01,
 	CameraFriction: 0.5,//0.21,
 	CameraShake: 0,//7,

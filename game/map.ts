@@ -9,6 +9,9 @@ class Map extends ex.Scene {
    private _lootProgress: ex.UIActor;
    private _monsterProgress: ex.UIActor;
    private _monsterSpecialProgress: ex.UIActor;
+   private _vg: ex.UIActor;
+   private _damageEffectTimeLeft: number = 0;
+   private _takingDamage: boolean = false;
    
    constructor(engine: ex.Engine) {
       super(engine);
@@ -16,16 +19,31 @@ class Map extends ex.Scene {
       this._treasures = [];
    }
    
-   public onInitialize() {
+   public damageEffect(): void {
+      this._takingDamage = true;
+      this._vg.setDrawing("red");
+      this.camera.shake(3, 3, 200);
+      this._damageEffectTimeLeft = Config.RedVignetteDuration;
+   }
+   
+   public onInitialize(engine: ex.Engine) {
       this._map = new ex.Actor(0, 0, 960, 960);
       this._map.anchor.setTo(0, 0);
       this._map.addDrawing(Resources.TextureMap);
       this.add(this._map);
       
       // vignette
-      var vg = new ex.UIActor(0, 0, game.getWidth(), game.getHeight());
-      vg.addDrawing(Resources.TextureVignette);
-      this.add(vg);
+      this._vg = new ex.UIActor(0, 0, game.getWidth(), game.getHeight());
+      var blackVignette = Resources.TextureVignette.asSprite().clone();
+      var redVignette = Resources.TextureVignette.asSprite().clone();
+      redVignette.colorize(new ex.Color(70, 0, 0));
+      var anim = new ex.Animation(engine, [], 100, false);
+      
+      this._vg.addDrawing("red", redVignette);
+      this._vg.addDrawing("black", blackVignette);
+      this._vg.setDrawing("black");
+      
+      this.add(this._vg);
 
       // Initialize blood
       this.add(blood);
@@ -172,6 +190,14 @@ class Map extends ex.Scene {
    
    public update(engine: ex.Engine, delta: number) {
       super.update(engine, delta);
+      
+      if(this._takingDamage){
+         this._damageEffectTimeLeft -= delta;
+         if(this._damageEffectTimeLeft <= 0){
+            this._takingDamage = false;
+            this._vg.setDrawing("black");
+         }
+      }
       
       // update treasure indicator
       var total = this.getHoardAmount();

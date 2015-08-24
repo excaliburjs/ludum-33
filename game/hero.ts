@@ -189,6 +189,8 @@ class Hero extends ex.Actor {
                Resources.HeroSwing.play();
                var monster = <Monster>e.other;
                monster.health--;
+               map.damageEffect();
+               
                Stats.damageTaken++;
                hero._attackCooldown = Config.HeroAttackCooldown;
                if(!hero._isAttacking){
