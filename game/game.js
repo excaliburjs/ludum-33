@@ -1435,7 +1435,7 @@ var SoundManager = (function () {
         }
         // set music volume
         if (Options.music) {
-            Resources.SoundMusic.setVolume(0.05);
+            Resources.SoundMusic.setVolume(0.03);
             if (!Resources.SoundMusic.isPlaying()) {
                 Resources.SoundMusic.play();
                 Resources.SoundMusic.setLoop(true);
