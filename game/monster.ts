@@ -410,7 +410,7 @@ class Monster extends ex.Actor {
       var hitHero = false;
       _.forIn(this._attackable, (hero: Hero) => {
          // hero.blink(500, 500, 5); //can't because moving already (no parallel actions support)
-         game.currentScene.camera.shake(2, 2, 200);
+         game.currentScene.camera.shake(5, 5, 200);
          hero.Health--;
          hitHero = true;
 
