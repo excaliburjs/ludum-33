@@ -163,6 +163,11 @@ var Map = (function (_super) {
     Map.prototype.onActivate = function () {
         // start sounds
         SoundManager.start();
+        game.canvas.className = "playing";
+    };
+    Map.prototype.onDeactivate = function () {
+        SoundManager.stop();
+        game.canvas.className = "";
     };
     Map.prototype.getPlayer = function () {
         return this._player;
@@ -254,9 +259,6 @@ var Map = (function (_super) {
         isGameOver = true;
         game.goToScene('gameover');
         gameOver.setType(type);
-    };
-    Map.prototype.onDeactivate = function () {
-        SoundManager.stop();
     };
     Map.CellSize = 24;
     Map.MapSize = 40;
@@ -803,7 +805,7 @@ var HeroSpawner = (function () {
             tombstone.traits.length = 0;
             // todo bug with actor scaling
             var sprite = Util.pickRandom(sprites).asSprite();
-            sprite.scale.setTo(2, 2);
+            sprite.scale.setTo(1.5, 1.5);
             tombstone.addDrawing("default", sprite);
             game.add(tombstone);
             HeroSpawner._tombstones.push(tombstone);
@@ -1216,13 +1218,13 @@ var GameOver = (function (_super) {
         this._type.addDrawing("slain", Resources.TextureGameOverSlain.asSprite());
         this.add(this._type);
         // stats
-        this._labelHeroesKilled = new ex.Label(null, 219, 340, "36px Arial");
+        this._labelHeroesKilled = new ex.Label(null, 223, 340, "30px Arial");
         this._labelHeroesKilled.textAlign = ex.TextAlign.Center;
-        this._labelHeroesEscaped = new ex.Label(null, 402, 340, "36px Arial");
+        this._labelHeroesEscaped = new ex.Label(null, 408, 340, "30px Arial");
         this._labelHeroesEscaped.textAlign = ex.TextAlign.Center;
-        this._labelGoldLost = new ex.Label(null, 570, 340, "36px Arial");
+        this._labelGoldLost = new ex.Label(null, 575, 340, "30px Arial");
         this._labelGoldLost.textAlign = ex.TextAlign.Center;
-        this._labelDamageTaken = new ex.Label(null, 743, 340, "36px Arial");
+        this._labelDamageTaken = new ex.Label(null, 748, 340, "30px Arial");
         this._labelDamageTaken.textAlign = ex.TextAlign.Center;
         this._labelHeroesKilled.color = ex.Color.White;
         this._labelHeroesEscaped.color = ex.Color.White;
@@ -1268,8 +1270,8 @@ var GameOver = (function (_super) {
     };
     GameOver.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
-        this._labelHeroesKilled.text = Math.floor(100 * (Stats.numHeroesKilled / HeroSpawner.getSpawnCount())).toString() + '%';
-        this._labelHeroesEscaped.text = Math.floor(100 * (Stats.numHeroesEscaped / HeroSpawner.getSpawnCount())).toString() + '%';
+        this._labelHeroesKilled.text = Stats.numHeroesKilled.toString() + ' (' + Math.floor(100 * (Stats.numHeroesKilled / HeroSpawner.getSpawnCount())).toString() + '%)';
+        this._labelHeroesEscaped.text = Stats.numHeroesEscaped.toString() + ' (' + Math.floor(100 * (Stats.numHeroesEscaped / HeroSpawner.getSpawnCount())).toString() + '%)';
         this._labelGoldLost.text = Math.floor(100 * (Stats.goldLost / map.getHoardAmount())).toString() + '%';
         this._labelDamageTaken.text = Math.floor(100 * (Stats.damageTaken / Config.MonsterHealth)).toString() + '%';
         // center labels

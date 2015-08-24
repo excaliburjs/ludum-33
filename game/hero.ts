@@ -60,7 +60,7 @@ class HeroSpawner {
          tombstone.traits.length = 0;
          // todo bug with actor scaling
          var sprite = Util.pickRandom(sprites).asSprite();
-         sprite.scale.setTo(2, 2);
+         sprite.scale.setTo(1.5, 1.5);
          tombstone.addDrawing("default", sprite);
          game.add(tombstone);
          HeroSpawner._tombstones.push(tombstone);
