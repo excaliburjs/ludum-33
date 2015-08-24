@@ -249,7 +249,7 @@ var Map = (function (_super) {
         var progress = monsterHealth / Config.MonsterHealth;
         this._monsterProgress.setWidth(Math.floor(progress * Config.MonsterProgressSize));
         // todo set special
-        this._monsterSpecialProgress.setWidth(Config.MonsterSpecialProgressSize);
+        this._monsterSpecialProgress.setWidth((this._player.dashLevel / Config.MonsterDashCooldown) * Config.MonsterSpecialProgressSize);
         if ((curr + looting) <= 0) {
             this._gameOver(GameOverType.Hoard);
         }
