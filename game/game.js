@@ -51,7 +51,7 @@ var Config = {
 var Resources = {
     AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
     AxeSwingHit: new ex.Sound('sounds/axe-swing-hit-2.wav'),
-    BloodSpatter: new ex.Sound('sounds/blood-splatter-1.wav'),
+    BloodSpatter: new ex.Sound('sounds/hero-slain.wav'),
     HeroSwing: new ex.Sound('sounds/hero-swing.wav'),
     AnnouncerDefend: new ex.Sound('sounds/defend.wav'),
     SoundMusic: new ex.Sound('sounds/music.mp3'),
