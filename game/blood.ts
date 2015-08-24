@@ -174,6 +174,8 @@ class SplatterEmitter implements IBloodEmitter {
       for (i = 0; i < this._particles.length; i++) {
          particle = this._particles[i];
          
+         if (map.isWall(particle.x, particle.y)) continue;
+         
          this.sprite.scale.setTo(particle.s, particle.s);
          this.sprite.draw(ctx, particle.x, particle.y);
       }

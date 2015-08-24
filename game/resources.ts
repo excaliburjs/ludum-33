@@ -6,6 +6,7 @@ var Resources = {
    AnnouncerDefend: new ex.Sound('sounds/defend.wav'),
    
    SoundMusic: new ex.Sound('sounds/music.mp3'),
+   GameOver: new ex.Sound('sounds/fail.mp3'),
    
    TextureVignette: new ex.Texture("images/vignette.png"),
    TextureHero: new ex.Texture("images/hero.png"),

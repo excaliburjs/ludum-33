@@ -76,6 +76,19 @@ class GameOver extends ex.Scene {
       });
    }
    
+   public onActivate(): void {
+      super.onActivate();
+      
+      Resources.GameOver.setVolume(0.1);
+      Resources.GameOver.play();
+   }
+   
+   public onDeactivate(): void {
+      super.onDeactivate();
+      
+      Resources.GameOver.stop();
+   }
+   
    public update(engine: ex.Engine, delta: number) {
       super.update(engine, delta);
       
