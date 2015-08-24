@@ -20,11 +20,11 @@ class HeroSpawner {
          spawnPoint = Util.pickRandom(spawnPoints);
          
          // increasing difficulty
-         if (Stats.numHeroesKilled > 30) {
+         if (Stats.numHeroesKilled > Config.HardThreshold) {
             heroTimer.interval = Config.HeroSpawnIntervalHard;
-         } else if (Stats.numHeroesKilled > 20) {
+         } else if (Stats.numHeroesKilled > Config.MedThreshold) {
             heroTimer.interval = Config.HeroSpawnIntervalMed;
-         } else if (Stats.numHeroesKilled > 10) {
+         } else if (Stats.numHeroesKilled > Config.EasyThreshold) {
             heroTimer.interval = Config.HeroSpawnIntervalEasy;
          }
          HeroSpawner._spawn(spawnPoint);

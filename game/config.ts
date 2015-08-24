@@ -45,6 +45,10 @@ var Config = {
    HeroSpawnIntervalMed: 6000,
    HeroSpawnIntervalHard: 4000,
    
+   EasyThreshold: 10,
+   MedThreshold: 20,
+   HardThreshold: 30,
+   
    // Max heroes to spawn at once
    HeroSpawnPoolMax: 5,
    // How much health a hero has

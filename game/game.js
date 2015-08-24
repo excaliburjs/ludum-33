@@ -37,6 +37,9 @@ var Config = {
     HeroSpawnIntervalEasy: 7500,
     HeroSpawnIntervalMed: 6000,
     HeroSpawnIntervalHard: 4000,
+    EasyThreshold: 10,
+    MedThreshold: 20,
+    HardThreshold: 30,
     // Max heroes to spawn at once
     HeroSpawnPoolMax: 5,
     // How much health a hero has
@@ -852,13 +855,13 @@ var HeroSpawner = (function () {
             spawnPoints = map.getSpawnPoints();
             spawnPoint = Util.pickRandom(spawnPoints);
             // increasing difficulty
-            if (Stats.numHeroesKilled > 30) {
+            if (Stats.numHeroesKilled > Config.HardThreshold) {
                 heroTimer.interval = Config.HeroSpawnIntervalHard;
             }
-            else if (Stats.numHeroesKilled > 20) {
+            else if (Stats.numHeroesKilled > Config.MedThreshold) {
                 heroTimer.interval = Config.HeroSpawnIntervalMed;
             }
-            else if (Stats.numHeroesKilled > 10) {
+            else if (Stats.numHeroesKilled > Config.EasyThreshold) {
                 heroTimer.interval = Config.HeroSpawnIntervalEasy;
             }
             HeroSpawner._spawn(spawnPoint);
