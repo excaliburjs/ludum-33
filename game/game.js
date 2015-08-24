@@ -71,6 +71,7 @@ var Resources = {
     TextureMonsterRight: new ex.Texture("images/minotaurv2right.png"),
     TextureMonsterUp: new ex.Texture("images/minotaurv2back.png"),
     TextureMonsterAim: new ex.Texture("images/aiming.png"),
+    TextureMonsterCharge: new ex.Texture("images/fireball.png"),
     TextureTreasure: new ex.Texture("images/treasure.png"),
     TextureTreasureEmpty: new ex.Texture("images/treasure-empty.png"),
     TextureTreasureIndicator: new ex.Texture("images/treasure-indicator.png"),
@@ -491,6 +492,11 @@ var Monster = (function (_super) {
         shiftAnimation.scale.setTo(1, 1);
         this._shiftIndicator = new ex.Actor(7, 70, 24, 24);
         this._shiftIndicator.addDrawing("shift", shiftAnimation);
+        var chargeSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterCharge, 3, 1, 96, 96);
+        var chargeAnim = chargeSpriteSheet.getAnimationForAll(engine, 100);
+        chargeAnim.loop = true;
+        chargeAnim.scale.setTo(2, 2);
+        this.addDrawing("charge", chargeAnim);
         var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 14, 1, 96, 96);
         var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 14, 1, 96, 96);
         var upSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterUp, 14, 1, 96, 96);
@@ -602,6 +608,9 @@ var Monster = (function (_super) {
             this._timeLeftDashing = Config.MonsterDashDuration;
             this.dx = dashVector.x;
             this.dy = dashVector.y;
+            this.setDrawing("charge");
+            //this.currentDrawing.anchor = new ex.Point(.25, 25);
+            this.currentDrawing.rotation = this._rotation;
         }
     };
     Monster.prototype.update = function (engine, delta) {

@@ -60,6 +60,11 @@ class Monster extends ex.Actor {
       this._shiftIndicator = new ex.Actor(7, 70, 24, 24);
       this._shiftIndicator.addDrawing("shift", shiftAnimation);
       
+      var chargeSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterCharge, 3, 1, 96, 96);
+      var chargeAnim = chargeSpriteSheet.getAnimationForAll(engine, 100);
+      chargeAnim.loop = true;
+      chargeAnim.scale.setTo(2, 2);
+      this.addDrawing("charge", chargeAnim);      
       
       var downSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterDown, 14, 1, 96, 96);
       var rightSpriteSheet = new ex.SpriteSheet(Resources.TextureMonsterRight, 14, 1, 96, 96);
@@ -192,6 +197,9 @@ class Monster extends ex.Actor {
          this._timeLeftDashing = Config.MonsterDashDuration;
          this.dx = dashVector.x;
          this.dy = dashVector.y;
+         this.setDrawing("charge");
+         //this.currentDrawing.anchor = new ex.Point(.25, 25);
+         this.currentDrawing.rotation = this._rotation;
       }
    }
    
