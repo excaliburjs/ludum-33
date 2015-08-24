@@ -31,7 +31,7 @@ class Monster extends ex.Actor {
       this._rays = new Array<ex.Ray>();
       this._closeRays = new Array<ex.Ray>();
       this._attackable = new Array<Hero>();
-      this.anchor = new ex.Point(0.35, 0.35);
+      //this.anchor = new ex.Point(0.35, 0.35);
       this.collisionType = ex.CollisionType.Active;
    }
    
@@ -198,8 +198,8 @@ class Monster extends ex.Actor {
          this.dx = dashVector.x;
          this.dy = dashVector.y;
          this.setDrawing("charge");
-         //this.currentDrawing.anchor = new ex.Point(.25, 25);
-         this.currentDrawing.rotation = this._rotation;
+         //this.currentDrawing.anchor = new ex.Point(.35, .35);
+         this.rotation = this._rotation;
       }
    }
    
@@ -219,6 +219,7 @@ class Monster extends ex.Actor {
          this._timeLeftDashing -= delta;
          if(this._timeLeftDashing <= 0){
             this._isDashing = false;
+            this.rotation = 0;
          }
       }
       
