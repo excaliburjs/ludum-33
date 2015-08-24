@@ -611,6 +611,9 @@ var Monster = (function (_super) {
             }
         }
     };
+    Monster.prototype.isDashing = function () {
+        return this._isDashing;
+    };
     Monster.prototype.dash = function () {
         if (this._canDash) {
             this.removeChild(this._shiftIndicator);
@@ -1015,7 +1018,9 @@ var Hero = (function (_super) {
                 if (hero._attackCooldown == 0 && hero._hasHitMinotaur) {
                     Resources.HeroSwing.play();
                     var monster = e.other;
-                    monster.health--;
+                    if (!monster.isDashing()) {
+                        monster.health--;
+                    }
                     map.damageEffect();
                     Stats.damageTaken++;
                     hero._attackCooldown = Config.HeroAttackCooldown;
