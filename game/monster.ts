@@ -16,6 +16,7 @@ class Monster extends ex.Actor {
    private _timeLeftAttacking: number = 0;
    private _direction: string = "none";
    private _aimSprite: ex.Sprite;
+   private _lastSwing: number = 0;
    
    constructor(x, y){
       super(x, y, Config.MonsterWidth, Config.MonsterHeight);
@@ -140,9 +141,13 @@ class Monster extends ex.Actor {
       
       // attack
       engine.input.pointers.primary.on("down", function (evt) {
-         that._attack();
-         that._isAttacking = true;
-         that._timeLeftAttacking = Config.MonsterAttackTime;
+         var currentTime = Date.now();
+         if(currentTime - that._lastSwing > Config.MonsterAttackCooldown){
+            that._attack();
+            that._isAttacking = true;
+            that._timeLeftAttacking = Config.MonsterAttackTime;
+            that._lastSwing = currentTime;
+         }
       });
       
       

@@ -9,6 +9,7 @@ var Config = {
     CloseMonsterAttackRange: 50,
     MonsterProgressSize: 200,
     MonsterAttackTime: 300,
+    MonsterAttackCooldown: 500,
     KnockBackForce: 200,
     BloodMaxAmount: 300,
     BloodMinFriction: 0.15,
@@ -404,6 +405,7 @@ var Monster = (function (_super) {
         this._isAttacking = false;
         this._timeLeftAttacking = 0;
         this._direction = "none";
+        this._lastSwing = 0;
         this.color = ex.Color.Red;
         this._mouseX = 0;
         this._mouseY = 0;
@@ -504,9 +506,13 @@ var Monster = (function (_super) {
         });
         // attack
         engine.input.pointers.primary.on("down", function (evt) {
-            that._attack();
-            that._isAttacking = true;
-            that._timeLeftAttacking = Config.MonsterAttackTime;
+            var currentTime = Date.now();
+            if (currentTime - that._lastSwing > Config.MonsterAttackCooldown) {
+                that._attack();
+                that._isAttacking = true;
+                that._timeLeftAttacking = Config.MonsterAttackTime;
+                that._lastSwing = currentTime;
+            }
         });
     };
     Monster.prototype._findFirstValidPad = function (engine) {
@@ -810,7 +816,7 @@ var Hero = (function (_super) {
         this.Health = Config.HeroHealth;
         this._treasure = 0;
         this._attackCooldown = Config.HeroAttackCooldown;
-        this._hasHitMinotaur = false;
+        this._hasHitMinotaur = true;
         this._isAttacking = false;
         this._timeLeftAttacking = 0;
         this._stunnedTime = 0;

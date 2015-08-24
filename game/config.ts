@@ -12,6 +12,7 @@ var Config = {
    CloseMonsterAttackRange: 50,
    MonsterProgressSize: 200,
    MonsterAttackTime: 300,
+   MonsterAttackCooldown: 500,
    KnockBackForce: 200,
    
    BloodMaxAmount: 300,

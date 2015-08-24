@@ -91,7 +91,7 @@ class Hero extends ex.Actor {
    private _chestLooted: Treasure;
    private _fsm: TypeState.FiniteStateMachine<HeroStates>;
    private _attackCooldown: number = Config.HeroAttackCooldown;
-   private _hasHitMinotaur: boolean = false; 
+   private _hasHitMinotaur: boolean = true; 
    private _isAttacking: boolean = false;
    private _timeLeftAttacking: number = 0;
    private _direction: string;
