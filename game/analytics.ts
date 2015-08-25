@@ -33,7 +33,7 @@ class Analytics {
       try {
          var ga = (<any>window).ga;
          
-         ga && ga('send', 'timing', 'Game', name, value);
+         ga && ga('send', 'timing', 'Ludum 33 Stats', name, value);
       
       } catch (ex) {
          ex.Logger.getInstance().error("Error while sending Google analytics timing", ex);
@@ -57,14 +57,14 @@ class Analytics {
          if (ga && stat > -1) {
             ga('send', {
                hitType: 'event',
-               eventCategory: 'Game',
+               eventCategory: 'Ludum 33 Stats',
                eventAction: name,
                eventValue: stat
             });
          } else if (ga) {
             ga('send', {
                hitType: 'event',
-               eventCategory: 'Game',
+               eventCategory: 'Ludum 33 Stats',
                eventAction: name
             });
          }

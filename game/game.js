@@ -66,20 +66,21 @@ var Analytics = (function () {
     function Analytics() {
     }
     Analytics.trackGameOver = function () {
-        var survivalTime = map.getSurvivalTime();
+        var survivalTime = map.getSurvivalTime() / 1000; // seconds;
         Analytics._trackEvent('GameOver', {
             SurvivalTime: survivalTime,
             HeroesKilled: Stats.numHeroesKilled,
             HeroesEscaped: Stats.numHeroesEscaped,
             TotalHeroes: HeroSpawner.getSpawnCount(),
-            GoldLost: (Stats.goldLost / map.getHoardAmount()),
+            GoldLost: Stats.goldLost / map.getHoardAmount(),
             TotalGold: map.getHoardAmount(),
-            DamageTaken: (Stats.damageTaken / Config.MonsterHealth)
+            DamageTaken: Stats.damageTaken / Config.MonsterHealth
         }, {
             GoreEnabled: Options.blood,
             MusicEnabled: Options.music,
             SoundEnabled: Options.sound
         }, survivalTime);
+        Analytics._trackTiming('Survival (in s)', survivalTime);
     };
     Analytics.trackGameStart = function () {
         Analytics._trackEvent('GameStart');
@@ -100,7 +101,7 @@ var Analytics = (function () {
             ai && ai.trackMetric(name, value);
         }
         catch (ex) {
-            ex.Logger.getInstance().error("Error while sending Google analytics timing", ex);
+            ex.Logger.getInstance().error("Error while sending App Insights timing", ex);
         }
     };
     Analytics._trackEvent = function (name, stats, strings, stat) {
@@ -285,7 +286,6 @@ var Map = (function (_super) {
     Map.prototype.onActivate = function () {
         // start sounds
         SoundManager.start();
-        Analytics.trackGameStart();
         this._survivalTimer = 0;
     };
     Map.prototype.onDeactivate = function () {
@@ -551,6 +551,7 @@ var Monster = (function (_super) {
         this.health = Config.MonsterHealth;
         this._rotation = 0;
         this._isAttacking = false;
+        this._hasMoved = false;
         this._timeLeftAttacking = 0;
         this._direction = "none";
         this._lastSwing = 0;
@@ -799,6 +800,10 @@ var Monster = (function (_super) {
             // WASD
             if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.W) ||
                 engine.input.keyboard.isKeyPressed(ex.Input.Keys.Up)) {
+                if (!this._hasMoved) {
+                    Analytics.trackGameStart();
+                    this._hasMoved = true;
+                }
                 if (!this._isAttacking) {
                     this.dy = -Config.MonsterSpeed;
                     this.setDrawing("walkUp");
@@ -806,6 +811,10 @@ var Monster = (function (_super) {
             }
             if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.S) ||
                 engine.input.keyboard.isKeyPressed(ex.Input.Keys.Down)) {
+                if (!this._hasMoved) {
+                    Analytics.trackGameStart();
+                    this._hasMoved = true;
+                }
                 if (!this._isAttacking) {
                     this.dy = Config.MonsterSpeed;
                     this.setDrawing("walkDown");
@@ -813,6 +822,10 @@ var Monster = (function (_super) {
             }
             if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.A) ||
                 engine.input.keyboard.isKeyPressed(ex.Input.Keys.Left)) {
+                if (!this._hasMoved) {
+                    Analytics.trackGameStart();
+                    this._hasMoved = true;
+                }
                 if (!this._isAttacking) {
                     this.dx = -Config.MonsterSpeed;
                     if (this.dy === 0) {
@@ -822,6 +835,10 @@ var Monster = (function (_super) {
             }
             if ((engine.input.keyboard.isKeyPressed(ex.Input.Keys.D) ||
                 engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right))) {
+                if (!this._hasMoved) {
+                    Analytics.trackGameStart();
+                    this._hasMoved = true;
+                }
                 if (!this._isAttacking) {
                     this.dx = Config.MonsterSpeed;
                     if (this.dy === 0) {
