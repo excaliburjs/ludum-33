@@ -1516,6 +1516,10 @@ var game = new ex.Engine({
     height: 640
 });
 game.setAntialiasing(false);
+game.canvas.oncontextmenu = function (e) {
+    e.preventDefault();
+    return false;
+};
 var loader = new ex.Loader();
 // load up all resources in dictionary
 _.forIn(Resources, function (resource) {
