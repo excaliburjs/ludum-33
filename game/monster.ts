@@ -23,7 +23,7 @@ class Monster extends ex.Actor {
    public dashLevel: number = 0;
    private _shiftIndicator: ex.Actor;
    
-   constructor(x, y){
+   constructor(x, y) {
       super(x, y, Config.MonsterWidth, Config.MonsterHeight);
       this.color = ex.Color.Red;
       this._mouseX = 0;
@@ -210,6 +210,23 @@ class Monster extends ex.Actor {
       if (this.health <= 0) {
          map._gameOver(GameOverType.Slain);
       }
+      
+      if (this.getLeft() < 0){
+         this.x = this.getWidth();   
+      }
+      
+      if (this.getTop() < 0) {
+         this.y = this.getHeight();
+      }
+      
+      if (this.getTop() > Map.MapSize * Map.CellSize) {
+         this.y = (Map.MapSize * Map.CellSize) - this.getHeight();
+      }
+      
+      if (this.getRight() > Map.MapSize * Map.CellSize) {
+         this.x = (Map.MapSize * Map.CellSize) - this.getWidth();
+      }
+      
       
       
       this._attackable.length = 0;
