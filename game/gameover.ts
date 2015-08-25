@@ -78,12 +78,17 @@ class GameOver extends ex.Scene {
          }
          HeroSpawner.cleanupTombstones();
          
+         Analytics.trackGameRestart();
+         
          game.goToScene('map');
       });
    }
    
    public onActivate(): void {
       super.onActivate();
+      
+      Analytics.trackGameOver();
+      
       Resources.SoundMusic.stop();
       Resources.GameOver.play();
    }

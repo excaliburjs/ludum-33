@@ -118,9 +118,7 @@ class Map extends ex.Scene {
    
    public onActivate() {
       // start sounds
-      SoundManager.start();
-      
-      game.canvas.className = "playing";
+      SoundManager.start();           
       
       this._survivalTimer = 0;
    }

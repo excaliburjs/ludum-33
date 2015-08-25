@@ -62,6 +62,81 @@ var Config = {
     // Treasure progress indicator width (in px)
     TreasureProgressSize: 600
 };
+var Analytics = (function () {
+    function Analytics() {
+    }
+    Analytics.trackGameOver = function () {
+        var survivalTime = map.getSurvivalTime() / 1000; // seconds;
+        Analytics._trackEvent('GameOver', {
+            SurvivalTime: survivalTime,
+            HeroesKilled: Stats.numHeroesKilled,
+            HeroesEscaped: Stats.numHeroesEscaped,
+            TotalHeroes: HeroSpawner.getSpawnCount(),
+            GoldLost: Stats.goldLost / map.getHoardAmount(),
+            TotalGold: map.getHoardAmount(),
+            DamageTaken: Stats.damageTaken / Config.MonsterHealth
+        }, {
+            GoreEnabled: Options.blood,
+            MusicEnabled: Options.music,
+            SoundEnabled: Options.sound
+        });
+        Analytics._trackTiming('Survival (in s)', survivalTime);
+    };
+    Analytics.trackGameStart = function () {
+        Analytics._trackEvent('GameStart');
+    };
+    Analytics.trackGameRestart = function () {
+        Analytics._trackEvent('GameRestart');
+    };
+    Analytics._trackTiming = function (name, value) {
+        try {
+            var ga = window.ga;
+            ga && ga('send', 'timing', 'Ludum 33 Stats', name, value);
+        }
+        catch (ex) {
+            ex.Logger.getInstance().error("Error while sending Google analytics timing", ex);
+        }
+        try {
+            var ai = window.appInsights;
+            ai && ai.trackMetric(name, value);
+        }
+        catch (ex) {
+            ex.Logger.getInstance().error("Error while sending App Insights timing", ex);
+        }
+    };
+    Analytics._trackEvent = function (name, stats, strings) {
+        if (stats === void 0) { stats = null; }
+        if (strings === void 0) { strings = null; }
+        try {
+            var ga = window.ga;
+            // google
+            if (ga) {
+                ga('send', {
+                    hitType: 'event',
+                    eventCategory: 'Ludum 33 Stats',
+                    eventAction: name
+                });
+            }
+        }
+        catch (ex) {
+            ex.Logger.getInstance().error("Error while sending Google analytics", ex);
+        }
+        try {
+            var ai = window.appInsights;
+            // appinsights
+            if (ai && strings && stats) {
+                ai.trackEvent(name, strings, stats);
+            }
+            else if (ai) {
+                ai.trackEvent(name);
+            }
+        }
+        catch (ex) {
+            ex.Logger.getInstance().error("Error while sending App Insights analytics", ex);
+        }
+    };
+    return Analytics;
+})();
 var Resources = {
     AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
     AxeSwingHit: new ex.Sound('sounds/axe-swing-hit-2.wav'),
@@ -203,7 +278,6 @@ var Map = (function (_super) {
     Map.prototype.onActivate = function () {
         // start sounds
         SoundManager.start();
-        game.canvas.className = "playing";
         this._survivalTimer = 0;
     };
     Map.prototype.onDeactivate = function () {
@@ -469,6 +543,7 @@ var Monster = (function (_super) {
         this.health = Config.MonsterHealth;
         this._rotation = 0;
         this._isAttacking = false;
+        this._hasMoved = false;
         this._timeLeftAttacking = 0;
         this._direction = "none";
         this._lastSwing = 0;
@@ -568,7 +643,7 @@ var Monster = (function (_super) {
         sprite.scale.setTo(2, 2);
         this.addDrawing("idleRight", sprite);
         this.setDrawing("idleDown");
-        var yValues = new Array(-0.62, -0.25, 0, 0.25, 0.62);
+        var yValues = new Array(-0.62, -.40, -0.25, -.15, 0, .15, 0.25, .40, 0.62);
         _.forIn(yValues, function (yValue) {
             var rayVector = new ex.Vector(1, yValue);
             var rayPoint = new ex.Point(_this.x, _this.y);
@@ -635,6 +710,18 @@ var Monster = (function (_super) {
         _super.prototype.update.call(this, engine, delta);
         if (this.health <= 0) {
             map._gameOver(GameOverType.Slain);
+        }
+        if (this.getLeft() < 0) {
+            this.x = this.getWidth();
+        }
+        if (this.getTop() < 0) {
+            this.y = this.getHeight();
+        }
+        if (this.getTop() > Map.MapSize * Map.CellSize) {
+            this.y = (Map.MapSize * Map.CellSize) - this.getHeight();
+        }
+        if (this.getRight() > Map.MapSize * Map.CellSize) {
+            this.x = (Map.MapSize * Map.CellSize) - this.getWidth();
         }
         this._attackable.length = 0;
         this._detectAttackable();
@@ -721,6 +808,10 @@ var Monster = (function (_super) {
             // WASD
             if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.W) ||
                 engine.input.keyboard.isKeyPressed(ex.Input.Keys.Up)) {
+                if (!this._hasMoved) {
+                    Analytics.trackGameStart();
+                    this._hasMoved = true;
+                }
                 if (!this._isAttacking) {
                     this.dy = -Config.MonsterSpeed;
                     this.setDrawing("walkUp");
@@ -728,6 +819,10 @@ var Monster = (function (_super) {
             }
             if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.S) ||
                 engine.input.keyboard.isKeyPressed(ex.Input.Keys.Down)) {
+                if (!this._hasMoved) {
+                    Analytics.trackGameStart();
+                    this._hasMoved = true;
+                }
                 if (!this._isAttacking) {
                     this.dy = Config.MonsterSpeed;
                     this.setDrawing("walkDown");
@@ -735,6 +830,10 @@ var Monster = (function (_super) {
             }
             if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.A) ||
                 engine.input.keyboard.isKeyPressed(ex.Input.Keys.Left)) {
+                if (!this._hasMoved) {
+                    Analytics.trackGameStart();
+                    this._hasMoved = true;
+                }
                 if (!this._isAttacking) {
                     this.dx = -Config.MonsterSpeed;
                     if (this.dy === 0) {
@@ -744,6 +843,10 @@ var Monster = (function (_super) {
             }
             if ((engine.input.keyboard.isKeyPressed(ex.Input.Keys.D) ||
                 engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right))) {
+                if (!this._hasMoved) {
+                    Analytics.trackGameStart();
+                    this._hasMoved = true;
+                }
                 if (!this._isAttacking) {
                     this.dx = Config.MonsterSpeed;
                     if (this.dy === 0) {
@@ -1153,7 +1256,20 @@ var Hero = (function (_super) {
         lines.push(newLine2);
         lines.push(newLine3);
         lines.push(newLine4);
+        var half = this.getWidth() / 4;
+        lines.forEach(function (l) {
+            l.begin.x -= half;
+            l.begin.y -= half;
+            l.end.x -= half;
+            l.end.y -= half;
+        });
         return lines;
+    };
+    Hero.prototype.debugDraw = function (ctx) {
+        var lines = this.getLines();
+        lines.forEach(function (l) {
+            ex.Util.drawLine(ctx, ex.Color.Green.toString(), l.begin.x, l.begin.y, l.end.x, l.end.y);
+        });
     };
     Hero.prototype.stun = function (direction) {
         this._fsm.go(HeroStates.Stunned);
@@ -1399,11 +1515,13 @@ var GameOver = (function (_super) {
                 HeroSpawner.despawn(HeroSpawner.getHeroes()[i], false);
             }
             HeroSpawner.cleanupTombstones();
+            Analytics.trackGameRestart();
             game.goToScene('map');
         });
     };
     GameOver.prototype.onActivate = function () {
         _super.prototype.onActivate.call(this);
+        Analytics.trackGameOver();
         Resources.SoundMusic.stop();
         Resources.GameOver.play();
     };
@@ -1474,6 +1592,7 @@ var SoundManager = (function () {
     return SoundManager;
 })();
 /// <reference path="config.ts" />
+/// <reference path="analytics.ts" />
 /// <reference path="resources.ts" />
 /// <reference path="util.ts" />
 /// <reference path="map.ts" />
@@ -1491,6 +1610,10 @@ var game = new ex.Engine({
     height: 640
 });
 game.setAntialiasing(false);
+game.canvas.oncontextmenu = function (e) {
+    e.preventDefault();
+    return false;
+};
 var loader = new ex.Loader();
 // load up all resources in dictionary
 _.forIn(Resources, function (resource) {

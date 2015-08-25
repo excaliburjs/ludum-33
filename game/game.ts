@@ -1,4 +1,5 @@
 /// <reference path="config.ts" />
+/// <reference path="analytics.ts" />
 /// <reference path="resources.ts" />
 /// <reference path="util.ts" />
 /// <reference path="map.ts" />
@@ -17,6 +18,11 @@ var game = new ex.Engine({
    height: 640
 });
 game.setAntialiasing(false);
+
+game.canvas.oncontextmenu = function(e){
+   e.preventDefault();
+   return false;
+};
 
 var loader = new ex.Loader();
 
@@ -85,7 +91,7 @@ game.start(loader).then(() => {
       Resources.AnnouncerDefend.play();      
    }).delay(2000).callMethod(() => {
       defendIntro.kill(); 
-      HeroSpawner.spawnHero(); 
+      HeroSpawner.spawnHero();       
    });
          
    heroTimer = new ex.Timer(() => HeroSpawner.spawnHero(), Config.HeroSpawnInterval, true);
