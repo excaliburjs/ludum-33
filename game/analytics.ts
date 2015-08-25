@@ -8,9 +8,9 @@ class Analytics {
          HeroesKilled: Stats.numHeroesKilled,
          HeroesEscaped: Stats.numHeroesEscaped,
          TotalHeroes: HeroSpawner.getSpawnCount(),
-         GoldLost: (Stats.goldLost / map.getHoardAmount()).toFixed(2),
+         GoldLost: Stats.goldLost / map.getHoardAmount(),
          TotalGold: map.getHoardAmount(),
-         DamageTaken: (Stats.damageTaken / Config.MonsterHealth).toFixed(2)                
+         DamageTaken: Stats.damageTaken / Config.MonsterHealth               
       }, { 
          GoreEnabled: Options.blood,
          MusicEnabled: Options.music,
