@@ -138,14 +138,14 @@ var Analytics = (function () {
     return Analytics;
 })();
 var Resources = {
-    AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
-    AxeSwingHit: new ex.Sound('sounds/axe-swing-hit-2.wav'),
-    BloodSpatter: new ex.Sound('sounds/hero-slain.wav'),
-    HeroSwing: new ex.Sound('sounds/hero-swing.wav'),
-    AnnouncerDefend: new ex.Sound('sounds/defend.wav'),
-    Fireball: new ex.Sound('sounds/fireball.wav'),
-    SoundMusic: new ex.Sound('sounds/music.mp3'),
-    GameOver: new ex.Sound('sounds/fail.mp3'),
+    AxeSwing: new ex.Sound('sounds/axe-swing.mp3', 'sounds/axe-swing.wav'),
+    AxeSwingHit: new ex.Sound('sounds/axe-swing-hit-2.mp3', 'sounds/axe-swing-hit-2.wav'),
+    BloodSpatter: new ex.Sound('sounds/hero-slain.mp3', 'sounds/hero-slain.wav'),
+    HeroSwing: new ex.Sound('sounds/hero-swing.mp3', 'sounds/hero-swing.wav'),
+    AnnouncerDefend: new ex.Sound('sounds/defend.mp3', 'sounds/defend.wav'),
+    Fireball: new ex.Sound('sounds/fireball.mp3', 'sounds/fireball.wav'),
+    SoundMusic: new ex.Sound('sounds/music.mp3', 'sounds/music.wav'),
+    GameOver: new ex.Sound('sounds/fail.mp3', 'sounds/fail.wav'),
     TextureShift: new ex.Texture("images/shift.png"),
     TextureVignette: new ex.Texture("images/vignette.png"),
     TextureHero: new ex.Texture("images/hero.png"),
