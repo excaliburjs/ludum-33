@@ -66,36 +66,81 @@ var Analytics = (function () {
     function Analytics() {
     }
     Analytics.trackGameOver = function () {
+        var survivalTime = map.getSurvivalTime();
         Analytics._trackEvent('GameOver', {
-            SurvivalTime: map.getSurvivalTime(),
+            SurvivalTime: survivalTime,
             HeroesKilled: Stats.numHeroesKilled,
             HeroesEscaped: Stats.numHeroesEscaped,
             TotalHeroes: HeroSpawner.getSpawnCount(),
             GoldLost: (Stats.goldLost / map.getHoardAmount()),
             TotalGold: map.getHoardAmount(),
-            DamageTaken: (Stats.damageTaken / Config.MonsterHealth),
+            DamageTaken: (Stats.damageTaken / Config.MonsterHealth)
+        }, {
             GoreEnabled: Options.blood,
             MusicEnabled: Options.music,
             SoundEnabled: Options.sound
-        });
+        }, survivalTime);
     };
     Analytics.trackGameStart = function () {
-        Analytics._trackEvent('GameStart', {});
+        Analytics._trackEvent('GameStart');
     };
-    Analytics._trackEvent = function (name, data) {
+    Analytics.trackGameRestart = function () {
+        Analytics._trackEvent('GameRestart');
+    };
+    Analytics._trackTiming = function (name, value) {
         try {
             var ga = window.ga;
+            ga && ga('send', 'timing', 'Game', name, value);
+        }
+        catch (ex) {
+            ex.Logger.getInstance().error("Error while sending Google analytics timing", ex);
+        }
+        try {
             var ai = window.appInsights;
+            ai && ai.trackMetric(name, value);
+        }
+        catch (ex) {
+            ex.Logger.getInstance().error("Error while sending Google analytics timing", ex);
+        }
+    };
+    Analytics._trackEvent = function (name, stats, strings, stat) {
+        if (stats === void 0) { stats = null; }
+        if (strings === void 0) { strings = null; }
+        if (stat === void 0) { stat = -1; }
+        try {
+            var ga = window.ga;
             // google
-            if (ga) {
+            if (ga && stat > -1) {
+                ga('send', {
+                    hitType: 'event',
+                    eventCategory: 'Game',
+                    eventAction: name,
+                    eventValue: stat
+                });
             }
-            // appinsights
-            if (ai) {
-                ai.trackEvent(name, data);
+            else if (ga) {
+                ga('send', {
+                    hitType: 'event',
+                    eventCategory: 'Game',
+                    eventAction: name
+                });
             }
         }
         catch (ex) {
-            ex.Logger.getInstance().error("Error while sending analytics", ex);
+            ex.Logger.getInstance().error("Error while sending Google analytics", ex);
+        }
+        try {
+            var ai = window.appInsights;
+            // appinsights
+            if (ai && strings && stats) {
+                ai.trackEvent(name, strings, stats);
+            }
+            else if (ai) {
+                ai.trackEvent(name);
+            }
+        }
+        catch (ex) {
+            ex.Logger.getInstance().error("Error while sending App Insights analytics", ex);
         }
     };
     return Analytics;
@@ -240,7 +285,7 @@ var Map = (function (_super) {
     Map.prototype.onActivate = function () {
         // start sounds
         SoundManager.start();
-        game.canvas.className = "playing";
+        Analytics.trackGameStart();
         this._survivalTimer = 0;
     };
     Map.prototype.onDeactivate = function () {
@@ -1430,11 +1475,13 @@ var GameOver = (function (_super) {
                 HeroSpawner.despawn(HeroSpawner.getHeroes()[i], false);
             }
             HeroSpawner.cleanupTombstones();
+            Analytics.trackGameRestart();
             game.goToScene('map');
         });
     };
     GameOver.prototype.onActivate = function () {
         _super.prototype.onActivate.call(this);
+        Analytics.trackGameOver();
         Resources.SoundMusic.stop();
         Resources.GameOver.play();
     };

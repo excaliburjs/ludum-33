@@ -4,20 +4,18 @@ class Analytics {
       var survivalTime = map.getSurvivalTime();
       
       Analytics._trackEvent('GameOver', {
-         SurvivalTime: survivalTime,
+         SurvivalTime: survivalTime / 1000, // seconds
          HeroesKilled: Stats.numHeroesKilled,
          HeroesEscaped: Stats.numHeroesEscaped,
          TotalHeroes: HeroSpawner.getSpawnCount(),
-         GoldLost: (Stats.goldLost / map.getHoardAmount()),
+         GoldLost: (Stats.goldLost / map.getHoardAmount()).toFixed(2),
          TotalGold: map.getHoardAmount(),
-         DamageTaken: (Stats.damageTaken / Config.MonsterHealth),
-         
+         DamageTaken: (Stats.damageTaken / Config.MonsterHealth).toFixed(2)                
+      }, { 
          GoreEnabled: Options.blood,
          MusicEnabled: Options.music,
          SoundEnabled: Options.sound
       }, survivalTime);
-      
-      Analytics._trackTiming('Survival', survivalTime);
    }
    
    static trackGameStart() {
@@ -49,7 +47,7 @@ class Analytics {
       }
    }
    
-   private static _trackEvent(name: string, data: {} = null, stat: number = -1) {
+   private static _trackEvent(name: string, stats: {} = null, strings: {} = null, stat: number = -1) {
       try {
          var ga = (<any>window).ga;
                   
@@ -76,8 +74,8 @@ class Analytics {
          var ai = (<any>window).appInsights;
          
          // appinsights
-         if (ai && data) {
-            ai.trackEvent(name, data);
+         if (ai && strings && stats) {
+            ai.trackEvent(name, strings, stats);
          } else if (ai) {
             ai.trackEvent(name);
          }
