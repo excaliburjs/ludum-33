@@ -19,6 +19,11 @@ var game = new ex.Engine({
 });
 game.setAntialiasing(false);
 
+game.canvas.oncontextmenu = function(e){
+   e.preventDefault();
+   return false;
+};
+
 var loader = new ex.Loader();
 
 // load up all resources in dictionary
