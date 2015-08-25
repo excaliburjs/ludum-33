@@ -9,7 +9,7 @@ class SoundManager {
       }
       // set music volume
       if (Options.music) {
-         Resources.SoundMusic.setVolume(0.05);
+         Resources.SoundMusic.setVolume(0.03);
          if (!Resources.SoundMusic.isPlaying()) {
             Resources.SoundMusic.play();    
             Resources.SoundMusic.setLoop(true);
@@ -26,6 +26,7 @@ class SoundManager {
          if (resource instanceof ex.Sound && (resource != Resources.SoundMusic) && (resource != Resources.GameOver)) {
             (<ex.Sound>resource).setVolume(volume);
          }
+         Resources.Fireball.setVolume(0.5);
       });
    }
    

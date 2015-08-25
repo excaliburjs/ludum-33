@@ -611,6 +611,9 @@ var Monster = (function (_super) {
             }
         }
     };
+    Monster.prototype.isDashing = function () {
+        return this._isDashing;
+    };
     Monster.prototype.dash = function () {
         if (this._canDash) {
             this.removeChild(this._shiftIndicator);
@@ -1027,7 +1030,9 @@ var Hero = (function (_super) {
                 if (hero._attackCooldown == 0 && hero._hasHitMinotaur) {
                     Resources.HeroSwing.play();
                     var monster = e.other;
-                    monster.health--;
+                    if (!monster.isDashing()) {
+                        monster.health--;
+                    }
                     map.damageEffect();
                     Stats.damageTaken++;
                     hero._attackCooldown = Config.HeroAttackCooldown;
@@ -1447,7 +1452,7 @@ var SoundManager = (function () {
         }
         // set music volume
         if (Options.music) {
-            Resources.SoundMusic.setVolume(0.05);
+            Resources.SoundMusic.setVolume(0.03);
             if (!Resources.SoundMusic.isPlaying()) {
                 Resources.SoundMusic.play();
                 Resources.SoundMusic.setLoop(true);
@@ -1464,6 +1469,7 @@ var SoundManager = (function () {
             if (resource instanceof ex.Sound && (resource != Resources.SoundMusic) && (resource != Resources.GameOver)) {
                 resource.setVolume(volume);
             }
+            Resources.Fireball.setVolume(0.5);
         });
     };
     SoundManager.stop = function () {

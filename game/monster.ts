@@ -187,6 +187,10 @@ class Monster extends ex.Actor {
       }
    }
    
+   public isDashing() {
+      return this._isDashing;
+   }
+   
    public dash(): void {
       if(this._canDash){
          this.removeChild(this._shiftIndicator);

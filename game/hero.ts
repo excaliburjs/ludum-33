@@ -188,7 +188,9 @@ class Hero extends ex.Actor {
             if (hero._attackCooldown == 0 && hero._hasHitMinotaur) {
                Resources.HeroSwing.play();
                var monster = <Monster>e.other;
-               monster.health--;
+               if (!monster.isDashing()) {
+                  monster.health--;
+               }
                map.damageEffect();
                
                Stats.damageTaken++;
