@@ -568,7 +568,7 @@ var Monster = (function (_super) {
         sprite.scale.setTo(2, 2);
         this.addDrawing("idleRight", sprite);
         this.setDrawing("idleDown");
-        var yValues = new Array(-0.62, -0.25, 0, 0.25, 0.62);
+        var yValues = new Array(-0.62, -.40, -0.25, -.15, 0, .15, 0.25, .40, 0.62);
         _.forIn(yValues, function (yValue) {
             var rayVector = new ex.Vector(1, yValue);
             var rayPoint = new ex.Point(_this.x, _this.y);
@@ -1165,7 +1165,20 @@ var Hero = (function (_super) {
         lines.push(newLine2);
         lines.push(newLine3);
         lines.push(newLine4);
+        var half = this.getWidth() / 4;
+        lines.forEach(function (l) {
+            l.begin.x -= half;
+            l.begin.y -= half;
+            l.end.x -= half;
+            l.end.y -= half;
+        });
         return lines;
+    };
+    Hero.prototype.debugDraw = function (ctx) {
+        var lines = this.getLines();
+        lines.forEach(function (l) {
+            ex.Util.drawLine(ctx, ex.Color.Green.toString(), l.begin.x, l.begin.y, l.end.x, l.end.y);
+        });
     };
     Hero.prototype.stun = function (direction) {
         this._fsm.go(HeroStates.Stunned);

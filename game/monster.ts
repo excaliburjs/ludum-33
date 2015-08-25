@@ -139,7 +139,7 @@ class Monster extends ex.Actor {
       this.addDrawing("idleRight", sprite);
       this.setDrawing("idleDown");
       
-      var yValues = new Array<number>(-0.62, -0.25, 0, 0.25, 0.62);
+      var yValues = new Array<number>(-0.62, -.40, -0.25, -.15, 0, .15, 0.25, .40, 0.62);
       _.forIn(yValues, (yValue) => {
          var rayVector = new ex.Vector(1, yValue);
          var rayPoint = new ex.Point(this.x, this.y);
