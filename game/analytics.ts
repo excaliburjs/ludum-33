@@ -1,10 +1,10 @@
 class Analytics {
    
    static trackGameOver() {
-      var survivalTime = map.getSurvivalTime();
+      var survivalTime = map.getSurvivalTime()  / 1000; // seconds;
       
       Analytics._trackEvent('GameOver', {
-         SurvivalTime: survivalTime / 1000, // seconds
+         SurvivalTime: survivalTime,
          HeroesKilled: Stats.numHeroesKilled,
          HeroesEscaped: Stats.numHeroesEscaped,
          TotalHeroes: HeroSpawner.getSpawnCount(),
@@ -16,6 +16,8 @@ class Analytics {
          MusicEnabled: Options.music,
          SoundEnabled: Options.sound
       }, survivalTime);
+      
+      Analytics._trackTiming('Survival (in s)', survivalTime);
    }
    
    static trackGameStart() {
@@ -43,7 +45,7 @@ class Analytics {
          ai && ai.trackMetric(name, value);
                
       } catch (ex) {
-         ex.Logger.getInstance().error("Error while sending Google analytics timing", ex);
+         ex.Logger.getInstance().error("Error while sending App Insights timing", ex);
       }
    }
    
