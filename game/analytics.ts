@@ -15,7 +15,7 @@ class Analytics {
          GoreEnabled: Options.blood,
          MusicEnabled: Options.music,
          SoundEnabled: Options.sound
-      }, survivalTime);
+      });
       
       Analytics._trackTiming('Survival (in s)', survivalTime);
    }
@@ -49,19 +49,12 @@ class Analytics {
       }
    }
    
-   private static _trackEvent(name: string, stats: {} = null, strings: {} = null, stat: number = -1) {
+   private static _trackEvent(name: string, stats: {} = null, strings: {} = null) {
       try {
          var ga = (<any>window).ga;
                   
          // google
-         if (ga && stat > -1) {
-            ga('send', {
-               hitType: 'event',
-               eventCategory: 'Ludum 33 Stats',
-               eventAction: name,
-               eventValue: stat
-            });
-         } else if (ga) {
+         if (ga) {
             ga('send', {
                hitType: 'event',
                eventCategory: 'Ludum 33 Stats',

@@ -79,7 +79,7 @@ var Analytics = (function () {
             GoreEnabled: Options.blood,
             MusicEnabled: Options.music,
             SoundEnabled: Options.sound
-        }, survivalTime);
+        });
         Analytics._trackTiming('Survival (in s)', survivalTime);
     };
     Analytics.trackGameStart = function () {
@@ -104,22 +104,13 @@ var Analytics = (function () {
             ex.Logger.getInstance().error("Error while sending App Insights timing", ex);
         }
     };
-    Analytics._trackEvent = function (name, stats, strings, stat) {
+    Analytics._trackEvent = function (name, stats, strings) {
         if (stats === void 0) { stats = null; }
         if (strings === void 0) { strings = null; }
-        if (stat === void 0) { stat = -1; }
         try {
             var ga = window.ga;
             // google
-            if (ga && stat > -1) {
-                ga('send', {
-                    hitType: 'event',
-                    eventCategory: 'Ludum 33 Stats',
-                    eventAction: name,
-                    eventValue: stat
-                });
-            }
-            else if (ga) {
+            if (ga) {
                 ga('send', {
                     hitType: 'event',
                     eventCategory: 'Ludum 33 Stats',
