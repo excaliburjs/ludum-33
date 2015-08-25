@@ -152,6 +152,7 @@ var Resources = {
     BloodSpatter: new ex.Sound('sounds/hero-slain.wav'),
     HeroSwing: new ex.Sound('sounds/hero-swing.wav'),
     AnnouncerDefend: new ex.Sound('sounds/defend.wav'),
+    Fireball: new ex.Sound('sounds/fireball.wav'),
     SoundMusic: new ex.Sound('sounds/music.mp3'),
     GameOver: new ex.Sound('sounds/fail.mp3'),
     TextureShift: new ex.Texture("images/shift.png"),
@@ -651,7 +652,7 @@ var Monster = (function (_super) {
         sprite.scale.setTo(2, 2);
         this.addDrawing("idleRight", sprite);
         this.setDrawing("idleDown");
-        var yValues = new Array(-0.62, -0.25, 0, 0.25, 0.62);
+        var yValues = new Array(-0.62, -.40, -0.25, -.15, 0, .15, 0.25, .40, 0.62);
         _.forIn(yValues, function (yValue) {
             var rayVector = new ex.Vector(1, yValue);
             var rayPoint = new ex.Point(_this.x, _this.y);
@@ -694,6 +695,9 @@ var Monster = (function (_super) {
             }
         }
     };
+    Monster.prototype.isDashing = function () {
+        return this._isDashing;
+    };
     Monster.prototype.dash = function () {
         if (this._canDash) {
             this.removeChild(this._shiftIndicator);
@@ -707,6 +711,7 @@ var Monster = (function (_super) {
             this.setDrawing("charge");
             //this.currentDrawing.anchor = new ex.Point(.35, .35);
             this.rotation = this._rotation;
+            Resources.Fireball.play();
         }
     };
     Monster.prototype.update = function (engine, delta) {
@@ -714,6 +719,18 @@ var Monster = (function (_super) {
         _super.prototype.update.call(this, engine, delta);
         if (this.health <= 0) {
             map._gameOver(GameOverType.Slain);
+        }
+        if (this.getLeft() < 0) {
+            this.x = this.getWidth();
+        }
+        if (this.getTop() < 0) {
+            this.y = this.getHeight();
+        }
+        if (this.getTop() > Map.MapSize * Map.CellSize) {
+            this.y = (Map.MapSize * Map.CellSize) - this.getHeight();
+        }
+        if (this.getRight() > Map.MapSize * Map.CellSize) {
+            this.x = (Map.MapSize * Map.CellSize) - this.getWidth();
         }
         this._attackable.length = 0;
         this._detectAttackable();
@@ -1113,7 +1130,9 @@ var Hero = (function (_super) {
                 if (hero._attackCooldown == 0 && hero._hasHitMinotaur) {
                     Resources.HeroSwing.play();
                     var monster = e.other;
-                    monster.health--;
+                    if (!monster.isDashing()) {
+                        monster.health--;
+                    }
                     map.damageEffect();
                     Stats.damageTaken++;
                     hero._attackCooldown = Config.HeroAttackCooldown;
@@ -1246,7 +1265,20 @@ var Hero = (function (_super) {
         lines.push(newLine2);
         lines.push(newLine3);
         lines.push(newLine4);
+        var half = this.getWidth() / 4;
+        lines.forEach(function (l) {
+            l.begin.x -= half;
+            l.begin.y -= half;
+            l.end.x -= half;
+            l.end.y -= half;
+        });
         return lines;
+    };
+    Hero.prototype.debugDraw = function (ctx) {
+        var lines = this.getLines();
+        lines.forEach(function (l) {
+            ex.Util.drawLine(ctx, ex.Color.Green.toString(), l.begin.x, l.begin.y, l.end.x, l.end.y);
+        });
     };
     Hero.prototype.stun = function (direction) {
         this._fsm.go(HeroStates.Stunned);
@@ -1535,7 +1567,7 @@ var SoundManager = (function () {
         }
         // set music volume
         if (Options.music) {
-            Resources.SoundMusic.setVolume(0.05);
+            Resources.SoundMusic.setVolume(0.03);
             if (!Resources.SoundMusic.isPlaying()) {
                 Resources.SoundMusic.play();
                 Resources.SoundMusic.setLoop(true);
@@ -1552,6 +1584,7 @@ var SoundManager = (function () {
             if (resource instanceof ex.Sound && (resource != Resources.SoundMusic) && (resource != Resources.GameOver)) {
                 resource.setVolume(volume);
             }
+            Resources.Fireball.setVolume(0.5);
         });
     };
     SoundManager.stop = function () {

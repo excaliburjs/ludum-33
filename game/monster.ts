@@ -24,7 +24,7 @@ class Monster extends ex.Actor {
    public dashLevel: number = 0;
    private _shiftIndicator: ex.Actor;
    
-   constructor(x, y){
+   constructor(x, y) {
       super(x, y, Config.MonsterWidth, Config.MonsterHeight);
       this.color = ex.Color.Red;
       this._mouseX = 0;
@@ -140,7 +140,7 @@ class Monster extends ex.Actor {
       this.addDrawing("idleRight", sprite);
       this.setDrawing("idleDown");
       
-      var yValues = new Array<number>(-0.62, -0.25, 0, 0.25, 0.62);
+      var yValues = new Array<number>(-0.62, -.40, -0.25, -.15, 0, .15, 0.25, .40, 0.62);
       _.forIn(yValues, (yValue) => {
          var rayVector = new ex.Vector(1, yValue);
          var rayPoint = new ex.Point(this.x, this.y);
@@ -188,6 +188,10 @@ class Monster extends ex.Actor {
       }
    }
    
+   public isDashing() {
+      return this._isDashing;
+   }
+   
    public dash(): void {
       if(this._canDash){
          this.removeChild(this._shiftIndicator);
@@ -201,6 +205,7 @@ class Monster extends ex.Actor {
          this.setDrawing("charge");
          //this.currentDrawing.anchor = new ex.Point(.35, .35);
          this.rotation = this._rotation;
+         Resources.Fireball.play();
       }
    }
    
@@ -210,6 +215,23 @@ class Monster extends ex.Actor {
       if (this.health <= 0) {
          map._gameOver(GameOverType.Slain);
       }
+      
+      if (this.getLeft() < 0){
+         this.x = this.getWidth();   
+      }
+      
+      if (this.getTop() < 0) {
+         this.y = this.getHeight();
+      }
+      
+      if (this.getTop() > Map.MapSize * Map.CellSize) {
+         this.y = (Map.MapSize * Map.CellSize) - this.getHeight();
+      }
+      
+      if (this.getRight() > Map.MapSize * Map.CellSize) {
+         this.x = (Map.MapSize * Map.CellSize) - this.getWidth();
+      }
+      
       
       
       this._attackable.length = 0;

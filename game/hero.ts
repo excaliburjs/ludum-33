@@ -188,7 +188,9 @@ class Hero extends ex.Actor {
             if (hero._attackCooldown == 0 && hero._hasHitMinotaur) {
                Resources.HeroSwing.play();
                var monster = <Monster>e.other;
-               monster.health--;
+               if (!monster.isDashing()) {
+                  monster.health--;
+               }
                map.damageEffect();
                
                Stats.damageTaken++;
@@ -344,8 +346,24 @@ class Hero extends ex.Actor {
       lines.push(newLine2);
       lines.push(newLine3);
       lines.push(newLine4);
+      
+      var half = this.getWidth()/4;
+      lines.forEach(function(l){
+         l.begin.x -= half;
+         l.begin.y -= half;
+         l.end.x -= half;
+         l.end.y -= half;
+      })
+      
       return lines;
 
+   }
+   
+   public debugDraw(ctx: CanvasRenderingContext2D): void{
+      var lines = this.getLines();
+      lines.forEach(function(l){
+         ex.Util.drawLine(ctx, ex.Color.Green.toString(), l.begin.x, l.begin.y, l.end.x, l.end.y);
+      });
    }
    
    public stun(direction: ex.Vector){      
