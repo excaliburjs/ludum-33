@@ -91,7 +91,7 @@ var Analytics = (function () {
     Analytics._trackTiming = function (name, value) {
         try {
             var ga = window.ga;
-            ga && ga('send', 'timing', 'Game', name, value);
+            ga && ga('send', 'timing', 'Ludum 33 Stats', name, value);
         }
         catch (ex) {
             ex.Logger.getInstance().error("Error while sending Google analytics timing", ex);
@@ -114,7 +114,7 @@ var Analytics = (function () {
             if (ga && stat > -1) {
                 ga('send', {
                     hitType: 'event',
-                    eventCategory: 'Game',
+                    eventCategory: 'Ludum 33 Stats',
                     eventAction: name,
                     eventValue: stat
                 });
@@ -122,7 +122,7 @@ var Analytics = (function () {
             else if (ga) {
                 ga('send', {
                     hitType: 'event',
-                    eventCategory: 'Game',
+                    eventCategory: 'Ludum 33 Stats',
                     eventAction: name
                 });
             }
