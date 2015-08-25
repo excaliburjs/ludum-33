@@ -30,14 +30,13 @@ class Treasure extends ex.Actor {
          this._hoard -= amount;
          return amount;
       } else {
+         var that = this;
          //TODO steal from another non-empty chest
          _.first(map.getTreasures(), (treasure: Treasure) => {
-            if (treasure != this) {
-               if (treasure.getAmount() > 0) {
+            if (treasure != that && treasure.getAmount() > 0) {
                   amount = treasure.steal();
                   // console.log('stealing from another chest');
                   return true;
-               }
             }
             return false;
          });

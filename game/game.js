@@ -1344,7 +1344,6 @@ var Treasure = (function (_super) {
         return this._hoard;
     };
     Treasure.prototype.steal = function () {
-        var _this = this;
         var amount = 0;
         if (this._hoard > 0) {
             if (this._hoard >= Config.TreasureStealAmount) {
@@ -1357,14 +1356,13 @@ var Treasure = (function (_super) {
             return amount;
         }
         else {
+            var that = this;
             //TODO steal from another non-empty chest
             _.first(map.getTreasures(), function (treasure) {
-                if (treasure != _this) {
-                    if (treasure.getAmount() > 0) {
-                        amount = treasure.steal();
-                        // console.log('stealing from another chest');
-                        return true;
-                    }
+                if (treasure != that && treasure.getAmount() > 0) {
+                    amount = treasure.steal();
+                    // console.log('stealing from another chest');
+                    return true;
                 }
                 return false;
             });
