@@ -1,4 +1,5 @@
 /// <reference path="config.ts" />
+/// <reference path="analytics.ts" />
 /// <reference path="resources.ts" />
 /// <reference path="util.ts" />
 /// <reference path="map.ts" />
@@ -90,7 +91,7 @@ game.start(loader).then(() => {
       Resources.AnnouncerDefend.play();      
    }).delay(2000).callMethod(() => {
       defendIntro.kill(); 
-      HeroSpawner.spawnHero(); 
+      HeroSpawner.spawnHero();       
    });
          
    heroTimer = new ex.Timer(() => HeroSpawner.spawnHero(), Config.HeroSpawnInterval, true);

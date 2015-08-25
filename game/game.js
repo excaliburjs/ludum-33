@@ -62,6 +62,90 @@ var Config = {
     // Treasure progress indicator width (in px)
     TreasureProgressSize: 600
 };
+var Analytics = (function () {
+    function Analytics() {
+    }
+    Analytics.trackGameOver = function () {
+        var survivalTime = map.getSurvivalTime() / 1000; // seconds;
+        Analytics._trackEvent('GameOver', {
+            SurvivalTime: survivalTime,
+            HeroesKilled: Stats.numHeroesKilled,
+            HeroesEscaped: Stats.numHeroesEscaped,
+            TotalHeroes: HeroSpawner.getSpawnCount(),
+            GoldLost: Stats.goldLost / map.getHoardAmount(),
+            TotalGold: map.getHoardAmount(),
+            DamageTaken: Stats.damageTaken / Config.MonsterHealth
+        }, {
+            GoreEnabled: Options.blood,
+            MusicEnabled: Options.music,
+            SoundEnabled: Options.sound
+        }, survivalTime);
+        Analytics._trackTiming('Survival (in s)', survivalTime);
+    };
+    Analytics.trackGameStart = function () {
+        Analytics._trackEvent('GameStart');
+    };
+    Analytics.trackGameRestart = function () {
+        Analytics._trackEvent('GameRestart');
+    };
+    Analytics._trackTiming = function (name, value) {
+        try {
+            var ga = window.ga;
+            ga && ga('send', 'timing', 'Ludum 33 Stats', name, value);
+        }
+        catch (ex) {
+            ex.Logger.getInstance().error("Error while sending Google analytics timing", ex);
+        }
+        try {
+            var ai = window.appInsights;
+            ai && ai.trackMetric(name, value);
+        }
+        catch (ex) {
+            ex.Logger.getInstance().error("Error while sending App Insights timing", ex);
+        }
+    };
+    Analytics._trackEvent = function (name, stats, strings, stat) {
+        if (stats === void 0) { stats = null; }
+        if (strings === void 0) { strings = null; }
+        if (stat === void 0) { stat = -1; }
+        try {
+            var ga = window.ga;
+            // google
+            if (ga && stat > -1) {
+                ga('send', {
+                    hitType: 'event',
+                    eventCategory: 'Ludum 33 Stats',
+                    eventAction: name,
+                    eventValue: stat
+                });
+            }
+            else if (ga) {
+                ga('send', {
+                    hitType: 'event',
+                    eventCategory: 'Ludum 33 Stats',
+                    eventAction: name
+                });
+            }
+        }
+        catch (ex) {
+            ex.Logger.getInstance().error("Error while sending Google analytics", ex);
+        }
+        try {
+            var ai = window.appInsights;
+            // appinsights
+            if (ai && strings && stats) {
+                ai.trackEvent(name, strings, stats);
+            }
+            else if (ai) {
+                ai.trackEvent(name);
+            }
+        }
+        catch (ex) {
+            ex.Logger.getInstance().error("Error while sending App Insights analytics", ex);
+        }
+    };
+    return Analytics;
+})();
 var Resources = {
     AxeSwing: new ex.Sound('sounds/axe-swing.wav'),
     AxeSwingHit: new ex.Sound('sounds/axe-swing-hit-2.wav'),
@@ -203,7 +287,6 @@ var Map = (function (_super) {
     Map.prototype.onActivate = function () {
         // start sounds
         SoundManager.start();
-        game.canvas.className = "playing";
         this._survivalTimer = 0;
     };
     Map.prototype.onDeactivate = function () {
@@ -469,6 +552,7 @@ var Monster = (function (_super) {
         this.health = Config.MonsterHealth;
         this._rotation = 0;
         this._isAttacking = false;
+        this._hasMoved = false;
         this._timeLeftAttacking = 0;
         this._direction = "none";
         this._lastSwing = 0;
@@ -733,6 +817,10 @@ var Monster = (function (_super) {
             // WASD
             if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.W) ||
                 engine.input.keyboard.isKeyPressed(ex.Input.Keys.Up)) {
+                if (!this._hasMoved) {
+                    Analytics.trackGameStart();
+                    this._hasMoved = true;
+                }
                 if (!this._isAttacking) {
                     this.dy = -Config.MonsterSpeed;
                     this.setDrawing("walkUp");
@@ -740,6 +828,10 @@ var Monster = (function (_super) {
             }
             if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.S) ||
                 engine.input.keyboard.isKeyPressed(ex.Input.Keys.Down)) {
+                if (!this._hasMoved) {
+                    Analytics.trackGameStart();
+                    this._hasMoved = true;
+                }
                 if (!this._isAttacking) {
                     this.dy = Config.MonsterSpeed;
                     this.setDrawing("walkDown");
@@ -747,6 +839,10 @@ var Monster = (function (_super) {
             }
             if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.A) ||
                 engine.input.keyboard.isKeyPressed(ex.Input.Keys.Left)) {
+                if (!this._hasMoved) {
+                    Analytics.trackGameStart();
+                    this._hasMoved = true;
+                }
                 if (!this._isAttacking) {
                     this.dx = -Config.MonsterSpeed;
                     if (this.dy === 0) {
@@ -756,6 +852,10 @@ var Monster = (function (_super) {
             }
             if ((engine.input.keyboard.isKeyPressed(ex.Input.Keys.D) ||
                 engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right))) {
+                if (!this._hasMoved) {
+                    Analytics.trackGameStart();
+                    this._hasMoved = true;
+                }
                 if (!this._isAttacking) {
                     this.dx = Config.MonsterSpeed;
                     if (this.dy === 0) {
@@ -1424,11 +1524,13 @@ var GameOver = (function (_super) {
                 HeroSpawner.despawn(HeroSpawner.getHeroes()[i], false);
             }
             HeroSpawner.cleanupTombstones();
+            Analytics.trackGameRestart();
             game.goToScene('map');
         });
     };
     GameOver.prototype.onActivate = function () {
         _super.prototype.onActivate.call(this);
+        Analytics.trackGameOver();
         Resources.SoundMusic.stop();
         Resources.GameOver.play();
     };
@@ -1499,6 +1601,7 @@ var SoundManager = (function () {
     return SoundManager;
 })();
 /// <reference path="config.ts" />
+/// <reference path="analytics.ts" />
 /// <reference path="resources.ts" />
 /// <reference path="util.ts" />
 /// <reference path="map.ts" />

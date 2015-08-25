@@ -1,6 +1,17 @@
 <html>
    <head>
       <title>Credits - Ludum Dare 33</title>
+      <link rel="stylesheet" href="site.css">
+      <script type="text/javascript">
+         var appInsights=window.appInsights||function(config){
+            function s(config){t[config]=function(){var i=arguments;t.queue.push(function(){t[config].apply(t,i)})}}var t={config:config},r=document,f=window,e="script",o=r.createElement(e),i,u;for(o.src=config.url||"//az416426.vo.msecnd.net/scripts/a/ai.0.js",r.getElementsByTagName(e)[0].parentNode.appendChild(o),t.cookie=r.cookie,t.queue=[],i=["Event","Exception","Metric","PageView","Trace"];i.length;)s("track"+i.pop());return config.disableExceptionTracking||(i="onerror",s("_"+i),u=f[i],f[i]=function(config,r,f,e,o){var s=u&&u(config,r,f,e,o);return s!==!0&&t["_"+i](config,r,f,e,o),s}),t
+         }({
+            instrumentationKey:"9183373c-462e-4c47-b11a-7bb08c34c45b"
+         });
+         
+         window.appInsights=appInsights;
+         appInsights.trackPageView();
+      </script>
    </head>
    <body>
       <h2>Thanks for playing!</h2>
@@ -21,5 +32,22 @@
          <p>Music is <a href="http://open.commonly.cc/unlocked">A Light in the Darkness of Destruction</a> by Halcyonic Falcon X (Public Domain)</p>
          <p>Music is <a href="http://open.commonly.cc/unlocked">Game Over</a> by Halcyonic Falcon X (Public Domain)</p>
       </div>
+      <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+        ga('create', 'UA-46390208-1', 'auto');
+        ga('send', 'pageview');
+
+    </script>
    </body>
 </html>

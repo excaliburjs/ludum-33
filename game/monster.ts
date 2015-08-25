@@ -13,6 +13,7 @@ class Monster extends ex.Actor {
    private _attackable: Hero[]; // heroes that can be attacked during current update loop
    
    private _isAttacking: boolean = false;
+   private _hasMoved: boolean = false;
    private _timeLeftAttacking: number = 0;
    private _direction: string = "none";
    private _aimSprite: ex.Sprite;
@@ -333,6 +334,10 @@ class Monster extends ex.Actor {
          // WASD
          if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.W) || 
             engine.input.keyboard.isKeyPressed(ex.Input.Keys.Up)) {
+               if (!this._hasMoved) {
+                  Analytics.trackGameStart();
+                  this._hasMoved = true;
+               }
                if(!this._isAttacking){
                   this.dy = -Config.MonsterSpeed;
                   this.setDrawing("walkUp");
@@ -341,6 +346,10 @@ class Monster extends ex.Actor {
          
          if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.S) ||
             engine.input.keyboard.isKeyPressed(ex.Input.Keys.Down)) {
+               if (!this._hasMoved) {
+                  Analytics.trackGameStart();
+                  this._hasMoved = true;
+               }
                if(!this._isAttacking) {
                   this.dy = Config.MonsterSpeed;
                   this.setDrawing("walkDown");
@@ -349,6 +358,10 @@ class Monster extends ex.Actor {
          
          if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.A) ||
             engine.input.keyboard.isKeyPressed(ex.Input.Keys.Left)) {
+            if (!this._hasMoved) {
+               Analytics.trackGameStart();
+               this._hasMoved = true;
+            }
             if(!this._isAttacking) {
                this.dx = -Config.MonsterSpeed;
                if(this.dy === 0) {
@@ -359,6 +372,10 @@ class Monster extends ex.Actor {
          
          if((engine.input.keyboard.isKeyPressed(ex.Input.Keys.D) ||
             engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right))) {
+            if (!this._hasMoved) {
+               Analytics.trackGameStart();
+               this._hasMoved = true;
+            }
             if(!this._isAttacking) {
                this.dx = Config.MonsterSpeed;
                if(this.dy === 0) {
