@@ -254,9 +254,9 @@ class Map extends ex.Scene {
    }
    
    public _gameOver(type: GameOverType) {
-      isGameOver = true;
+      isGameOver = true;      
       game.goToScene('gameover');
-      gameOver.setType(type);
+      gameOver.setType(type);      
    }
    
    

@@ -76,6 +76,7 @@ var Analytics = (function () {
             TotalGold: map.getHoardAmount(),
             DamageTaken: Stats.damageTaken / Config.MonsterHealth
         }, {
+            GameOverType: GameOverType[Stats.gameOverType],
             GoreEnabled: Options.blood,
             MusicEnabled: Options.music,
             SoundEnabled: Options.sound
@@ -1519,7 +1520,6 @@ var GameOver = (function (_super) {
     };
     GameOver.prototype.onActivate = function () {
         _super.prototype.onActivate.call(this);
-        Analytics.trackGameOver();
         Resources.SoundMusic.stop();
         Resources.GameOver.play();
     };
@@ -1540,6 +1540,8 @@ var GameOver = (function (_super) {
     };
     GameOver.prototype.setType = function (type) {
         this._type.setDrawing(type === GameOverType.Hoard ? "hoard" : "slain");
+        Stats.gameOverType = type;
+        Analytics.trackGameOver();
     };
     return GameOver;
 })(ex.Scene);

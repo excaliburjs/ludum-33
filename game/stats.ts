@@ -3,4 +3,5 @@ class Stats {
    public static numHeroesEscaped: number = 0;
    public static goldLost: number = 0;
    public static damageTaken: number = 0;
+   public static gameOverType: GameOverType;
 }

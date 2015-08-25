@@ -11,7 +11,8 @@ class Analytics {
          GoldLost: Stats.goldLost / map.getHoardAmount(),
          TotalGold: map.getHoardAmount(),
          DamageTaken: Stats.damageTaken / Config.MonsterHealth               
-      }, { 
+      }, {
+         GameOverType: GameOverType[Stats.gameOverType],
          GoreEnabled: Options.blood,
          MusicEnabled: Options.music,
          SoundEnabled: Options.sound

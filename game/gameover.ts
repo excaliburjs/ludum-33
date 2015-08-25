@@ -85,9 +85,7 @@ class GameOver extends ex.Scene {
    }
    
    public onActivate(): void {
-      super.onActivate();
-      
-      Analytics.trackGameOver();
+      super.onActivate();           
       
       Resources.SoundMusic.stop();
       Resources.GameOver.play();
@@ -115,5 +113,7 @@ class GameOver extends ex.Scene {
    
    public setType(type: GameOverType): void {
       this._type.setDrawing(type === GameOverType.Hoard ? "hoard" : "slain");
+      Stats.gameOverType = type;
+      Analytics.trackGameOver();
    }
 }
