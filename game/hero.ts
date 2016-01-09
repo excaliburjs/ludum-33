@@ -313,9 +313,9 @@ class Hero extends ex.Actor {
       }
 
       if (this._treasure > 0) {
-         this.addChild(this._lootIndicator);
+         this.add(this._lootIndicator);
       } else {
-         this.removeChild(this._lootIndicator);
+         this.remove(this._lootIndicator);
       }
    }
 

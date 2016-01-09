@@ -185,8 +185,7 @@ var Util = (function () {
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var Map = (function (_super) {
     __extends(Map, _super);
@@ -692,7 +691,7 @@ var Monster = (function (_super) {
     };
     Monster.prototype.dash = function () {
         if (this._canDash) {
-            this.removeChild(this._shiftIndicator);
+            this.remove(this._shiftIndicator);
             this._canDash = false;
             this.dashLevel = 0;
             var dashVector = ex.Vector.fromAngle(this._rotation).scale(Config.MonsterDashSpeed);
@@ -752,7 +751,7 @@ var Monster = (function (_super) {
             this.dashLevel = Math.min(this.dashLevel + delta, Config.MonsterDashCooldown);
             if (this.dashLevel >= Config.MonsterDashCooldown) {
                 this._canDash = true;
-                this.addChild(this._shiftIndicator);
+                this.add(this._shiftIndicator);
             }
             // clear move
             this.dx = 0;
@@ -807,8 +806,8 @@ var Monster = (function (_super) {
                 }
             }
             // WASD
-            if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.W) ||
-                engine.input.keyboard.isKeyPressed(ex.Input.Keys.Up)) {
+            if (engine.input.keyboard.isHeld(ex.Input.Keys.W) ||
+                engine.input.keyboard.isHeld(ex.Input.Keys.Up)) {
                 if (!this._hasMoved) {
                     Analytics.trackGameStart();
                     this._hasMoved = true;
@@ -818,8 +817,8 @@ var Monster = (function (_super) {
                     this.setDrawing("walkUp");
                 }
             }
-            if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.S) ||
-                engine.input.keyboard.isKeyPressed(ex.Input.Keys.Down)) {
+            if (engine.input.keyboard.isHeld(ex.Input.Keys.S) ||
+                engine.input.keyboard.isHeld(ex.Input.Keys.Down)) {
                 if (!this._hasMoved) {
                     Analytics.trackGameStart();
                     this._hasMoved = true;
@@ -829,8 +828,8 @@ var Monster = (function (_super) {
                     this.setDrawing("walkDown");
                 }
             }
-            if (engine.input.keyboard.isKeyPressed(ex.Input.Keys.A) ||
-                engine.input.keyboard.isKeyPressed(ex.Input.Keys.Left)) {
+            if (engine.input.keyboard.isHeld(ex.Input.Keys.A) ||
+                engine.input.keyboard.isHeld(ex.Input.Keys.Left)) {
                 if (!this._hasMoved) {
                     Analytics.trackGameStart();
                     this._hasMoved = true;
@@ -842,8 +841,8 @@ var Monster = (function (_super) {
                     }
                 }
             }
-            if ((engine.input.keyboard.isKeyPressed(ex.Input.Keys.D) ||
-                engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right))) {
+            if ((engine.input.keyboard.isHeld(ex.Input.Keys.D) ||
+                engine.input.keyboard.isHeld(ex.Input.Keys.Right))) {
                 if (!this._hasMoved) {
                     Analytics.trackGameStart();
                     this._hasMoved = true;
@@ -1230,10 +1229,10 @@ var Hero = (function (_super) {
                 break;
         }
         if (this._treasure > 0) {
-            this.addChild(this._lootIndicator);
+            this.add(this._lootIndicator);
         }
         else {
-            this.removeChild(this._lootIndicator);
+            this.remove(this._lootIndicator);
         }
     };
     Hero.prototype.getLootAmount = function () {

@@ -194,7 +194,7 @@ class Monster extends ex.Actor {
    
    public dash(): void {
       if(this._canDash){
-         this.removeChild(this._shiftIndicator);
+         this.remove(this._shiftIndicator);
          this._canDash = false;
          this.dashLevel = 0;
          var dashVector = ex.Vector.fromAngle(this._rotation).scale(Config.MonsterDashSpeed);
@@ -266,7 +266,7 @@ class Monster extends ex.Actor {
          this.dashLevel = Math.min(this.dashLevel + delta, Config.MonsterDashCooldown);
          if(this.dashLevel >= Config.MonsterDashCooldown){
             this._canDash = true;
-            this.addChild(this._shiftIndicator);
+            this.add(this._shiftIndicator);
          }
          
          // clear move
@@ -332,8 +332,8 @@ class Monster extends ex.Actor {
          
          
          // WASD
-         if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.W) || 
-            engine.input.keyboard.isKeyPressed(ex.Input.Keys.Up)) {
+         if(engine.input.keyboard.isHeld(ex.Input.Keys.W) || 
+            engine.input.keyboard.isHeld(ex.Input.Keys.Up)) {
                if (!this._hasMoved) {
                   Analytics.trackGameStart();
                   this._hasMoved = true;
@@ -344,8 +344,8 @@ class Monster extends ex.Actor {
                }
          }
          
-         if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.S) ||
-            engine.input.keyboard.isKeyPressed(ex.Input.Keys.Down)) {
+         if(engine.input.keyboard.isHeld(ex.Input.Keys.S) ||
+            engine.input.keyboard.isHeld(ex.Input.Keys.Down)) {
                if (!this._hasMoved) {
                   Analytics.trackGameStart();
                   this._hasMoved = true;
@@ -356,8 +356,8 @@ class Monster extends ex.Actor {
                }
          }
          
-         if(engine.input.keyboard.isKeyPressed(ex.Input.Keys.A) ||
-            engine.input.keyboard.isKeyPressed(ex.Input.Keys.Left)) {
+         if(engine.input.keyboard.isHeld(ex.Input.Keys.A) ||
+            engine.input.keyboard.isHeld(ex.Input.Keys.Left)) {
             if (!this._hasMoved) {
                Analytics.trackGameStart();
                this._hasMoved = true;
@@ -370,8 +370,8 @@ class Monster extends ex.Actor {
             }
          }
          
-         if((engine.input.keyboard.isKeyPressed(ex.Input.Keys.D) ||
-            engine.input.keyboard.isKeyPressed(ex.Input.Keys.Right))) {
+         if((engine.input.keyboard.isHeld(ex.Input.Keys.D) ||
+            engine.input.keyboard.isHeld(ex.Input.Keys.Right))) {
             if (!this._hasMoved) {
                Analytics.trackGameStart();
                this._hasMoved = true;
