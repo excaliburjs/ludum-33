@@ -26,16 +26,21 @@ class GameOver extends ex.Scene {
       
       // stats
       var statY = 420;
-      this._labelSurvivalTime = new ex.Label(null, game.getWidth() / 2, 300, "bold 60px Arial");
+      this._labelSurvivalTime = new ex.Label(null, game.getWidth() / 2, 300, "Arial");
       this._labelSurvivalTime.textAlign = ex.TextAlign.Center;
-      this._labelHeroesKilled = new ex.Label(null, 223, statY, "30px Arial");
+      this._labelSurvivalTime.fontSize = 60;
+      this._labelHeroesKilled = new ex.Label(null, 223, statY, "Arial");
       this._labelHeroesKilled.textAlign = ex.TextAlign.Center;
-      this._labelHeroesEscaped = new ex.Label(null, 408, statY, "30px Arial");
+      this._labelHeroesKilled.fontSize = 30;
+      this._labelHeroesEscaped = new ex.Label(null, 408, statY, "Arial");
       this._labelHeroesEscaped.textAlign = ex.TextAlign.Center;
-      this._labelGoldLost = new ex.Label(null, 575, statY, "30px Arial");
+      this._labelHeroesEscaped.fontSize = 30;
+      this._labelGoldLost = new ex.Label(null, 575, statY, "Arial");
       this._labelGoldLost.textAlign = ex.TextAlign.Center;
-      this._labelDamageTaken = new ex.Label(null, 748, statY, "30px Arial");
+      this._labelGoldLost.fontSize = 30;
+      this._labelDamageTaken = new ex.Label(null, 748, statY, "Arial");
       this._labelDamageTaken.textAlign = ex.TextAlign.Center;
+      this._labelDamageTaken.fontSize = 30;
       
       this._labelSurvivalTime.color = ex.Color.fromHex("#e7a800");
       this._labelHeroesKilled.color = ex.Color.White;

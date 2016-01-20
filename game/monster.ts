@@ -48,7 +48,7 @@ class Monster extends ex.Actor {
       
       this._aimSprite = Resources.TextureMonsterAim.asSprite();
       this._aimSprite.scale.setTo(2,2);
-      this._aimSprite.anchor = new ex.Point(.25, .25);
+      this._aimSprite.anchor = new ex.Point(.5, .5);
       this._aimSprite.opacity(.7);
       this._aimSprite.colorize(ex.Color.Green);
       this._aimSprite.colorize(ex.Color.Green);
